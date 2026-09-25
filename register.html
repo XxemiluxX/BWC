@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear cuenta — Better World Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <section class="auth-brand">
+      <a class="brand" href="index.html"><span class="brand-mark">🌱</span><span>Better World <strong>Challenge</strong></span></a>
+      <div><span class="eyebrow">3 RETOS · 1 EXPERIENCIA</span><h1>Tu próxima<br><span>acción cuenta.</span></h1><p>Crea tu perfil, completa los desafíos y deja una huella positiva en tu comunidad.</p></div>
+      <div class="challenge-preview"><span>01</span><div><b>Cuida tu entorno</b><small>Comienza con una acción local.</small></div></div>
+      <div class="challenge-preview"><span>02</span><div><b>Una acción por el planeta</b><small>Haz una elección sostenible.</small></div></div>
+      <div class="challenge-preview"><span>03</span><div><b>Mejora tu comunidad</b><small>Inspira a otras personas.</small></div></div>
+    </section>
+    <section class="auth-panel">
+      <a class="back-link" href="index.html">← Volver al inicio</a>
+      <div class="form-card">
+        <div class="form-heading"><span class="eyebrow">COMENZAR</span><h2>Crear cuenta</h2><p>Tu challenge empieza aquí.</p></div>
+        <form id="registerForm" novalidate>
+          <label>Nombre completo<input id="registerName" type="text" autocomplete="name" placeholder="Tu nombre" required minlength="2"></label>
+          <label>Correo electrónico<input id="registerEmail" type="email" autocomplete="email" placeholder="tu@email.com" required></label>
+          <label>Contraseña<input id="registerPassword" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" minlength="6" required></label>
+          <label>Confirmar contraseña<input id="registerPassword2" type="password" autocomplete="new-password" placeholder="Repite tu contraseña" minlength="6" required></label>
+          <button class="btn btn-primary btn-full" type="submit">Crear cuenta y comenzar →</button>
+          <div id="registerMessage" class="form-message" role="status"></div>
+        </form>
+        <div class="divider"><span>o</span></div>
+        <button id="googleRegisterBtn" class="btn btn-google btn-full" type="button"><span class="google-g">G</span> Continuar con Google</button>
+        <p class="demo-note">Google utiliza Firebase Authentication y abre el inicio de sesión seguro de Google.</p>
+        <p class="switch-auth">¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a></p>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi perfil — Better World Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.gstatic.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-page">
+  <header class="app-header">
+    <a class="brand" href="profile.html"><span class="brand-mark">🌱</span><span>Better World <strong>Challenge</strong></span></a>
+    <div class="user-menu"><span id="headerUserName">Participante</span><button id="logoutBtn" class="btn btn-ghost btn-small">Cerrar sesión</button></div>
+  </header>
+  <main class="container dashboard-main">
+    <section class="welcome-row"><div><span class="eyebrow">PANEL DE PARTICIPANTE</span><h1>Hola, <span id="welcomeName">...</span> 👋</h1><p>Tu siguiente acción está a un clic.</p></div><a href="challenge.html" id="topChallengeBtn" class="btn btn-primary">Ver mi desafío →</a></section>
+
+    <section class="progress-card">
+      <div class="progress-head"><div><span class="eyebrow">TU PROGRESO</span><h2>El camino hasta el reconocimiento</h2></div><strong id="progressCount">0/3</strong></div>
+      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      <div class="progress-steps" id="progressSteps"></div>
+    </section>
+
+    <section id="completionBanner" class="completion-banner hidden">
+      <div class="completion-orbit">🏆</div>
+      <div><span class="eyebrow">RETO COMPLETADO</span><h2>Has terminado los 3 desafíos.</h2><p>Tu esfuerzo ya forma parte de la historia de Better World Challenge.</p></div>
+      <a class="btn btn-primary" href="#evidenceHistory">Ver mi progreso</a>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel-card current-challenge">
+        <div class="panel-heading"><div><span class="eyebrow">TU DESAFÍO ACTUAL</span><h2 id="currentChallengeTitle">Desafío 1</h2></div><span id="currentStatusBadge" class="status-badge status-neutral">Pendiente</span></div>
+        <p id="currentChallengeText"></p>
+        <div id="currentEvidenceBox"></div>
+        <a id="openChallengeBtn" href="challenge.html" class="btn btn-primary">Abrir desafío</a>
+      </article>
+
+      <article class="panel-card impact-card">
+        <div class="impact-icon">🌿</div><div><span class="eyebrow">TU IMPACTO</span><h2 id="impactTitle">Empieza con una acción.</h2><p id="impactText">Completa el primer desafío para comenzar a construir tu progreso.</p></div>
+        <div class="impact-meter"><span id="impactMeterFill"></span></div>
+      </article>
+    </section>
+
+    <section id="evidenceHistory" class="panel-card">
+      <div class="panel-heading"><div><span class="eyebrow">HISTORIAL</span><h2>Mis evidencias</h2></div><span id="historyCount" class="muted"></span></div>
+      <div id="myEvidenceList" class="evidence-history"></div>
+    </section>
+  </main>
+  <div id="toastRoot" class="toast-root"></div>
+  <script type="module" src="js/profile.js"></script>
+</body>
+</html>

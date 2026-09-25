@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión — Better World Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <section class="auth-brand">
+      <a class="brand" href="index.html"><span class="brand-mark">🌱</span><span>Better World <strong>Challenge</strong></span></a>
+      <div>
+        <span class="eyebrow">TU IMPACTO EMPIEZA AQUÍ</span>
+        <h1>Listo para seguir<br><span>cambiando.</span></h1>
+        <p>Inicia sesión para ver tu progreso y continuar con tus desafíos.</p>
+      </div>
+      <div class="auth-quote">“Cada acción positiva, por pequeña que sea, puede inspirar otra.”</div>
+    </section>
+    <section class="auth-panel">
+      <a class="back-link" href="index.html">← Volver al inicio</a>
+      <div class="form-card">
+        <div class="form-heading"><span class="eyebrow">BIENVENIDO DE VUELTA</span><h2>Iniciar sesión</h2><p>Continúa tu challenge.</p></div>
+        <form id="loginForm" novalidate>
+          <label>Correo electrónico<input id="loginEmail" type="email" autocomplete="username" placeholder="tu@email.com" required></label>
+          <label>Contraseña<input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" required></label>
+          <button class="btn btn-primary btn-full" type="submit">Entrar</button>
+          <div id="loginMessage" class="form-message" role="status"></div>
+        </form>
+        <div class="divider"><span>o</span></div>
+        <button id="googleDemoBtn" class="btn btn-google btn-full" type="button"><span class="google-g">G</span> Continuar con Google</button>
+        <button id="adminDemoBtn" class="btn btn-soft btn-full" type="button">🛠️ Abrir moderador — modo demo</button>
+        <p class="demo-note">Google utiliza Firebase Authentication. El acceso de moderador es únicamente para esta demostración frontend.</p>
+        <p class="switch-auth">¿Todavía no tienes cuenta? <a href="register.html">Crear una cuenta</a></p>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+
+  
+  "name": "better-world-challenge",
+  "version": "1.0.0",
+  "description": "Demo frontend funcional de una plataforma de retos de sostenibilidad.",
+  "main": "index.js",
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XxemiluxX/better-world-challenge.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/XxemiluxX/better-world-challenge/issues"
+  },
+  "homepage": "https://github.com/XxemiluxX/better-world-challenge#readme",
+  "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
+    "firebase": "^12.19.0"
+  }
+}

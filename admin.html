@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Moderador — Better World Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-page">
+  <aside class="admin-sidebar">
+    <a class="brand" href="admin.html"><span class="brand-mark">🌱</span><span>Better World <strong>Challenge</strong></span></a>
+    <div class="admin-label">MODERACIÓN</div>
+    <nav id="adminNav">
+      <button class="admin-nav-btn active" data-view="dashboard">📊 <span>Dashboard</span></button>
+      <button class="admin-nav-btn" data-view="users">👥 <span>Usuarios</span></button>
+      <button class="admin-nav-btn" data-view="evidence">📷 <span>Evidencias</span><span id="pendingNavCount" class="nav-count">0</span></button>
+      <button class="admin-nav-btn" data-view="completed">🏆 <span>Completados</span></button>
+      <button class="admin-nav-btn" data-view="settings">⚙️ <span>Configuración</span></button>
+    </nav>
+    <div class="admin-side-bottom">
+      <div class="demo-pill">DEMO FRONTEND</div>
+      <button id="adminLogoutBtn" class="btn btn-soft btn-full">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main class="admin-content">
+    <header class="admin-topbar">
+      <div><span class="eyebrow">PANEL DE MODERACIÓN</span><h1>Better World Challenge</h1></div>
+      <div class="moderator-chip"><span class="avatar">M</span><div><b>Moderador</b><small>Modo demo</small></div></div>
+    </header>
+
+    <div id="adminViewRoot"></div>
+  </main>
+
+  <div id="adminModalRoot"></div>
+  <div id="toastRoot" class="toast-root"></div>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
