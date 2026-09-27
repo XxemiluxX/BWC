@@ -1,0 +1,76 @@
+mutation CreateDemoData @transaction {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      email: "alice@example.com",
+      fullName: "Alice Smith",
+      role: "Manager"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440002",
+      email: "bob@example.com",
+      fullName: "Bob Jones",
+      role: "Developer"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440003",
+      email: "charlie@example.com",
+      fullName: "Charlie Brown",
+      role: "Developer"
+    }
+  ])
+  project_insertMany(data: [
+    {
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01",
+      title: "Alpha Project",
+      status: "In Progress",
+      ownerId: "550e8400-e29b-41d4-a716-446655440001"
+    },
+    {
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a02",
+      title: "Beta Project",
+      status: "Planning",
+      ownerId: "550e8400-e29b-41d4-a716-446655440001"
+    }
+  ])
+  task_insertMany(data: [
+    {
+      id: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b01",
+      title: "Setup Repo",
+      status: "Done",
+      projectId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01",
+      assigneeId: "550e8400-e29b-41d4-a716-446655440002"
+    },
+    {
+      id: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b02",
+      title: "Implement Auth",
+      status: "In Progress",
+      projectId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01",
+      assigneeId: "550e8400-e29b-41d4-a716-446655440003"
+    }
+  ])
+  comment_insertMany(data: [
+    {
+      content: "First comment on task",
+      taskId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b01",
+      authorId: "550e8400-e29b-41d4-a716-446655440002"
+    },
+    {
+      content: "Looks good!",
+      taskId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b01",
+      authorId: "550e8400-e29b-41d4-a716-446655440001"
+    }
+  ])
+  activityLog_insertMany(data: [
+    {
+      changeDescription: "Task status changed to Done",
+      taskId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b01",
+      timestamp: "2023-10-27T10:00:00Z"
+    },
+    {
+      changeDescription: "Task created",
+      taskId: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380b02",
+      timestamp: "2023-10-27T11:00:00Z"
+    }
+  ])
+}

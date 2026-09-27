@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function isConfiguredAdmin() {
+      return signedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.matches('^mongemoraemiliano60(@.*)?$');
+    }
+    function isAdmin() {
+      return isConfiguredAdmin();
+    }
+
+    match /evidence/{uid}/{fileName} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size < 8 * 1024 * 1024;
+      allow delete: if isAdmin();
+    }
+  }
+}

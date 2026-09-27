@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "411769645050",
+    "project_id": "bwc2026-f956e",
+    "storage_bucket": "bwc2026-f956e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411769645050:android:13521539e0ed01bae9a643",
+        "android_client_info": {
+          "package_name": "bwc.proyect_Proceso_de_seleccion2026"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "411769645050-q2r9lqru692u8rvp6mf2p7vg5m8vknbb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvIOqHmtUPPYyMqiAkIMx4uuNWWSFzOio"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "411769645050-q2r9lqru692u8rvp6mf2p7vg5m8vknbb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
