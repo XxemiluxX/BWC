@@ -1,4 +1,4 @@
-import { auth, db, storage } from "./firebase-client.js";
+import { auth, db } from "./firebase-client.js";
 import {
   onAuthStateChanged,
   signOut
@@ -126,7 +126,6 @@ function showToast(message) {
 }
 
 function applyTheme(theme) {
-  if (!document.body.classList.contains("landing")) return;
   document.documentElement.dataset.theme = theme;
   document.querySelectorAll("[data-theme-toggle]").forEach(btn => {
     btn.textContent = theme === "dark" ? "☀️" : "🌙";
@@ -135,7 +134,6 @@ function applyTheme(theme) {
   });
 }
 function initTheme() {
-  if (!document.body.classList.contains("landing")) return;
   const stored = localStorage.getItem(THEME_KEY);
   const preferred = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
   applyTheme(stored || preferred);
@@ -145,6 +143,44 @@ function initTheme() {
       localStorage.setItem(THEME_KEY, next); applyTheme(next);
     });
   });
+  window.matchMedia?.("(prefers-color-scheme: dark)")?.addEventListener?.("change", event => {
+    if (localStorage.getItem(THEME_KEY)) return;
+    applyTheme(event.matches ? "dark" : "light");
+  });
+}
+
+// Aplicar el tema lo antes posible (antes de DOMContentLoaded) para evitar parpadeos.
+(function bootTheme() {
+  const stored = localStorage.getItem(THEME_KEY);
+  const preferred = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+  document.documentElement.dataset.theme = stored || preferred;
+})();
+
+function togglePasswordVisibility() {
+  document.querySelectorAll("[data-toggle-password]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.getAttribute("data-toggle-password");
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      const showing = input.type === "text";
+      input.type = showing ? "password" : "text";
+      btn.textContent = showing ? "Mostrar" : "Ocultar";
+      btn.setAttribute("aria-label", showing ? "Mostrar contraseña" : "Ocultar contraseña");
+    });
+  });
+}
+
+function openModal(html) {
+  let root = document.getElementById("modalRoot") || document.getElementById("adminModalRoot");
+  if (!root) {
+    root = document.createElement("div"); root.id = "modalRoot"; document.body.appendChild(root);
+  }
+  root.innerHTML = html;
+  const close = () => { root.innerHTML = ""; };
+  root.querySelectorAll("[data-close]").forEach(btn => btn.addEventListener("click", close));
+  root.querySelectorAll("[data-close-modal]").forEach(overlay => overlay.addEventListener("click", e => { if (e.target === overlay) close(); }));
+  document.addEventListener("keydown", function escHandler(e) { if (e.key === "Escape") { close(); document.removeEventListener("keydown", escHandler); } });
+  return { close, root };
 }
 
 function wireLogout() {
@@ -165,12 +201,12 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => { initTheme(); wireLogout(); });
+document.addEventListener("DOMContentLoaded", () => { initTheme(); wireLogout(); togglePasswordVisibility(); });
 
 window.BWC = {
   auth, db, CHALLENGES, ADMIN_EMAIL, waitForAuth,
   nowISO, uid, initials, formatDate, escapeHTML,
   isConfiguredAdmin, ensureUserProfile, getCurrentProfile,
   requireParticipant, requireAdmin, showToast, signOutAndGoLogin,
-  applyTheme
+  applyTheme, openModal
 };

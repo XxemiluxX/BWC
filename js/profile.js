@@ -1,9 +1,12 @@
 import "./app.js";
+import { auth } from "./firebase-client.js";
 import {
-  collection, getDocs, query, where
+  collection, getDocs, query, where, doc, updateDoc
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-const { db, CHALLENGES, requireParticipant, formatDate, escapeHTML, showToast } = window.BWC;
+const { db, CHALLENGES, requireParticipant, formatDate, escapeHTML, showToast, initials, openModal } = window.BWC;
+let currentUser = null;
 
 async function getMyEvidences(userId) {
   const snap = await getDocs(query(collection(db, "evidences"), where("userId", "==", userId)));
@@ -18,11 +21,47 @@ function statusBadge(status) {
   return `<span class="status-badge status-${cls}">${text}</span>`;
 }
 
+function openEditProfile() {
+  if (!currentUser) return;
+  const modal = openModal(`<div class="detail-modal" data-close-modal><div class="modal-card">
+    <div class="modal-header"><div><span class="eyebrow">MI CUENTA</span><h2>Editar perfil</h2><p class="muted">Actualiza cómo te vemos en Better World Challenge.</p></div><button class="modal-close" data-close type="button">✕</button></div>
+    <form id="editProfileForm">
+      <label>Nombre completo<input id="editProfileName" type="text" value="${escapeHTML(currentUser.name || "")}" minlength="2" required></label>
+      <label>Correo electrónico<input type="email" value="${escapeHTML(currentUser.email || "")}" disabled></label>
+      <div id="editProfileMessage" class="form-message" role="status"></div>
+      <div class="evidence-actions"><button type="button" class="btn btn-ghost btn-full" data-close>Cancelar</button><button type="submit" class="btn btn-primary btn-full">Guardar cambios</button></div>
+    </form>
+  </div></div>`);
+  modal.root.querySelector("#editProfileForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const name = document.getElementById("editProfileName")?.value.trim();
+    const msg = document.getElementById("editProfileMessage");
+    if (!name || name.length < 2) { msg.textContent = "Escribe un nombre válido."; msg.className = "form-message error"; return; }
+    const btn = event.target.querySelector("button[type='submit']");
+    btn.disabled = true; btn.textContent = "Guardando…";
+    try {
+      await updateDoc(doc(db, "users", currentUser.id), { name, updatedAt: new Date().toISOString() });
+      if (auth.currentUser) await updateProfile(auth.currentUser, { displayName: name });
+      modal.close();
+      showToast("Perfil actualizado correctamente.");
+      await render();
+    } catch (error) {
+      console.error(error);
+      msg.textContent = "No se pudo guardar el cambio. Intenta de nuevo.";
+      msg.className = "form-message error";
+      btn.disabled = false; btn.textContent = "Guardar cambios";
+    }
+  });
+}
+
 async function render() {
   const user = await requireParticipant(); if (!user) return;
+  currentUser = user;
   const mine = await getMyEvidences(user.id);
   document.getElementById("headerUserName").textContent = user.name || "Participante";
   document.getElementById("welcomeName").textContent = (user.name || "Participante").split(" ")[0];
+  const avatarEl = document.getElementById("headerAvatar");
+  if (avatarEl) avatarEl.textContent = initials(user.name || "U");
 
   const completed = Number(user.completed || 0);
   const percent = Math.min(100, completed / 3 * 100);
@@ -94,5 +133,6 @@ async function render() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   try { await render(); } catch (error) { console.error(error); showToast("No se pudo cargar tu perfil. Revisa tu conexión con Firebase."); }
+  document.getElementById("editProfileBtn")?.addEventListener("click", openEditProfile);
   window.addEventListener("focus", () => render().catch(console.error));
 });

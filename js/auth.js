@@ -6,10 +6,23 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   updateProfile,
-  signOut
+  signOut,
+  sendPasswordResetEmail,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const { ensureUserProfile } = window.BWC;
+
+// Si la persona ya inició sesión y visita login/register, la mandamos directo a su panel.
+let redirectChecked = false;
+onAuthStateChanged(auth, async user => {
+  if (redirectChecked || !user) return;
+  redirectChecked = true;
+  try {
+    const profile = await ensureUserProfile(user);
+    go(profile);
+  } catch { /* deja que la persona use el formulario con normalidad */ }
+});
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
@@ -98,6 +111,19 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "login.html?registered=1";
     } catch (error) {
       setMessage("registerMessage", firebaseError(error)); button.disabled = false; button.textContent = "Crear cuenta y comenzar →";
+    }
+  });
+
+  document.getElementById("forgotPasswordBtn")?.addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail")?.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || "")) {
+      return setMessage("loginMessage", "Escribe primero tu correo arriba para poder enviarte el enlace.");
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage("loginMessage", `Te enviamos un enlace para restablecer tu contraseña a ${email}.`, "success");
+    } catch (error) {
+      setMessage("loginMessage", firebaseError(error));
     }
   });
 

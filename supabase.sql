@@ -3,8 +3,8 @@
 -- El bucket es público para que el panel web pueda mostrar las fotografías.
 -- NUNCA pongas una service_role/secret key en el navegador.
 
-insert into storage.buckets (id, name, public)
-values ('evidence', 'evidence', true, 5242880, 'image/jpeg')
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('evidence', 'evidence', true, 5242880, array['image/jpeg'])
 on conflict (id) do update set public = true, file_size_limit = 5242880, allowed_mime_types = array['image/jpeg'];
 
 -- La app solo sube JPEG ya comprimidos y usa rutas con al menos una carpeta:
