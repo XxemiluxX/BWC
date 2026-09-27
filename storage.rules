@@ -5,7 +5,7 @@ service firebase.storage {
     function isConfiguredAdmin() {
       return signedIn()
         && request.auth.token.email != null
-        && request.auth.token.email.matches('^mongemoraemiliano60(@.*)?$');
+        && request.auth.token.email == 'mongemoraemiliano60@gmail.com';
     }
     function isAdmin() {
       return isConfiguredAdmin();

@@ -1,203 +1,93 @@
 import "./app.js";
 import {
-  collection, getDocs, doc, runTransaction, updateDoc,
-  onSnapshot
+  collection, doc, runTransaction, updateDoc, addDoc,
+  onSnapshot, query, orderBy, limit
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-const { db, CHALLENGES, requireAdmin, formatDate, escapeHTML, initials, showToast } = window.BWC;
+const { db, CHALLENGES, requireAdmin, formatDate, escapeHTML, initials, showToast, ADMIN_EMAIL } = window.BWC;
 let currentView = "dashboard";
 let filters = { search:"", challenge:"all", status:"all", completed:"all" };
-let state = { users:[], evidences:[] };
-let unsubscribeUsers = null;
-let unsubscribeEvidences = null;
+let state = { users:[], evidences:[], activity:[] };
+let unsubscribeUsers = null, unsubscribeEvidences = null, unsubscribeActivity = null;
 
 function normalizeUserDoc(d) {
   const completed = Number(d.completed ?? d.challengesCompleted ?? d.completedChallenges ?? 0);
   const current = Number(d.currentChallenge ?? d.challenge ?? d.stage ?? (completed >= 3 ? 4 : Math.min(3, completed + 1)));
   return { ...d, role: d.role === "admin" ? "admin" : "participant", name: d.name || d.displayName || d.fullName || "Usuario", email: d.email || "", completed, currentChallenge: current };
 }
-
 function normalizeEvidenceDoc(d) {
-  return { ...d, userId: d.userId || d.uid || "", userName: d.userName || d.name || "Usuario", userEmail: d.userEmail || d.email || "", challengeNumber: Number(d.challengeNumber ?? d.challenge ?? d.stage ?? 1), challengeId: d.challengeId || `challenge-${Number(d.challengeNumber ?? d.challenge ?? 1)}`, status: d.status || "pending", imageURL: d.imageURL || d.imageUrl || d.photoURL || d.photoUrl || d.image || d.photo || "", submittedAt: d.submittedAt || d.createdAt || new Date().toISOString() };
+  return { ...d, userId:d.userId||d.uid||"", userName:d.userName||d.name||"Usuario", userEmail:d.userEmail||d.email||"", challengeNumber:Number(d.challengeNumber??d.challenge??d.stage??1), challengeId:d.challengeId||`challenge-${Number(d.challengeNumber??d.challenge??1)}`, status:d.status||"pending", imageURL:d.imageURL||d.imageUrl||d.photoURL||d.photoUrl||d.image||d.photo||"", submittedAt:d.submittedAt||d.createdAt||new Date().toISOString() };
 }
-
+function normalizeActivityDoc(d) { return { ...d, createdAt:d.createdAt||d.timestamp||new Date().toISOString() }; }
+function timeValue(value) { const d=value?.toDate?value.toDate():new Date(value); return Number.isNaN(d.getTime())?0:d.getTime(); }
+function statusBadge(status) { const cls=status==="pending"?"pending":status==="approved"?"approved":"rejected"; const text=status==="pending"?"🟡 Pendiente":status==="approved"?"🟢 Aprobada":"🔴 Rechazada"; return `<span class="status-badge status-${cls}">${text}</span>`; }
+function activityIcon(type) { return type==="approved"?"✓":type==="rejected"?"×":type==="submission"?"↑":"•"; }
+function activityText(a) {
+  const name=escapeHTML(a.userName||a.actorName||"Usuario"), n=Number(a.challengeNumber||0);
+  if(a.type==="approved") return `<b>${name}</b> avanzó tras aprobar el desafío ${n}.`;
+  if(a.type==="rejected") return `<b>${name}</b> recibió un rechazo en el desafío ${n}.`;
+  if(a.type==="submission") return `<b>${name}</b> envió evidencia para el desafío ${n}.`;
+  return `<b>${name}</b> tuvo actividad en el challenge.`;
+}
 function stats() {
-  const participants = state.users.filter(u => u.role === "participant");
-  return {
-    users: participants.length,
-    c1: participants.filter(u => Number(u.currentChallenge) === 1).length,
-    c2: participants.filter(u => Number(u.currentChallenge) === 2).length,
-    c3: participants.filter(u => Number(u.currentChallenge) === 3).length,
-    completed: participants.filter(u => Number(u.completed) >= 3).length,
-    pending: state.evidences.filter(e => e.status === "pending").length
-  };
+  const participants=state.users.filter(u=>u.role==="participant");
+  const approved=state.evidences.filter(e=>e.status==="approved").length;
+  const rejected=state.evidences.filter(e=>e.status==="rejected").length;
+  return { users:participants.length, c1:participants.filter(u=>Number(u.currentChallenge)===1).length, c2:participants.filter(u=>Number(u.currentChallenge)===2).length, c3:participants.filter(u=>Number(u.currentChallenge)===3).length, completed:participants.filter(u=>Number(u.completed)>=3).length, pending:state.evidences.filter(e=>e.status==="pending").length, approved, rejected };
 }
-
-function timeValue(value) { const d = value?.toDate ? value.toDate() : new Date(value); return Number.isNaN(d.getTime()) ? 0 : d.getTime(); }
-
-function statusBadge(status) {
-  const cls = status === "pending" ? "pending" : status === "approved" ? "approved" : "rejected";
-  const text = status === "pending" ? "🟡 Pendiente" : status === "approved" ? "🟢 Aprobada" : "🔴 Rechazada";
-  return `<span class="status-badge status-${cls}">${text}</span>`;
-}
-
 function renderShell() {
-  const s = stats();
-  document.getElementById("pendingNavCount").textContent = s.pending;
-  document.querySelectorAll(".admin-nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.view === currentView));
-  document.getElementById("adminUserName").textContent = window.BWC_PROFILE?.name || "Moderador";
-  document.getElementById("adminUserEmail").textContent = window.BWC_PROFILE?.email || "";
-  document.getElementById("adminAvatar").textContent = initials(window.BWC_PROFILE?.name || "M");
+  const s=stats();
+  document.getElementById("pendingNavCount").textContent=s.pending;
+  document.querySelectorAll(".admin-nav-btn").forEach(btn=>btn.classList.toggle("active",btn.dataset.view===currentView));
+  document.getElementById("adminUserName").textContent=window.BWC_PROFILE?.name||"Moderador";
+  document.getElementById("adminUserEmail").textContent=window.BWC_PROFILE?.email||ADMIN_EMAIL;
+  document.getElementById("adminAvatar").textContent=initials(window.BWC_PROFILE?.name||"M");
 }
-
 function dashboardView() {
-  const s = stats();
-  const recent = [...state.evidences].sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt)).slice(0,6);
+  const s=stats();
+  const recent=[...state.evidences].sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt)).slice(0,5);
+  const activity=state.activity.slice(0,8);
+  const total=Math.max(1,s.users);
   return `<section class="stat-grid">
-    <div class="stat-card"><small>Total usuarios</small><strong>${s.users}</strong><span>Registrados en Firebase</span></div>
-    <div class="stat-card"><small>Etapa 1</small><strong>${s.c1}</strong><span>En desafío 1</span></div>
-    <div class="stat-card"><small>Etapa 2</small><strong>${s.c2}</strong><span>Han llegado al desafío 2</span></div>
-    <div class="stat-card"><small>Etapa 3</small><strong>${s.c3}</strong><span>Han llegado al desafío 3</span></div>
-    <div class="stat-card"><small>Completados</small><strong>${s.completed}</strong><span>3/3 desafíos aprobados</span></div>
-    <div class="stat-card stat-card-wide"><small>Por revisar</small><strong>${s.pending}</strong><span>Evidencias pendientes</span></div>
+    <div class="stat-card"><small>Personas</small><strong>${s.users}</strong><span>Participantes</span></div>
+    <div class="stat-card"><small>Desafío 1</small><strong>${s.c1}</strong><span>Etapa actual</span></div>
+    <div class="stat-card"><small>Desafío 2</small><strong>${s.c2}</strong><span>Etapa actual</span></div>
+    <div class="stat-card"><small>Desafío 3</small><strong>${s.c3}</strong><span>Etapa actual</span></div>
+    <div class="stat-card"><small>Completados</small><strong>${s.completed}</strong><span>3/3 desafíos</span></div>
+    <div class="stat-card stat-card-wide"><small>Pendientes</small><strong>${s.pending}</strong><span>Esperando moderación</span></div>
   </section>
   <section class="admin-grid">
-    <article class="panel-card"><div class="panel-heading"><div><span class="eyebrow">ACTIVIDAD RECIENTE</span><h2>Últimas evidencias</h2></div><button class="btn btn-ghost btn-small" data-action="view-evidence">Ver todas</button></div>
-    ${recent.length ? `<div class="evidence-history">${recent.map(e => `<article class="history-item"><img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia"><div><h3>${escapeHTML(e.userName || "Usuario")} · Desafío ${e.challengeNumber}</h3><p>${formatDate(e.submittedAt)}</p></div><div class="history-side">${statusBadge(e.status)}</div></article>`).join("")}</div>` : `<div class="empty-state">Todavía no hay evidencias guardadas en Firebase.</div>`}</article>
-    <article class="panel-card"><div><span class="eyebrow">MODERACIÓN</span><h2>Flujo de revisión</h2></div><p class="muted">Las fotografías llegan a Firebase Storage y su registro se guarda en Firestore. Desde aquí puedes abrirlas y decidir.</p><div class="challenge-callout"><b>🟡 Pendiente</b><p>Revisa la fotografía y decide.</p></div><div class="challenge-callout"><b>🟢 Aprobada</b><p>El usuario avanza al siguiente reto.</p></div><div class="challenge-callout"><b>🔴 Rechazada</b><p>El usuario puede volver a enviarla.</p></div></article>
+    <article class="panel-card"><div class="panel-heading"><div><span class="eyebrow">FLUJO EN VIVO</span><h2>Actividad reciente</h2></div><button class="btn btn-ghost btn-small" data-action="view-evidence">Ver evidencias</button></div>
+      ${activity.length?`<div class="activity-feed">${activity.map(a=>`<div class="activity-item"><span class="activity-dot activity-${escapeHTML(a.type||"other")}">${activityIcon(a.type)}</span><div><p>${activityText(a)}</p><small>${formatDate(a.createdAt)}${a.moderatorComment?` · ${escapeHTML(a.moderatorComment)}`:""}</small></div></div>`).join("")}</div>`:`<div class="empty-state">Aquí aparecerán envíos, aprobaciones y rechazos.</div>`}
+    </article>
+    <article class="panel-card"><div class="panel-heading"><div><span class="eyebrow">EMBUDO</span><h2>Progreso de personas</h2></div></div>
+      <div class="funnel"><div><span>Registradas</span><b>${s.users}</b></div><div><span>Desafío 1+</span><b>${Math.max(0,s.users-s.c1)}</b></div><div><span>Desafío 2+</span><b>${Math.max(0,s.users-s.c1-s.c2)}</b></div><div><span>Completadas</span><b>${s.completed}</b></div></div>
+      <div class="flow-note"><b>${s.pending} pendientes</b><span>·</span><b>${s.approved} aprobadas</b><span>·</span><b>${s.rejected} rechazadas</b></div>
+    </article>
+  </section>
+  <section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">EVIDENCIAS</span><h2>Últimos envíos</h2></div><span class="muted">${recent.length} recientes</span></div>
+    ${recent.length?`<div class="evidence-history">${recent.map(e=>`<article class="history-item"><img src="${escapeHTML(e.imageURL||"")}" alt="Evidencia"><div><h3>${escapeHTML(e.userName||"Usuario")} · Desafío ${e.challengeNumber}</h3><p>${formatDate(e.submittedAt)}</p></div><div class="history-side">${statusBadge(e.status)}</div></article>`).join("")}</div>`:`<div class="empty-state">Todavía no hay evidencias.</div>`}
   </section>`;
 }
-
 function usersView() {
-  const search = filters.search.toLowerCase();
-  let users = state.users.filter(u => u.role === "participant").filter(u => !search || `${u.name || ""} ${u.email || ""}`.toLowerCase().includes(search));
-  return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">PARTICIPANTES</span><h2>Usuarios registrados</h2></div><span class="muted">${users.length} resultados</span></div>
-    <div class="filter-row"><input id="userSearch" placeholder="Buscar por nombre o correo…" value="${escapeHTML(filters.search)}"></div>
-    <div class="table-wrap"><table class="data-table"><thead><tr><th>Usuario</th><th>Correo</th><th>Desafío actual</th><th>Progreso</th><th>Estado</th><th></th></tr></thead><tbody>
-    ${users.map(u => `<tr><td><div class="user-cell"><span class="avatar">${initials(u.name)}</span><div><b>${escapeHTML(u.name || "Sin nombre")}</b><small class="muted">Registrado ${formatDate(u.createdAt)}</small></div></div></td><td>${escapeHTML(u.email || "")}</td><td>${Number(u.completed)>=3 ? "Completado" : `Desafío ${u.currentChallenge || 1}`}</td><td>${Number(u.completed || 0)}/3</td><td>${Number(u.completed)>=3 ? statusBadge("approved") : '<span class="status-badge status-neutral">En progreso</span>'}</td><td><button class="btn btn-soft btn-small" data-user="${u.id}">Ver</button></td></tr>`).join("")}
-    </tbody></table></div></section>`;
+  const search=filters.search.toLowerCase();
+  const users=state.users.filter(u=>u.role==="participant").filter(u=>!search||`${u.name||""} ${u.email||""}`.toLowerCase().includes(search));
+  return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">PARTICIPANTES</span><h2>Personas registradas</h2></div><span class="muted">${users.length} resultados</span></div><div class="filter-row"><input id="userSearch" placeholder="Buscar por nombre o correo…" value="${escapeHTML(filters.search)}"></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Persona</th><th>Correo</th><th>Desafío</th><th>Progreso</th><th>Estado</th><th></th></tr></thead><tbody>${users.map(u=>`<tr><td><div class="user-cell"><span class="avatar">${initials(u.name)}</span><div><b>${escapeHTML(u.name)}</b><small class="muted">Registrado ${formatDate(u.createdAt)}</small></div></div></td><td>${escapeHTML(u.email)}</td><td>${Number(u.completed)>=3?"Completado":`Desafío ${u.currentChallenge||1}`}</td><td>${Number(u.completed||0)}/3</td><td>${Number(u.completed)>=3?statusBadge("approved"):"<span class='status-badge status-neutral'>En progreso</span>"}</td><td><button class="btn btn-soft btn-small" data-user="${u.id}">Ver</button></td></tr>`).join("")}</tbody></table></div></section>`;
 }
-
-function filteredEvidence() {
-  return state.evidences.filter(e => {
-    const user = state.users.find(u => u.id === e.userId);
-    const search = filters.search.toLowerCase();
-    const matchesSearch = !search || `${e.userName || ""} ${e.userEmail || ""} ${e.challengeNumber}`.toLowerCase().includes(search);
-    const matchesChallenge = filters.challenge === "all" || Number(filters.challenge) === Number(e.challengeNumber);
-    const matchesStatus = filters.status === "all" || filters.status === e.status;
-    const matchesCompleted = filters.completed === "all" || (filters.completed === "yes" ? Number(user?.completed) >= 3 : Number(user?.completed) < 3);
-    return matchesSearch && matchesChallenge && matchesStatus && matchesCompleted;
-  }).sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt));
-}
-
-function evidenceView() {
-  const list = filteredEvidence();
-  return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">MODERACIÓN</span><h2>Evidencias</h2></div><span class="muted">${list.length} evidencias</span></div>
-    <div class="filter-row"><input id="evidenceSearch" placeholder="Buscar participante…" value="${escapeHTML(filters.search)}"><select id="evidenceChallenge"><option value="all">Todos los desafíos</option>${CHALLENGES.map(c=>`<option value="${c.number}" ${filters.challenge==c.number?"selected":""}>Desafío ${c.number}</option>`).join("")}</select><select id="evidenceStatus"><option value="all">Todos los estados</option><option value="pending" ${filters.status==="pending"?"selected":""}>Pendientes</option><option value="approved" ${filters.status==="approved"?"selected":""}>Aprobadas</option><option value="rejected" ${filters.status==="rejected"?"selected":""}>Rechazadas</option></select><select id="evidenceCompleted"><option value="all">Todos los usuarios</option><option value="yes" ${filters.completed==="yes"?"selected":""}>Completados</option><option value="no" ${filters.completed==="no"?"selected":""}>En progreso</option></select></div>
-    ${list.length ? `<div class="evidence-grid">${list.map(e => `<article class="evidence-admin-card"><button class="evidence-image-btn" data-view-evidence="${e.id}" aria-label="Abrir evidencia"><img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia de ${escapeHTML(e.userName || "usuario")} — desafío ${e.challengeNumber}"></button><div class="evidence-admin-body"><div class="evidence-admin-meta"><div><h3>${escapeHTML(e.userName || "Usuario")}</h3><small>Desafío ${e.challengeNumber} · ${formatDate(e.submittedAt)}</small></div>${statusBadge(e.status)}</div><p>${escapeHTML(CHALLENGES[e.challengeNumber-1]?.title || "")}</p><div class="evidence-actions"><button class="btn btn-ghost btn-small" data-view-evidence="${e.id}">VER</button>${e.status==="pending"?`<button class="btn btn-success btn-small" data-approve="${e.id}">APROBAR</button><button class="btn btn-danger btn-small" data-reject="${e.id}">RECHAZAR</button>`:""}</div></div></article>`).join("")}</div>` : `<div class="empty-state">No hay evidencias que coincidan con los filtros.</div>`}</section>`;
-}
-
-function completedView() {
-  const users = state.users.filter(u=>u.role==="participant" && Number(u.completed)>=3);
-  return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">RECONOCIMIENTOS</span><h2>Participantes completados</h2></div><strong>${users.length}</strong></div>${users.length?`<div class="evidence-history">${users.map(u=>`<article class="history-item"><div class="avatar">${initials(u.name)}</div><div><h3>${escapeHTML(u.name)}</h3><p>${escapeHTML(u.email)} · 3/3 desafíos completados</p></div><div class="history-side"><span class="completion-badge">🏆 Completado</span></div></article>`).join("")}</div>`:`<div class="empty-state">Todavía no hay participantes con 3/3 desafíos.</div>`}</section>`;
-}
-
-function settingsView() {
-  return `<section class="settings-grid"><article class="settings-card"><span class="eyebrow">DATOS</span><h2>Firebase conectado</h2><p>Usuarios y evidencias se consultan directamente desde Firestore. Las fotografías se guardan de forma persistente en Firebase Storage.</p><div class="code-note">Proyecto: bwc2026-f956e · Administrador: ${escapeHTML(window.BWC.ADMIN_IDENTIFIER)}</div></article><article class="settings-card"><span class="eyebrow">SEGURIDAD</span><h2>Rol de administrador</h2><p>La cuenta cuyo correo empieza exactamente por <b>${escapeHTML(window.BWC.ADMIN_IDENTIFIER)}</b> recibe el rol administrador al sincronizar su perfil.</p><p class="muted">Para una versión pública, usa claims de administrador en el backend.</p></article><article class="settings-card"><span class="eyebrow">VISUALIZACIÓN</span><h2>Modo de color</h2><p>Usa el botón de luna/sol en la barra superior para cambiar entre modo claro y oscuro. La preferencia queda guardada en este navegador.</p><div class="code-note">La apariencia se conserva aunque cierres el navegador.</div></article><article class="settings-card"><span class="eyebrow">ACTUALIZACIÓN</span><h2>Datos en tiempo real</h2><p>El dashboard escucha cambios de usuarios y evidencias en Firebase, por lo que las estadísticas y nuevas fotos aparecen sin tener que recargar la página.</p></article></section>`;
-}
-
-function render() {
-  renderShell();
-  const root = document.getElementById("adminViewRoot");
-  root.innerHTML = currentView === "dashboard" ? dashboardView() : currentView === "users" ? usersView() : currentView === "evidence" ? evidenceView() : currentView === "completed" ? completedView() : settingsView();
-  if (currentView === "settings") document.querySelectorAll("[data-theme-toggle]").forEach(b => b.addEventListener("click", () => setTimeout(render, 0)));
-  bindViewEvents();
-}
-
-function bindViewEvents() {
-  document.querySelectorAll(".admin-nav-btn").forEach(btn => btn.onclick = () => { currentView=btn.dataset.view; filters.search=""; render(); });
-  document.querySelectorAll("[data-action='view-evidence']").forEach(btn => btn.onclick = () => { currentView="evidence"; filters.status="all"; render(); });
-  document.querySelectorAll("[data-view-evidence]").forEach(btn => btn.onclick = () => openEvidence(btn.dataset.viewEvidence));
-  document.querySelectorAll("[data-approve]").forEach(btn => btn.onclick = () => openApprove(btn.dataset.approve));
-  document.querySelectorAll("[data-reject]").forEach(btn => btn.onclick = () => openReject(btn.dataset.reject));
-  document.querySelectorAll("[data-user]").forEach(btn => btn.onclick = () => openUser(btn.dataset.user));
-  const debounce = (fn, ms=180) => { let t; return e => { clearTimeout(t); t=setTimeout(()=>fn(e),ms); }; };
-  const bindFilter = (id,key) => document.getElementById(id)?.addEventListener("input", debounce(e => { filters[key]=e.target.value; render(); }));
-  const bindSelect = (id,key) => document.getElementById(id)?.addEventListener("change", e => { filters[key]=e.target.value; render(); });
-  bindFilter("userSearch","search"); bindFilter("evidenceSearch","search"); bindSelect("evidenceChallenge","challenge"); bindSelect("evidenceStatus","status"); bindSelect("evidenceCompleted","completed");
-}
-
-function closeModal() { document.getElementById("adminModalRoot").innerHTML=""; }
-
-function openEvidence(id) {
-  const e = state.evidences.find(x=>x.id===id); if(!e) return;
-  document.getElementById("adminModalRoot").innerHTML = `<div class="detail-modal" data-close-modal><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">EVIDENCIA · DESAFÍO ${e.challengeNumber}</span><h2>${escapeHTML(e.userName || "Usuario")}</h2><p class="muted">${formatDate(e.submittedAt)}</p></div><button class="modal-close" data-close>✕</button></div><img class="modal-evidence-image" src="${escapeHTML(e.imageURL || "")}" alt="Evidencia enviada por ${escapeHTML(e.userName || "usuario")}"><div class="challenge-callout"><b>${statusBadge(e.status)}</b><p>${e.moderatorComment?escapeHTML(e.moderatorComment):"Sin comentario del moderador."}</p><small>Archivo: ${escapeHTML(e.originalFileName || "fotografía")} · ${Math.max(1,Math.round(Number(e.fileSize||0)/1024))} KB</small></div>${e.status==="pending"?`<div class="evidence-actions"><button class="btn btn-success btn-full" data-modal-approve="${e.id}">Aprobar evidencia</button><button class="btn btn-danger btn-full" data-modal-reject="${e.id}">Rechazar</button></div>`:""}</div></div>`;
-  document.querySelector("[data-close]")?.addEventListener("click", closeModal);
-  document.querySelector("[data-close-modal]")?.addEventListener("click", e=>{if(e.target.hasAttribute("data-close-modal"))closeModal();});
-  document.querySelector("[data-modal-approve]")?.addEventListener("click",()=>openApprove(id));
-  document.querySelector("[data-modal-reject]")?.addEventListener("click",()=>openReject(id));
-}
-
-function openApprove(id) {
-  const e = state.evidences.find(x=>x.id===id); if(!e || e.status!=="pending") return;
-  document.getElementById("adminModalRoot").innerHTML = `<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">CONFIRMAR</span><h2>¿Aprobar esta evidencia?</h2><p class="muted">${escapeHTML(e.userName || "Usuario")} · Desafío ${e.challengeNumber}</p></div><button class="modal-close" data-close>✕</button></div><p>El participante avanzará al siguiente desafío después de guardar esta decisión.</p><div class="evidence-actions"><button class="btn btn-ghost btn-full" data-close>Cancelar</button><button class="btn btn-success btn-full" data-confirm-approve>Aprobar evidencia</button></div></div></div>`;
-  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal); document.querySelector("[data-confirm-approve]").onclick=()=>approveEvidence(id);
-}
-
-async function approveEvidence(id) {
-  const admin = await requireAdmin(); if(!admin) return;
-  try {
-    await runTransaction(db, async tx => {
-      const evRef = doc(db, "evidences", id);
-      const evSnap = await tx.get(evRef);
-      if(!evSnap.exists() || evSnap.data().status !== "pending") throw new Error("Esta evidencia ya fue revisada.");
-      const e = evSnap.data();
-      const userRef = doc(db, "users", e.userId);
-      const userSnap = await tx.get(userRef);
-      if(!userSnap.exists()) throw new Error("No encontramos el usuario asociado.");
-      const user = userSnap.data();
-      const patch = { status:"approved", reviewedAt:new Date().toISOString(), reviewedBy:admin.user.uid, moderatorComment:"Evidencia aprobada." };
-      tx.update(evRef, patch);
-      const currentChallenge = Number(user.currentChallenge ?? (Number(user.completed || 0) >= 3 ? 4 : Number(user.completed || 0) + 1));
-      if(Number(e.challengeNumber) === currentChallenge && Number(user.completed) < 3) {
-        const nextCompleted = Math.max(Number(user.completed||0), Number(e.challengeNumber));
-        tx.update(userRef, { completed: nextCompleted, currentChallenge: nextCompleted >= 3 ? 4 : nextCompleted + 1, updatedAt:new Date().toISOString() });
-      }
-    });
-    closeModal(); showToast("Evidencia aprobada y progreso actualizado.");
-  } catch(error) { console.error(error); closeModal(); showToast(error.message || "No se pudo aprobar la evidencia."); }
-}
-
-function openReject(id) {
-  const e = state.evidences.find(x=>x.id===id); if(!e || e.status!=="pending") return;
-  document.getElementById("adminModalRoot").innerHTML = `<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">RECHAZAR EVIDENCIA</span><h2>Motivo del rechazo</h2><p class="muted">${escapeHTML(e.userName || "Usuario")} · Desafío ${e.challengeNumber}</p></div><button class="modal-close" data-close>✕</button></div><textarea id="rejectReason" maxlength="500" placeholder="Escribe un comentario opcional para el participante…"></textarea><div class="evidence-actions"><button class="btn btn-ghost btn-full" data-close>Cancelar</button><button class="btn btn-danger btn-full" data-confirm-reject>Confirmar rechazo</button></div></div></div>`;
-  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal); document.querySelector("[data-confirm-reject]").onclick=()=>rejectEvidence(id);
-}
-
-async function rejectEvidence(id) {
-  const admin = await requireAdmin(); if(!admin) return;
-  const comment = document.getElementById("rejectReason")?.value.trim() || "La evidencia necesita una nueva fotografía o una explicación más clara de la acción realizada.";
-  try {
-    await updateDoc(doc(db,"evidences",id), { status:"rejected", reviewedAt:new Date().toISOString(), reviewedBy:admin.user.uid, moderatorComment:comment });
-    closeModal(); showToast("Evidencia rechazada. El participante puede enviarla nuevamente.");
-  } catch(error) { console.error(error); closeModal(); showToast(error.message || "No se pudo rechazar la evidencia."); }
-}
-
-function openUser(id) {
-  const u = state.users.find(x=>x.id===id); if(!u) return;
-  const ev = state.evidences.filter(e=>e.userId===id).sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt));
-  document.getElementById("adminModalRoot").innerHTML = `<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">PERFIL</span><h2>${escapeHTML(u.name || "Usuario")}</h2><p class="muted">${escapeHTML(u.email || "")}</p></div><button class="modal-close" data-close>✕</button></div><div class="profile-summary"><div><small>Progreso</small><strong>${Number(u.completed||0)}/3</strong></div><div><small>Desafío actual</small><strong>${Number(u.completed)>=3?"Completado":Number(u.currentChallenge||1)}</strong></div></div><h3>Historial de evidencias</h3>${ev.length?`<div class="evidence-history">${ev.map(e=>`<article class="history-item"><img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia"><div><h3>Desafío ${e.challengeNumber}</h3><p>${formatDate(e.submittedAt)}</p></div><div class="history-side">${statusBadge(e.status)}</div></article>`).join("")}</div>`:`<div class="empty-state">No hay evidencias.</div>`}</div></div>`;
-  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);
-}
-
-async function start() {
-  const admin = await requireAdmin(); if(!admin) return;
-  window.BWC_PROFILE = admin.profile;
-  state.users = []; state.evidences=[];
-  unsubscribeUsers = onSnapshot(collection(db,"users"), snap => { state.users = snap.docs.map(d=>normalizeUserDoc({id:d.id,...d.data()})); render(); }, err => { console.error(err); showToast("No se pudieron leer los usuarios de Firebase."); });
-  unsubscribeEvidences = onSnapshot(collection(db,"evidences"), snap => { state.evidences = snap.docs.map(d=>normalizeEvidenceDoc({id:d.id,...d.data()})); render(); }, err => { console.error(err); showToast("No se pudieron leer las evidencias de Firebase."); });
-  render();
-}
-
-document.addEventListener("DOMContentLoaded", () => start().catch(error => { console.error(error); showToast("No se pudo abrir el panel de moderación."); }));
-window.addEventListener("beforeunload", () => { unsubscribeUsers?.(); unsubscribeEvidences?.(); });
+function filteredEvidence(){return state.evidences.filter(e=>{const user=state.users.find(u=>u.id===e.userId),search=filters.search.toLowerCase();return (!search||`${e.userName||""} ${e.userEmail||""} ${e.challengeNumber}`.toLowerCase().includes(search))&&(filters.challenge==="all"||Number(filters.challenge)===Number(e.challengeNumber))&&(filters.status==="all"||filters.status===e.status)&&(filters.completed==="all"||(filters.completed==="yes"?Number(user?.completed)>=3:Number(user?.completed)<3));}).sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt));}
+function evidenceView(){const list=filteredEvidence();return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">MODERACIÓN</span><h2>Evidencias</h2></div><span class="muted">${list.length} evidencias</span></div><div class="filter-row"><input id="evidenceSearch" placeholder="Buscar participante…" value="${escapeHTML(filters.search)}"><select id="evidenceChallenge"><option value="all">Todos los desafíos</option>${CHALLENGES.map(c=>`<option value="${c.number}" ${filters.challenge==c.number?"selected":""}>Desafío ${c.number}</option>`).join("")}</select><select id="evidenceStatus"><option value="all">Todos los estados</option><option value="pending" ${filters.status==="pending"?"selected":""}>Pendientes</option><option value="approved" ${filters.status==="approved"?"selected":""}>Aprobadas</option><option value="rejected" ${filters.status==="rejected"?"selected":""}>Rechazadas</option></select></div>${list.length?`<div class="evidence-grid">${list.map(e=>`<article class="evidence-admin-card"><button class="evidence-image-btn" data-view-evidence="${e.id}" aria-label="Abrir evidencia"><img src="${escapeHTML(e.imageURL||"")}" alt="Evidencia de ${escapeHTML(e.userName||"usuario")}"></button><div class="evidence-admin-body"><div class="evidence-admin-meta"><div><h3>${escapeHTML(e.userName||"Usuario")}</h3><small>Desafío ${e.challengeNumber} · ${formatDate(e.submittedAt)}</small></div>${statusBadge(e.status)}</div><p>${escapeHTML(CHALLENGES[e.challengeNumber-1]?.title||"")}</p><div class="evidence-actions"><button class="btn btn-ghost btn-small" data-view-evidence="${e.id}">VER</button>${e.status==="pending"?`<button class="btn btn-success btn-small" data-approve="${e.id}">APROBAR</button><button class="btn btn-danger btn-small" data-reject="${e.id}">RECHAZAR</button>`:""}</div></div></article>`).join("")}</div>`:`<div class="empty-state">No hay evidencias que coincidan.</div>`}</section>`;}
+function completedView(){const users=state.users.filter(u=>u.role==="participant"&&Number(u.completed)>=3);return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">RECONOCIMIENTOS</span><h2>Participantes completados</h2></div><strong>${users.length}</strong></div>${users.length?`<div class="evidence-history">${users.map(u=>`<article class="history-item"><div class="avatar">${initials(u.name)}</div><div><h3>${escapeHTML(u.name)}</h3><p>${escapeHTML(u.email)} · 3/3 desafíos</p></div><div class="history-side"><span class="completion-badge">🏆 Completado</span></div></article>`).join("")}</div>`:`<div class="empty-state">Todavía no hay participantes con 3/3.</div>`}</section>`;}
+function settingsView(){return `<section class="settings-grid"><article class="settings-card"><span class="eyebrow">DATOS</span><h2>Firebase + Supabase</h2><p>Firebase mantiene autenticación, usuarios, estados y moderación. Supabase Storage almacena las fotografías.</p><div class="code-note">Firebase: bwc2026-f956e · Admin: ${escapeHTML(ADMIN_EMAIL)} · Bucket: evidence</div></article><article class="settings-card"><span class="eyebrow">ADMINISTRACIÓN</span><h2>Cuenta de moderación</h2><p>El acceso administrativo se valida contra el correo exacto <b>${escapeHTML(ADMIN_EMAIL)}</b> mediante las reglas de Firebase.</p><p class="muted">Para una instalación pública de mayor seguridad, migra el rol a custom claims administrados en backend.</p></article><article class="settings-card"><span class="eyebrow">FOTOS</span><h2>Supabase Storage</h2><p>Las fotos nuevas se suben a <b>evidence/&lt;firebaseUid&gt;/...</b>. El bucket debe existir y estar configurado según <b>supabase.sql</b>.</p><div class="code-note">js/supabase-config.js</div></article><article class="settings-card"><span class="eyebrow">TIEMPO REAL</span><h2>Actividad viva</h2><p>El panel escucha usuarios, evidencias y actividad en tiempo real. Cada aprobación o rechazo queda registrada con fecha y moderador.</p></article></section>`;}
+function render(){renderShell();const root=document.getElementById("adminViewRoot");root.innerHTML=currentView==="dashboard"?dashboardView():currentView==="users"?usersView():currentView==="evidence"?evidenceView():currentView==="completed"?completedView():settingsView();bindViewEvents();}
+function bindViewEvents(){document.querySelectorAll(".admin-nav-btn").forEach(btn=>btn.onclick=()=>{currentView=btn.dataset.view;filters.search="";render();});document.querySelectorAll("[data-action='view-evidence']").forEach(btn=>btn.onclick=()=>{currentView="evidence";render();});document.querySelectorAll("[data-view-evidence]").forEach(btn=>btn.onclick=()=>openEvidence(btn.dataset.viewEvidence));document.querySelectorAll("[data-approve]").forEach(btn=>btn.onclick=()=>openApprove(btn.dataset.approve));document.querySelectorAll("[data-reject]").forEach(btn=>btn.onclick=()=>openReject(btn.dataset.reject));document.querySelectorAll("[data-user]").forEach(btn=>btn.onclick=()=>openUser(btn.dataset.user));const debounce=(fn,ms=180)=>{let t;return e=>{clearTimeout(t);t=setTimeout(()=>fn(e),ms)}};const bindFilter=(id,key)=>document.getElementById(id)?.addEventListener("input",debounce(e=>{filters[key]=e.target.value;render();}));const bindSelect=(id,key)=>document.getElementById(id)?.addEventListener("change",e=>{filters[key]=e.target.value;render();});bindFilter("userSearch","search");bindFilter("evidenceSearch","search");bindSelect("evidenceChallenge","challenge");bindSelect("evidenceStatus","status");}
+function closeModal(){document.getElementById("adminModalRoot").innerHTML="";}
+function openEvidence(id){const e=state.evidences.find(x=>x.id===id);if(!e)return;document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal" data-close-modal><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">EVIDENCIA · DESAFÍO ${e.challengeNumber}</span><h2>${escapeHTML(e.userName||"Usuario")}</h2><p class="muted">${formatDate(e.submittedAt)}</p></div><button class="modal-close" data-close>✕</button></div><img class="modal-evidence-image" src="${escapeHTML(e.imageURL||"")}" alt="Evidencia enviada"><div class="challenge-callout"><b>${statusBadge(e.status)}</b><p>${e.moderatorComment?escapeHTML(e.moderatorComment):"Sin comentario del moderador."}</p><small>Archivo: ${escapeHTML(e.originalFileName||"fotografía")} · ${Math.max(1,Math.round(Number(e.fileSize||0)/1024))} KB · ${escapeHTML(e.storageProvider||"supabase")}</small></div>${e.status==="pending"?`<div class="evidence-actions"><button class="btn btn-success btn-full" data-modal-approve="${e.id}">Aprobar</button><button class="btn btn-danger btn-full" data-modal-reject="${e.id}">Rechazar</button></div>`:""}</div></div>`;document.querySelector("[data-close]")?.addEventListener("click",closeModal);document.querySelector("[data-close-modal]")?.addEventListener("click",e=>{if(e.target.hasAttribute("data-close-modal"))closeModal();});document.querySelector("[data-modal-approve]")?.addEventListener("click",()=>openApprove(id));document.querySelector("[data-modal-reject]")?.addEventListener("click",()=>openReject(id));}
+function openApprove(id){const e=state.evidences.find(x=>x.id===id);if(!e||e.status!=="pending")return;document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">CONFIRMAR</span><h2>Aprobar evidencia</h2><p class="muted">${escapeHTML(e.userName||"Usuario")} · Desafío ${e.challengeNumber}</p></div><button class="modal-close" data-close>✕</button></div><p>El participante avanzará al siguiente desafío después de guardar esta decisión.</p><div class="evidence-actions"><button class="btn btn-ghost btn-full" data-close>Cancelar</button><button class="btn btn-success btn-full" data-confirm-approve>Aprobar evidencia</button></div></div></div>`;document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);document.querySelector("[data-confirm-approve]").onclick=()=>approveEvidence(id);}
+async function logActivity(data){try{await addDoc(collection(db,"activity"),{...data,createdAt:new Date().toISOString()});}catch(error){console.error("activity log",error);}}
+async function approveEvidence(id){const admin=await requireAdmin();if(!admin)return;try{let changedUser=null;await runTransaction(db,async tx=>{const evRef=doc(db,"evidences",id),evSnap=await tx.get(evRef);if(!evSnap.exists()||evSnap.data().status!=="pending")throw new Error("Esta evidencia ya fue revisada.");const e=evSnap.data(),userRef=doc(db,"users",e.userId),userSnap=await tx.get(userRef);if(!userSnap.exists())throw new Error("No encontramos el usuario asociado.");const user=userSnap.data();const currentChallenge=Number(user.currentChallenge??(Number(user.completed||0)>=3?4:Number(user.completed||0)+1));const nextCompleted=Math.max(Number(user.completed||0),Number(e.challengeNumber));tx.update(evRef,{status:"approved",reviewedAt:new Date().toISOString(),reviewedBy:admin.user.uid,moderatorComment:"Evidencia aprobada."});if(Number(e.challengeNumber)===currentChallenge&&Number(user.completed)<3){tx.update(userRef,{completed:nextCompleted,currentChallenge:nextCompleted>=3?4:nextCompleted+1,updatedAt:new Date().toISOString()});changedUser={name:user.name||e.userName,challengeNumber:Number(e.challengeNumber),nextCompleted};}});await logActivity({type:"approved",actorUid:admin.user.uid,actorName:admin.profile?.name||admin.user.email,userId:state.evidences.find(x=>x.id===id)?.userId||"",userName:state.evidences.find(x=>x.id===id)?.userName||"Usuario",challengeNumber:state.evidences.find(x=>x.id===id)?.challengeNumber||0});closeModal();showToast(changedUser?`Aprobada. ${changedUser.name} avanzó al siguiente desafío.`:"Evidencia aprobada.");}catch(error){console.error(error);closeModal();showToast(error.message||"No se pudo aprobar la evidencia.");}}
+function openReject(id){const e=state.evidences.find(x=>x.id===id);if(!e||e.status!=="pending")return;document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">RECHAZAR EVIDENCIA</span><h2>Motivo del rechazo</h2><p class="muted">${escapeHTML(e.userName||"Usuario")} · Desafío ${e.challengeNumber}</p></div><button class="modal-close" data-close>✕</button></div><textarea id="rejectReason" maxlength="500" placeholder="Escribe un comentario para el participante…"></textarea><div class="evidence-actions"><button class="btn btn-ghost btn-full" data-close>Cancelar</button><button class="btn btn-danger btn-full" data-confirm-reject>Confirmar rechazo</button></div></div></div>`;document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);document.querySelector("[data-confirm-reject]").onclick=()=>rejectEvidence(id);}
+async function rejectEvidence(id){const admin=await requireAdmin();if(!admin)return;const comment=document.getElementById("rejectReason")?.value.trim()||"La evidencia necesita una nueva fotografía o una explicación más clara de la acción realizada.";const e=state.evidences.find(x=>x.id===id);try{await updateDoc(doc(db,"evidences",id),{status:"rejected",reviewedAt:new Date().toISOString(),reviewedBy:admin.user.uid,moderatorComment:comment});await logActivity({type:"rejected",actorUid:admin.user.uid,actorName:admin.profile?.name||admin.user.email,userId:e?.userId||"",userName:e?.userName||"Usuario",challengeNumber:e?.challengeNumber||0,moderatorComment:comment});closeModal();showToast("Evidencia rechazada. La persona puede enviarla nuevamente.");}catch(error){console.error(error);closeModal();showToast(error.message||"No se pudo rechazar la evidencia.");}}
+function openUser(id){const u=state.users.find(x=>x.id===id);if(!u)return;const ev=state.evidences.filter(e=>e.userId===id).sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt));document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">PERFIL</span><h2>${escapeHTML(u.name||"Usuario")}</h2><p class="muted">${escapeHTML(u.email||"")}</p></div><button class="modal-close" data-close>✕</button></div><div class="profile-summary"><div><small>Progreso</small><strong>${Number(u.completed||0)}/3</strong></div><div><small>Desafío actual</small><strong>${Number(u.completed)>=3?"Completado":Number(u.currentChallenge||1)}</strong></div></div><h3>Historial de evidencias</h3>${ev.length?`<div class="evidence-history">${ev.map(e=>`<article class="history-item"><img src="${escapeHTML(e.imageURL||"")}" alt="Evidencia"><div><h3>Desafío ${e.challengeNumber}</h3><p>${formatDate(e.submittedAt)}</p></div><div class="history-side">${statusBadge(e.status)}</div></article>`).join("")}</div>`:`<div class="empty-state">No hay evidencias.</div>`}</div></div>`;document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);}
+async function start(){const admin=await requireAdmin();if(!admin)return;window.BWC_PROFILE=admin.profile;state={users:[],evidences:[],activity:[]};unsubscribeUsers=onSnapshot(collection(db,"users"),snap=>{state.users=snap.docs.map(d=>normalizeUserDoc({id:d.id,...d.data()}));render();},err=>{console.error(err);showToast("No se pudieron leer los usuarios.");});unsubscribeEvidences=onSnapshot(collection(db,"evidences"),snap=>{state.evidences=snap.docs.map(d=>normalizeEvidenceDoc({id:d.id,...d.data()}));render();},err=>{console.error(err);showToast("No se pudieron leer las evidencias.");});unsubscribeActivity=onSnapshot(query(collection(db,"activity"),orderBy("createdAt","desc"),limit(80)),snap=>{state.activity=snap.docs.map(d=>normalizeActivityDoc({id:d.id,...d.data()}));render();},err=>{console.error(err);showToast("No se pudo leer la actividad.");});render();}
+document.addEventListener("DOMContentLoaded",()=>start().catch(error=>{console.error(error);showToast("No se pudo abrir el panel de moderación.");}));
+window.addEventListener("beforeunload",()=>{unsubscribeUsers?.();unsubscribeEvidences?.();unsubscribeActivity?.();});

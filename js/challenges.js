@@ -2,11 +2,9 @@ import "./app.js";
 import {
   collection, getDocs, addDoc, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import {
-  ref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-storage.js";
+import { supabase, SUPABASE_BUCKET, assertSupabaseConfigured } from "./supabase-client.js";
 
-const { db, storage, CHALLENGES, requireParticipant, formatDate, escapeHTML, showToast, uid } = window.BWC;
+const { db, CHALLENGES, requireParticipant, formatDate, escapeHTML, showToast, uid } = window.BWC;
 
 function timeValue(value) { const d = value?.toDate ? value.toDate() : new Date(value); return Number.isNaN(d.getTime()) ? 0 : d.getTime(); }
 
@@ -65,7 +63,7 @@ async function render() {
 
   const disabled = status === "pending" ? "disabled" : "";
   const submitLabel = status === "rejected" ? "Enviar nueva evidencia" : "SUBIR EVIDENCIA";
-  root.innerHTML = `<section class="challenge-hero reveal"><article class="challenge-copy"><div class="challenge-index">${challenge.icon} DESAFÍO ${challenge.number} DE 3</div><h1>${escapeHTML(challenge.title.split(" ").slice(0,-1).join(" "))} <span>${escapeHTML(challenge.title.split(" ").slice(-1)[0])}</span></h1><p>${escapeHTML(challenge.instruction)}</p><div class="challenge-callout"><b>📸 Tu evidencia</b><p>Realiza la actividad y captura una fotografía clara. La aprobación es manual y la foto queda almacenada para la moderación.</p></div>${stateHTML}<a href="profile.html" class="btn btn-ghost">← Volver a mi perfil</a></article><article class="upload-card"><div><span class="eyebrow">EVIDENCIA FOTOGRÁFICA</span><h2>${status === "pending" ? "Esperando revisión" : status === "rejected" ? "Corrige tu evidencia" : "Demuestra tu acción"}</h2><label class="drop-zone" id="dropZone" for="evidenceInput"><input id="evidenceInput" type="file" accept="image/jpeg,image/png,image/webp" ${disabled}><div class="drop-icon">📷</div><b>Selecciona una fotografía</b><small>JPG, PNG o WebP · máximo 15 MB original</small></label><img id="previewImg" class="preview-img hidden" alt="Vista previa de la evidencia"><p id="fileName" class="upload-note">Aún no has seleccionado una imagen.</p><div id="uploadProgress" class="upload-progress hidden"><div class="upload-progress-bar"><span id="uploadProgressFill"></span></div><small id="uploadProgressText">Preparando…</small></div></div><div><button id="submitEvidenceBtn" class="btn btn-primary btn-full" ${disabled}>${submitLabel}</button><p class="upload-note">La imagen se comprime en el navegador y se guarda en Firebase Storage. El moderador podrá verla aunque cambies de dispositivo.</p></div></article></section>`;
+  root.innerHTML = `<section class="challenge-hero reveal"><article class="challenge-copy"><div class="challenge-index">${challenge.icon} DESAFÍO ${challenge.number} DE 3</div><h1>${escapeHTML(challenge.title.split(" ").slice(0,-1).join(" "))} <span>${escapeHTML(challenge.title.split(" ").slice(-1)[0])}</span></h1><p>${escapeHTML(challenge.instruction)}</p><div class="challenge-callout"><b>📸 Tu evidencia</b><p>Realiza la actividad y captura una fotografía clara. La aprobación es manual y la foto queda almacenada en Supabase Storage para la moderación.</p></div>${stateHTML}<a href="profile.html" class="btn btn-ghost">← Volver a mi perfil</a></article><article class="upload-card"><div><span class="eyebrow">EVIDENCIA FOTOGRÁFICA</span><h2>${status === "pending" ? "Esperando revisión" : status === "rejected" ? "Corrige tu evidencia" : "Demuestra tu acción"}</h2><label class="drop-zone" id="dropZone" for="evidenceInput"><input id="evidenceInput" type="file" accept="image/jpeg,image/png,image/webp" ${disabled}><div class="drop-icon">📷</div><b>Selecciona una fotografía</b><small>JPG, PNG o WebP · máximo 15 MB original</small></label><img id="previewImg" class="preview-img hidden" alt="Vista previa de la evidencia"><p id="fileName" class="upload-note">Aún no has seleccionado una imagen.</p><div id="uploadProgress" class="upload-progress hidden"><div class="upload-progress-bar"><span id="uploadProgressFill"></span></div><small id="uploadProgressText">Preparando…</small></div></div><div><button id="submitEvidenceBtn" class="btn btn-primary btn-full" ${disabled}>${submitLabel}</button><p class="upload-note">La imagen se comprime en el navegador y se guarda en Supabase Storage. El moderador podrá verla aunque cambies de dispositivo.</p></div></article></section>`;
 
   const input = document.getElementById("evidenceInput");
   const drop = document.getElementById("dropZone");
@@ -100,17 +98,18 @@ async function render() {
     try {
       compressedBlob = await compressImage(selectedFile);
       fileName.textContent = `${selectedFile.name} → ${(compressedBlob.size/1024/1024).toFixed(2)} MB optimizada`;
-      const path = `evidence/${user.id}/${Date.now()}_${uid("photo").slice(-8)}.jpg`;
-      const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, compressedBlob, { contentType: "image/jpeg", cacheControl: "public,max-age=31536000" });
-      await new Promise((resolve, reject) => {
-        uploadTask.on("state_changed", snap => {
-          const percent = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-          fill.style.width = `${percent}%`; progressText.textContent = `Subiendo… ${percent}%`;
-        }, reject, resolve);
-      });
-      submit.textContent = "Guardando evidencia…";
-      const imageURL = await getDownloadURL(uploadTask.snapshot.ref);
+      assertSupabaseConfigured();
+      const path = `${user.id}/${Date.now()}_${uid("photo").slice(-8)}.jpg`;
+      fill.style.width = "15%";
+      progressText.textContent = "Subiendo a Supabase Storage…";
+      const { error: uploadError } = await supabase.storage
+        .from(SUPABASE_BUCKET)
+        .upload(path, compressedBlob, { contentType: "image/jpeg", cacheControl: "31536000", upsert: false });
+      if (uploadError) throw uploadError;
+      fill.style.width = "85%";
+      progressText.textContent = "Generando enlace de la fotografía…";
+      const { data: publicData } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
+      const imageURL = publicData.publicUrl;
       await addDoc(collection(db, "evidences"), {
         userId: user.id,
         userName: user.name,
@@ -119,6 +118,7 @@ async function render() {
         challengeNumber: challenge.number,
         storagePath: path,
         imageURL,
+        storageProvider: "supabase",
         originalFileName: selectedFile.name,
         fileSize: compressedBlob.size,
         submittedAt: new Date().toISOString(),
@@ -128,6 +128,17 @@ async function render() {
         reviewedAt: null,
         reviewedBy: null
       });
+      await addDoc(collection(db, "activity"), {
+        type: "submission",
+        actorUid: user.id,
+        actorName: user.name || "Usuario",
+        userId: user.id,
+        userName: user.name || "Usuario",
+        challengeNumber: challenge.number,
+        createdAt: new Date().toISOString()
+      });
+      fill.style.width = "100%";
+      progressText.textContent = "Evidencia guardada.";
       showToast("Evidencia enviada y guardada. Quedó pendiente de revisión.");
       await render();
     } catch (error) {

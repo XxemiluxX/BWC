@@ -5,7 +5,7 @@ service cloud.firestore {
     function isConfiguredAdmin() {
       return signedIn()
         && request.auth.token.email != null
-        && request.auth.token.email.matches('^mongemoraemiliano60(@.*)?$');
+        && request.auth.token.email == 'mongemoraemiliano60@gmail.com';
     }
     function isAdmin() { return isConfiguredAdmin(); }
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
@@ -24,12 +24,20 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+
+    match /activity/{activityId} {
+      allow read: if isAdmin();
+      allow create: if (isAdmin() || (signedIn() && request.resource.data.actorUid == request.auth.uid && request.resource.data.type == 'submission'));
+      allow update, delete: if false;
+    }
+
     match /evidences/{evidenceId} {
       allow create: if signedIn()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'pending'
         && request.resource.data.challengeNumber >= 1
-        && request.resource.data.challengeNumber <= 3;
+        && request.resource.data.challengeNumber <= 3
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.currentChallenge == request.resource.data.challengeNumber;
       allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
       allow update: if isAdmin();
       allow delete: if isAdmin();

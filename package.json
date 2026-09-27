@@ -4,7 +4,7 @@
   "description": "Plataforma web de retos de sostenibilidad con Firebase Authentication, Firestore y Storage.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "node --check js/app.js && node --check js/auth.js && node --check js/challenges.js && node --check js/profile.js && node --check js/admin.js && node --check js/firebase-client.js && node --check js/firebase-config.js && node --check js/supabase-client.js && node --check js/supabase-config.js"
   },
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/XxemiluxX/better-world-challenge/issues"
   },

@@ -12,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const THEME_KEY = "bwc_theme_v2";
-const ADMIN_IDENTIFIER = "mongemoraemiliano60";
+const ADMIN_EMAIL = "mongemoraemiliano60@gmail.com";
 
 export const CHALLENGES = [
   {
@@ -50,9 +50,7 @@ function normalize(value = "") { return String(value).trim().toLowerCase(); }
 
 function isConfiguredAdmin(userOrProfile) {
   const email = normalize(userOrProfile?.email || "");
-  const emailLocal = email.split("@")[0];
-  const name = normalize(userOrProfile?.name || userOrProfile?.displayName || "");
-  return emailLocal === normalize(ADMIN_IDENTIFIER) || email === normalize(ADMIN_IDENTIFIER) || name === normalize(ADMIN_IDENTIFIER);
+  return email === normalize(ADMIN_EMAIL);
 }
 
 async function ensureUserProfile(user, preferredName = "") {
@@ -128,6 +126,7 @@ function showToast(message) {
 }
 
 function applyTheme(theme) {
+  if (!document.body.classList.contains("landing")) return;
   document.documentElement.dataset.theme = theme;
   document.querySelectorAll("[data-theme-toggle]").forEach(btn => {
     btn.textContent = theme === "dark" ? "☀️" : "🌙";
@@ -136,6 +135,7 @@ function applyTheme(theme) {
   });
 }
 function initTheme() {
+  if (!document.body.classList.contains("landing")) return;
   const stored = localStorage.getItem(THEME_KEY);
   const preferred = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
   applyTheme(stored || preferred);
@@ -168,7 +168,7 @@ onAuthStateChanged(auth, async user => {
 document.addEventListener("DOMContentLoaded", () => { initTheme(); wireLogout(); });
 
 window.BWC = {
-  auth, db, storage, CHALLENGES, ADMIN_IDENTIFIER, waitForAuth,
+  auth, db, CHALLENGES, ADMIN_EMAIL, waitForAuth,
   nowISO, uid, initials, formatDate, escapeHTML,
   isConfiguredAdmin, ensureUserProfile, getCurrentProfile,
   requireParticipant, requireAdmin, showToast, signOutAndGoLogin,
