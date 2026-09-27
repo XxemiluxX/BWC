@@ -128,6 +128,7 @@ function showToast(message) {
 }
 
 function applyTheme(theme) {
+  if (!document.body.classList.contains("landing")) return;
   document.documentElement.dataset.theme = theme;
   document.querySelectorAll("[data-theme-toggle]").forEach(btn => {
     btn.textContent = theme === "dark" ? "☀️" : "🌙";
@@ -136,6 +137,7 @@ function applyTheme(theme) {
   });
 }
 function initTheme() {
+  if (!document.body.classList.contains("landing")) return;
   const stored = localStorage.getItem(THEME_KEY);
   const preferred = window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
   applyTheme(stored || preferred);
