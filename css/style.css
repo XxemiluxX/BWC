@@ -42,8 +42,8 @@
   --success-bg: #eaf7f0;
 
   /* Sombras */
-  --shadow: 0 18px 50px rgba(16, 41, 31, 0.08);
-  --shadow-sm: 0 8px 22px rgba(16, 41, 31, 0.07);
+  --shadow: 0 18px 50px rgba(10, 175, 109, 0.71);
+  --shadow-sm: 0 8px 22px rgba(0, 170, 102, 0.566);
 
   /* Bordes redondeados */
   --radius: 22px;
