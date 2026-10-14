@@ -2113,14 +2113,14 @@ select {
 html[data-theme="dark"] {
   color-scheme: dark;
 
-  --green-950: #07140f;
-  --green-900: #0d2419;
+  --green-950: #0f4430;
+  --green-900: #1f5d3f;
   --green-800: #133524;
-  --green-700: #2f8a61;
+  --green-700: #0d613b;
   --green-600: #49a978;
   --green-500: #6bc690;
   --green-100: #173526;
-  --green-50: #11271b;
+  --green-50: #145632;
 
   --earth: #a98767;
   --earth-light: #382c22;
