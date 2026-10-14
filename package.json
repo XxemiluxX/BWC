@@ -1,5 +1,5 @@
 {
-  "name": "better-world-challenge",
+  "name": "ecra",
   "version": "1.0.0",
   "description": "Plataforma web de retos de sostenibilidad con Firebase Authentication, Firestore y Storage.",
   "main": "index.js",
@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/XxemiluxX/better-world-challenge.git"
+    "url": "git+https://github.com/XxemiluxX/ecra.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/XxemiluxX/better-world-challenge/issues"
+    "url": "https://github.com/XxemiluxX/ecra/issues"
   },
-  "homepage": "https://github.com/XxemiluxX/better-world-challenge#readme",
+  "homepage": "https://github.com/XxemiluxX/ecra#readme",
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated",
     "firebase": "^12.19.0"

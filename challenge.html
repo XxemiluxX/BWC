@@ -1,29 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Desafío — ECRA</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23173d2c'/%3E%3Cpath d='M20 8c-6.4 3-9.8 8.1-9.8 13.1A9.8 9.8 0 0 0 20 30.9a9.8 9.8 0 0 0 9.8-9.8C29.8 16.1 26.4 11 20 8Z' fill='%235eaa7c'/%3E%3Cpath d='M20 12.4c-3.8 2.3-5.7 5.7-5.7 9.1' stroke='%230f251a' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-  <meta name="theme-color" content="#173d2c">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subir Evidencia de Reto — ECRA</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23123322'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23358b5e' stroke-width='2'/%3E%3Cpath d='M20 9c-4.5 3-7 7.5-7 11.5 0 4 3 7.5 7 7.5s7-3.5 7-7.5C27 16.5 24.5 12 20 9Z' fill='%2349ab77'/%3E</svg>">
+  <meta name="theme-color" content="#123322">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <script>(function(){try{var t=localStorage.getItem('bwc_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+  <script>(function(){try{var t=localStorage.getItem('ecra_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 </head>
 <body class="app-page">
   <header class="app-header">
-    <a class="brand" href="profile.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bwcGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#3d8b63"/><stop offset="1" stop-color="#173d2c"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#bwcGrad)"/><path d="M20 8c-6.4 3-9.8 8.1-9.8 
-13.1A9.8 9.8 0 0 0 20 30.9a9.8 9.8 0 0 0 9.8-9.8C29.8 16.1 26.4 11 20 8Z" fill="#eaf7ef"/><path d="M20 12.4c-3.8 2.3-5.7 5.7-5.7 9.1" stroke="#2f8a61" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span><span>ECRA</span></a>
-    <div class="user-menu">
-      <button class="theme-toggle" data-theme-toggle type="button" aria-label="Activar modo oscuro">🌙</button>
-      <a class="btn btn-ghost btn-small" href="profile.html">Mi perfil</a>
-      <button id="logoutBtn" class="btn btn-ghost btn-small">Salir</button>
+    <div class="container header-content">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="40" height="40" rx="10" fill="#123322"/>
+            <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
+            <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
+          </svg>
+        </span>
+        <span>ECRA</span>
+      </a>
+
+      <nav class="nav-links">
+        <a class="nav-link" href="challenges.html">Retos</a>
+        <a class="nav-link" href="forums.html">Foros</a>
+        <a class="nav-link" href="profile.html">Mi perfil</a>
+        <button id="logoutBtn" class="btn btn-ghost btn-sm" type="button" data-logout>Salir</button>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">🌙</button>
+      </div>
     </div>
   </header>
-  <main class="container challenge-main">
-    <a href="profile.html" class="back-link">← Volver a mi perfil</a>
-    <section id="challengeContent"></section>
+
+  <main class="section container container-narrow">
+    <div style="margin-bottom: var(--space-lg);">
+      <a href="profile.html" class="nav-link" style="display: inline-flex; align-items: center; gap: 6px; padding-left: 0;">
+        ← Volver a mi perfil
+      </a>
+    </div>
+
+    <section id="challengeContent">
+      <div class="card" style="text-align: center; padding: var(--space-2xl);">
+        <p class="text-muted">Cargando desafío…</p>
+      </div>
+    </section>
   </main>
+
+  <!-- Pie de Página Estandarizado -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid">
+        <div class="footer-brand-col">
+          <div class="brand">
+            <span class="brand-mark">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="#123322"/>
+                <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
+                <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
+              </svg>
+            </span>
+            <span>ECRA</span>
+          </div>
+          <p style="font-size: 0.9rem; margin-top: var(--space-xs);">
+            Plataforma comunitaria e independiente para promover la sostenibilidad y las acciones positivas en los barrios.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Navegación</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="challenges.html">Retos Ambientales</a></li>
+            <li><a href="forums.html">Foros Comunitarios</a></li>
+            <li><a href="profile.html">Mi Perfil</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Contacto</h4>
+          <div class="footer-contact-item">
+            <span>📞</span>
+            <span>Teléfono: <strong>87506973</strong></span>
+          </div>
+          <div class="footer-contact-item">
+            <span>✉️</span>
+            <a href="mailto:mongemoraemiliano60@gmail.com" style="text-decoration: underline;">mongemoraemiliano60@gmail.com</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-disclaimer-box">
+        <strong>Aviso de independencia del proyecto:</strong> ECRA es un proyecto independiente desarrollado en el marco de una iniciativa personal de sostenibilidad. No está afiliado, patrocinado ni respaldado oficialmente por United World Colleges (UWC).
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>© 2026 ECRA. Todos los derechos reservados.</span>
+        <span>Acciones locales para un futuro sostenible 🌿</span>
+      </div>
+    </div>
+  </footer>
+
   <div id="toastRoot" class="toast-root"></div>
   <script type="module" src="js/challenges.js"></script>
 </body>

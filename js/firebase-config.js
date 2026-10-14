@@ -1,4 +1,4 @@
-// Configuración web de Firebase para Better World Challenge.
+// Configuración web de Firebase para ECRA.
 export const firebaseConfig = {
   apiKey: "AIzaSyC5cmdaeO2-u-n43NkgQO0EIxrupHuf5Yc",
   authDomain: "bwc2026-f956e.firebaseapp.com",

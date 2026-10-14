@@ -1,99 +1,955 @@
 import "./app.js";
+import { auth, db } from "./firebase-client.js";
 import {
-  collection, doc, runTransaction, updateDoc, addDoc,
-  onSnapshot, query, orderBy, limit
+  collection,
+  doc,
+  runTransaction,
+  updateDoc,
+  deleteDoc,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-const { db, CHALLENGES, requireAdmin, formatDate, escapeHTML, initials, showToast, ADMIN_EMAIL } = window.BWC;
-let currentView = "dashboard";
-let filters = { search:"", challenge:"all", status:"all", completed:"all" };
-let state = { users:[], evidences:[], activity:[] };
-let unsubscribeUsers = null, unsubscribeEvidences = null, unsubscribeActivity = null;
+const {
+  CHALLENGES,
+  FORUM_CATEGORIES,
+  FORUM_STATUSES,
+  FORUM_TYPES,
+  requireAdmin,
+  formatDate,
+  formatDateShort,
+  escapeHTML,
+  initials,
+  showToast,
+  ADMIN_EMAIL,
+  nowISO
+} = window.ECRA;
 
-function normalizeUserDoc(d) {
-  const completed = Number(d.completed ?? d.challengesCompleted ?? d.completedChallenges ?? 0);
-  const current = Number(d.currentChallenge ?? d.challenge ?? d.stage ?? (completed >= 3 ? 4 : Math.min(3, completed + 1)));
-  return { ...d, role: d.role === "admin" ? "admin" : "participant", name: d.name || d.displayName || d.fullName || "Usuario", email: d.email || "", completed, currentChallenge: current };
+let currentView = "dashboard";
+let filters = { search: "", challenge: "all", status: "all", reportStatus: "all" };
+let state = {
+  users: [],
+  evidences: [],
+  activity: [],
+  forumPosts: [],
+  reports: []
+};
+
+let unsubscribers = [];
+
+function timeValue(value) {
+  const d = value?.toDate ? value.toDate() : new Date(value);
+  return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
-function normalizeEvidenceDoc(d) {
-  return { ...d, userId:d.userId||d.uid||"", userName:d.userName||d.name||"Usuario", userEmail:d.userEmail||d.email||"", challengeNumber:Number(d.challengeNumber??d.challenge??d.stage??1), challengeId:d.challengeId||`challenge-${Number(d.challengeNumber??d.challenge??1)}`, status:d.status||"pending", imageURL:d.imageURL||d.imageUrl||d.photoURL||d.photoUrl||d.image||d.photo||"", submittedAt:d.submittedAt||d.createdAt||new Date().toISOString() };
+
+function evidenceStatusBadge(status) {
+  if (status === "approved") {
+    return `<span class="status-badge status-approved">🟢 Aprobada</span>`;
+  }
+  if (status === "rejected") {
+    return `<span class="status-badge status-rejected">🔴 Rechazada</span>`;
+  }
+  return `<span class="status-badge status-pending">🟡 Pendiente</span>`;
 }
-function normalizeActivityDoc(d) { return { ...d, createdAt:d.createdAt||d.timestamp||new Date().toISOString() }; }
-function timeValue(value) { const d=value?.toDate?value.toDate():new Date(value); return Number.isNaN(d.getTime())?0:d.getTime(); }
-function statusBadge(status) { const cls=status==="pending"?"pending":status==="approved"?"approved":"rejected"; const text=status==="pending"?"🟡 Pendiente":status==="approved"?"🟢 Aprobada":"🔴 Rechazada"; return `<span class="status-badge status-${cls}">${text}</span>`; }
-function activityIcon(type) { return type==="approved"?"✓":type==="rejected"?"×":type==="submission"?"↑":"•"; }
-function activityText(a) {
-  const name=escapeHTML(a.userName||a.actorName||"Usuario"), n=Number(a.challengeNumber||0);
-  if(a.type==="approved") return `<b>${name}</b> avanzó tras aprobar el desafío ${n}.`;
-  if(a.type==="rejected") return `<b>${name}</b> recibió un rechazo en el desafío ${n}.`;
-  if(a.type==="submission") return `<b>${name}</b> envió evidencia para el desafío ${n}.`;
-  return `<b>${name}</b> tuvo actividad en el challenge.`;
+
+function calculateStats() {
+  const participants = state.users.filter(u => u.role !== "admin");
+  const pendingEvidences = state.evidences.filter(e => e.status === "pending").length;
+  const approvedEvidences = state.evidences.filter(e => e.status === "approved").length;
+  const rejectedEvidences = state.evidences.filter(e => e.status === "rejected").length;
+  const pendingReports = state.reports.filter(r => r.status === "pending" || !r.status).length;
+
+  return {
+    usersCount: participants.length,
+    pendingEvidences,
+    approvedEvidences,
+    rejectedEvidences,
+    postsCount: state.forumPosts.length,
+    pendingReports,
+    totalEvidences: state.evidences.length
+  };
 }
-function stats() {
-  const participants=state.users.filter(u=>u.role==="participant");
-  const approved=state.evidences.filter(e=>e.status==="approved").length;
-  const rejected=state.evidences.filter(e=>e.status==="rejected").length;
-  return { users:participants.length, c1:participants.filter(u=>Number(u.currentChallenge)===1).length, c2:participants.filter(u=>Number(u.currentChallenge)===2).length, c3:participants.filter(u=>Number(u.currentChallenge)===3).length, completed:participants.filter(u=>Number(u.completed)>=3).length, pending:state.evidences.filter(e=>e.status==="pending").length, approved, rejected, files:state.evidences.length };
-}
+
 function renderShell() {
-  const s=stats();
-  document.getElementById("pendingNavCount").textContent=s.pending;
-  document.querySelectorAll(".admin-nav-btn").forEach(btn=>btn.classList.toggle("active",btn.dataset.view===currentView));
-  document.getElementById("adminUserName").textContent=window.BWC_PROFILE?.name||"Moderador";
-  document.getElementById("adminUserEmail").textContent=window.BWC_PROFILE?.email||ADMIN_EMAIL;
-  document.getElementById("adminAvatar").textContent=initials(window.BWC_PROFILE?.name||"M");
+  const s = calculateStats();
+
+  const pendingBadge = document.getElementById("pendingNavCount");
+  if (pendingBadge) pendingBadge.textContent = String(s.pendingEvidences);
+
+  const postsBadge = document.getElementById("postsNavCount");
+  if (postsBadge) postsBadge.textContent = String(s.postsCount);
+
+  const reportsBadge = document.getElementById("reportsNavCount");
+  if (reportsBadge) reportsBadge.textContent = String(s.pendingReports);
+
+  document.querySelectorAll(".admin-nav-item").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === currentView);
+  });
+
+  const nameEl = document.getElementById("adminUserName");
+  const emailEl = document.getElementById("adminUserEmail");
+  const avatarEl = document.getElementById("adminAvatar");
+
+  if (nameEl) nameEl.textContent = window.ECRA_PROFILE?.name || "Moderador ECRA";
+  if (emailEl) emailEl.textContent = window.ECRA_PROFILE?.email || ADMIN_EMAIL;
+  if (avatarEl) avatarEl.textContent = initials(window.ECRA_PROFILE?.name || "M");
 }
+
+// --------------------------------------------------------------------------
+// VISTA: DASHBOARD
+// --------------------------------------------------------------------------
 function dashboardView() {
-  const s=stats();
-  const recent=[...state.evidences].sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt)).slice(0,5);
-  const activity=state.activity.slice(0,8);
-  const total=Math.max(1,s.users);
-  return `<section class="stat-grid">
-    <div class="stat-card"><small>Personas</small><strong>${s.users}</strong><span>Participantes</span></div>
-    <div class="stat-card"><small>Desafío 1</small><strong>${s.c1}</strong><span>Etapa actual</span></div>
-    <div class="stat-card"><small>Desafío 2</small><strong>${s.c2}</strong><span>Etapa actual</span></div>
-    <div class="stat-card"><small>Desafío 3</small><strong>${s.c3}</strong><span>Etapa actual</span></div>
-    <div class="stat-card"><small>Completados</small><strong>${s.completed}</strong><span>3/3 desafíos</span></div>
-    <div class="stat-card stat-card-wide"><small>Pendientes</small><strong>${s.pending}</strong><span>Esperando moderación</span></div>
-    <div class="stat-card"><small>Archivos</small><strong>${s.files}</strong><span>Fotos en Supabase</span></div>
-  </section>
-  <section class="admin-grid">
-    <article class="panel-card"><div class="panel-heading"><div><span class="eyebrow">FLUJO EN VIVO</span><h2>Actividad reciente</h2></div><button class="btn btn-ghost btn-small" data-action="view-evidence">Ver evidencias</button></div>
-      ${activity.length?`<div class="activity-feed">${activity.map(a=>`<div class="activity-item"><span class="activity-dot activity-${escapeHTML(a.type||"other")}">${activityIcon(a.type)}</span><div><p>${activityText(a)}</p><small>${formatDate(a.createdAt)}${a.moderatorComment?` · ${escapeHTML(a.moderatorComment)}`:""}</small></div></div>`).join("")}</div>`:`<div class="empty-state">Aquí aparecerán envíos, aprobaciones y rechazos.</div>`}
-    </article>
-    <article class="panel-card"><div class="panel-heading"><div><span class="eyebrow">EMBUDO</span><h2>Progreso de personas</h2></div></div>
-      <div class="funnel"><div><span>Registradas</span><b>${s.users}</b></div><div><span>Desafío 1+</span><b>${Math.max(0,s.users-s.c1)}</b></div><div><span>Desafío 2+</span><b>${Math.max(0,s.users-s.c1-s.c2)}</b></div><div><span>Completadas</span><b>${s.completed}</b></div></div>
-      <div class="flow-note"><b>${s.pending} pendientes</b><span>·</span><b>${s.approved} aprobadas</b><span>·</span><b>${s.rejected} rechazadas</b></div>
-    </article>
-  </section>
-  <section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">EVIDENCIAS</span><h2>Últimos envíos</h2></div><span class="muted">${recent.length} recientes</span></div>
-    ${recent.length?`<div class="evidence-history">${recent.map(e=>`<article class="history-item"><img src="${escapeHTML(e.imageURL||"")}" alt="Evidencia"><div><h3>${escapeHTML(e.userName||"Usuario")} · Desafío ${e.challengeNumber}</h3><p>${formatDate(e.submittedAt)}</p></div><div class="history-side">${statusBadge(e.status)}</div></article>`).join("")}</div>`:`<div class="empty-state">Todavía no hay evidencias.</div>`}
-  </section>`;
+  const s = calculateStats();
+  const recentEvidences = [...state.evidences]
+    .sort((a, b) => timeValue(b.submittedAt) - timeValue(a.submittedAt))
+    .slice(0, 5);
+  const recentActivity = state.activity.slice(0, 6);
+
+  return `
+    <!-- Tarjetas de Métricas -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl);">
+      <div class="card" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow" style="margin-bottom: 4px;">Comunidad</span>
+        <strong style="font-size: 2rem; color: var(--forest-700); display: block;">${s.usersCount}</strong>
+        <span class="text-muted" style="font-size: 0.8rem;">Participantes registrados</span>
+      </div>
+
+      <div class="card" style="padding: var(--space-lg); text-align: center; border-color: ${s.pendingEvidences > 0 ? 'var(--status-pending-border)' : 'var(--border-subtle)'}; background: ${s.pendingEvidences > 0 ? 'var(--status-pending-bg)' : 'var(--bg-surface)'};">
+        <span class="eyebrow" style="margin-bottom: 4px;">Evidencias</span>
+        <strong style="font-size: 2rem; color: ${s.pendingEvidences > 0 ? 'var(--status-pending-text)' : 'var(--text-primary)'}; display: block;">${s.pendingEvidences}</strong>
+        <span class="text-muted" style="font-size: 0.8rem;">Esperando revisión</span>
+      </div>
+
+      <div class="card" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow" style="margin-bottom: 4px;">Aprobadas</span>
+        <strong style="font-size: 2rem; color: var(--status-approved-text); display: block;">${s.approvedEvidences}</strong>
+        <span class="text-muted" style="font-size: 0.8rem;">Acciones validadas</span>
+      </div>
+
+      <div class="card" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow" style="margin-bottom: 4px;">Foros Ciudadanos</span>
+        <strong style="font-size: 2rem; color: var(--forest-600); display: block;">${s.postsCount}</strong>
+        <span class="text-muted" style="font-size: 0.8rem;">Iniciativas activas</span>
+      </div>
+
+      <div class="card" style="padding: var(--space-lg); text-align: center; ${s.pendingReports > 0 ? 'border-color: var(--status-rejected-border); background: var(--status-rejected-bg);' : ''}">
+        <span class="eyebrow" style="margin-bottom: 4px;">Reportes</span>
+        <strong style="font-size: 2rem; color: ${s.pendingReports > 0 ? 'var(--status-rejected-text)' : 'var(--text-muted)'}; display: block;">${s.pendingReports}</strong>
+        <span class="text-muted" style="font-size: 0.8rem;">Pendientes de resolver</span>
+      </div>
+    </div>
+
+    <!-- Rejilla de Actividad y Últimas Evidencias -->
+    <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-lg);">
+      <!-- Evidencias Recientes -->
+      <div class="card" style="padding: var(--space-lg);">
+        <div class="flex items-center justify-between mb-md">
+          <div>
+            <span class="eyebrow">REVISIÓN RÁPIDA</span>
+            <h2 style="font-size: 1.25rem;">Últimas evidencias enviadas</h2>
+          </div>
+          <button class="btn btn-secondary btn-sm" data-action="goto-view" data-target="evidence">Ver todas</button>
+        </div>
+
+        ${recentEvidences.length ? `
+          <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+            ${recentEvidences.map(e => `
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; border-radius: var(--radius-sm); background-color: var(--bg-surface-secondary); border: 1px solid var(--border-subtle);">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                  <img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia" style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-xs); flex-shrink: 0;">
+                  <div style="min-width: 0;">
+                    <strong style="display: block; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(e.userName || "Participante")}</strong>
+                    <small class="text-muted" style="font-size: 0.75rem;">Reto #${e.challengeNumber || 1} · ${formatDateShort(e.submittedAt)}</small>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                  ${evidenceStatusBadge(e.status)}
+                  <button class="btn btn-secondary btn-sm" data-action="open-evidence" data-id="${e.id}" style="padding: 4px 8px; font-size: 0.75rem;">Revisar</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        ` : `
+          <p class="text-muted" style="text-align: center; padding: var(--space-xl);">No hay evidencias registradas en el sistema.</p>
+        `}
+      </div>
+
+      <!-- Bitácora Rápida -->
+      <div class="card" style="padding: var(--space-lg);">
+        <div class="flex items-center justify-between mb-md">
+          <div>
+            <span class="eyebrow">TRAZABILIDAD</span>
+            <h2 style="font-size: 1.25rem;">Actividad en tiempo real</h2>
+          </div>
+          <button class="btn btn-secondary btn-sm" data-action="goto-view" data-target="activity">Ver bitácora</button>
+        </div>
+
+        ${recentActivity.length ? `
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${recentActivity.map(a => `
+              <div style="font-size: 0.85rem; border-left: 3px solid var(--forest-500); padding-left: 10px;">
+                <div>${formatActivitySummary(a)}</div>
+                <small class="text-muted">${formatDate(a.createdAt)}</small>
+              </div>
+            `).join("")}
+          </div>
+        ` : `
+          <p class="text-muted" style="text-align: center; padding: var(--space-xl);">Aún no hay actividad registrada.</p>
+        `}
+      </div>
+    </div>
+  `;
 }
+
+function formatActivitySummary(a) {
+  const name = escapeHTML(a.actorName || a.userName || "Usuario");
+  if (a.type === "approved") {
+    return `<strong>${name}</strong>: Evidencia aprobada para el reto #${a.challengeNumber || 1}.`;
+  }
+  if (a.type === "rejected") {
+    return `<strong>${name}</strong>: Evidencia rechazada para el reto #${a.challengeNumber || 1}.`;
+  }
+  if (a.type === "submission") {
+    return `<strong>${name}</strong>: Envió nueva evidencia para el reto #${a.challengeNumber || 1}.`;
+  }
+  return `<strong>${name}</strong>: Actividad comunitaria registrada.`;
+}
+
+// --------------------------------------------------------------------------
+// VISTA: EVIDENCIAS FOTOGRÁFICAS
+// --------------------------------------------------------------------------
+function evidenceView() {
+  const list = state.evidences.filter(e => {
+    const search = filters.search.toLowerCase();
+    const matchesSearch = !search ||
+      (e.userName && e.userName.toLowerCase().includes(search)) ||
+      (e.userEmail && e.userEmail.toLowerCase().includes(search));
+    const matchesChallenge = filters.challenge === "all" || String(e.challengeNumber) === String(filters.challenge);
+    const matchesStatus = filters.status === "all" || e.status === filters.status;
+    return matchesSearch && matchesChallenge && matchesStatus;
+  }).sort((a, b) => timeValue(b.submittedAt) - timeValue(a.submittedAt));
+
+  return `
+    <div class="card mb-lg" style="padding: var(--space-lg);">
+      <div class="flex items-center justify-between mb-md" style="flex-wrap: wrap; gap: var(--space-sm);">
+        <div>
+          <span class="eyebrow">MODERACIÓN DE IMPACTO</span>
+          <h2>Evidencias fotográficas enviadas (${list.length})</h2>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btnExportEvidences" type="button">⬇ Exportar a CSV</button>
+      </div>
+
+      <!-- Filtros de Evidencias -->
+      <div class="filter-bar" style="margin-bottom: 0;">
+        <input class="filter-input" id="evFilterSearch" placeholder="🔍 Buscar por participante o correo..." value="${escapeHTML(filters.search)}">
+        
+        <select class="filter-select" id="evFilterChallenge">
+          <option value="all">Todos los retos (8)</option>
+          ${CHALLENGES.map(c => `
+            <option value="${c.number}" ${String(filters.challenge) === String(c.number) ? "selected" : ""}>Reto #${c.number}: ${escapeHTML(c.shortTitle || c.title)}</option>
+          `).join("")}
+        </select>
+
+        <select class="filter-select" id="evFilterStatus">
+          <option value="all" ${filters.status === "all" ? "selected" : ""}>Todos los estados</option>
+          <option value="pending" ${filters.status === "pending" ? "selected" : ""}>🟡 Pendientes de revisión</option>
+          <option value="approved" ${filters.status === "approved" ? "selected" : ""}>🟢 Aprobadas</option>
+          <option value="rejected" ${filters.status === "rejected" ? "selected" : ""}>🔴 Rechazadas</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Rejilla de Evidencias -->
+    ${list.length ? `
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: var(--space-lg);">
+        ${list.map(e => {
+          const ch = CHALLENGES.find(c => c.number === Number(e.challengeNumber)) || { title: `Reto #${e.challengeNumber}`, icon: "🌱" };
+          return `
+            <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+              <div style="position: relative; height: 180px; background-color: var(--bg-surface-secondary);">
+                <img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; top: 8px; right: 8px;">${evidenceStatusBadge(e.status)}</div>
+              </div>
+
+              <div style="padding: var(--space-md); flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 2px;">${formatDate(e.submittedAt)}</div>
+                  <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">${escapeHTML(e.userName || "Participante")}</strong>
+                  <div style="font-size: 0.825rem; color: var(--forest-700); margin-bottom: 6px;">${ch.icon} Reto #${e.challengeNumber}: ${escapeHTML(ch.title)}</div>
+                  ${e.comment ? `<p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;">"${escapeHTML(e.comment)}"</p>` : ""}
+                  ${e.moderatorComment ? `<div style="background-color: var(--forest-50); padding: 6px 8px; border-radius: var(--radius-xs); font-size: 0.775rem; color: var(--forest-950);">Nota: ${escapeHTML(e.moderatorComment)}</div>` : ""}
+                </div>
+
+                <div style="margin-top: var(--space-md); border-top: 1px solid var(--border-subtle); padding-top: var(--space-xs); display: flex; justify-content: flex-end; gap: 6px;">
+                  <button class="btn btn-secondary btn-sm" data-action="open-evidence" data-id="${e.id}">Revisar / Calificar</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    ` : `
+      <div class="card text-center p-xl">
+        <p class="text-muted">No se encontraron evidencias con los filtros seleccionados.</p>
+      </div>
+    `}
+  `;
+}
+
+// --------------------------------------------------------------------------
+// VISTA: FOROS Y PROYECTOS COMUNITARIOS
+// --------------------------------------------------------------------------
+function forumsView() {
+  const search = filters.search.toLowerCase();
+  const list = state.forumPosts.filter(p => {
+    return !search ||
+      (p.title && p.title.toLowerCase().includes(search)) ||
+      (p.authorName && p.authorName.toLowerCase().includes(search)) ||
+      (p.location && p.location.toLowerCase().includes(search));
+  }).sort((a, b) => timeValue(b.createdAt) - timeValue(a.createdAt));
+
+  return `
+    <div class="card mb-lg" style="padding: var(--space-lg);">
+      <div class="flex items-center justify-between mb-md" style="flex-wrap: wrap; gap: var(--space-sm);">
+        <div>
+          <span class="eyebrow">MODERACIÓN CIUDADANA</span>
+          <h2>Iniciativas y proyectos comunitarios (${list.length})</h2>
+        </div>
+        <a class="btn btn-primary btn-sm" href="forums.html" target="_blank">Abrir Foros Públicos ↗</a>
+      </div>
+
+      <div class="filter-bar" style="margin-bottom: 0;">
+        <input class="filter-input" id="forumAdminSearch" placeholder="🔍 Buscar por título, autor o comunidad..." value="${escapeHTML(filters.search)}">
+      </div>
+    </div>
+
+    ${list.length ? `
+      <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+        ${list.map(p => {
+          const cat = FORUM_CATEGORIES[p.category] || FORUM_CATEGORIES.general;
+          const status = FORUM_STATUSES[p.status] || FORUM_STATUSES.proposal;
+          const pType = FORUM_TYPES[p.type] || FORUM_TYPES.idea;
+
+          return `
+            <div class="card" style="padding: var(--space-md); display: flex; justify-content: space-between; align-items: center; gap: var(--space-md); flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 260px;">
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="tag-category">${cat.icon} ${escapeHTML(cat.label)}</span>
+                  <span class="tag-type">${pType.icon} ${escapeHTML(pType.label)}</span>
+                  <span class="status-badge ${status.class}">${status.badge}</span>
+                  ${p.location ? `<span class="tag-location">📍 ${escapeHTML(p.location)}</span>` : ""}
+                </div>
+
+                <h3 style="font-size: 1.15rem; margin-bottom: 4px;">${escapeHTML(p.title)}</h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">
+                  Por <strong>${escapeHTML(p.authorName || "Anónimo")}</strong> (${escapeHTML(p.authorEmail || "Sin correo")}) · ${formatDate(p.createdAt)}
+                </div>
+                <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px; line-height: 1.4;">
+                  ${escapeHTML(p.description?.substring(0, 180) || "")}${p.description?.length > 180 ? "..." : ""}
+                </p>
+                <div style="font-size: 0.775rem; color: var(--text-muted);">
+                  💬 ${p.commentsCount || 0} comentarios · 🤝 ${p.participantsCount || 0} voluntarios
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                <a class="btn btn-secondary btn-sm" href="forums.html?id=${p.id}" target="_blank">Ver en vivo ↗</a>
+                <button class="btn btn-danger btn-sm" data-action="admin-delete-post" data-id="${p.id}">Eliminar</button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    ` : `
+      <div class="card text-center p-xl">
+        <p class="text-muted">No hay publicaciones de foros registradas.</p>
+      </div>
+    `}
+  `;
+}
+
+// --------------------------------------------------------------------------
+// VISTA: REPORTES CIUDADANOS
+// --------------------------------------------------------------------------
+function reportsView() {
+  const list = state.reports.sort((a, b) => timeValue(b.createdAt) - timeValue(a.createdAt));
+
+  return `
+    <div class="card mb-lg" style="padding: var(--space-lg);">
+      <span class="eyebrow">MODERACIÓN Y SEGURIDAD</span>
+      <h2>Reportes de contenido inapropiado o spam (${list.length})</h2>
+      <p class="text-muted" style="margin-bottom: 0; font-size: 0.85rem;">
+        Revisa los avisos enviados por la comunidad para mantener un ambiente de respeto y veracidad en los foros de ECRA.
+      </p>
+    </div>
+
+    ${list.length ? `
+      <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+        ${list.map(r => {
+          const isPending = !r.status || r.status === "pending";
+          return `
+            <div class="card" style="padding: var(--space-md); border-left: 4px solid ${isPending ? 'var(--status-rejected-border)' : 'var(--border-subtle)'};">
+              <div class="flex items-center justify-between mb-xs">
+                <div>
+                  <span class="status-badge ${isPending ? 'status-rejected' : 'status-approved'}">
+                    ${isPending ? '⚠️ Pendiente de revisión' : '✓ Resuelto / Desestimado'}
+                  </span>
+                  <strong style="margin-left: 8px; font-size: 0.95rem;">Motivo: ${escapeHTML(r.reason || "General")}</strong>
+                </div>
+                <small class="text-muted">${formatDate(r.createdAt)}</small>
+              </div>
+
+              <div style="font-size: 0.875rem; margin-bottom: 6px;">
+                <strong>Publicación reportada:</strong> ${escapeHTML(r.postTitle || r.postId || "ID " + r.postId)}
+              </div>
+
+              ${r.detail ? `
+                <div style="background-color: var(--bg-surface-secondary); padding: 8px 12px; border-radius: var(--radius-xs); font-size: 0.825rem; color: var(--text-secondary); margin-bottom: 8px;">
+                  "${escapeHTML(r.detail)}"
+                </div>
+              ` : ""}
+
+              <div style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 8px;">
+                Reportado por: ${escapeHTML(r.reporterEmail || r.reporterId || "Anónimo")}
+              </div>
+
+              <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                <a class="btn btn-secondary btn-sm" href="forums.html?id=${r.postId}" target="_blank">Ver publicación ↗</a>
+                ${isPending ? `
+                  <button class="btn btn-danger btn-sm" data-action="report-delete-post" data-report-id="${r.id}" data-post-id="${r.postId}">Eliminar publicación</button>
+                  <button class="btn btn-secondary btn-sm" data-action="report-dismiss" data-report-id="${r.id}">Desestimar reporte</button>
+                ` : ""}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    ` : `
+      <div class="card text-center p-xl">
+        <p class="text-muted">No hay reportes de moderación pendientes. ¡Excelente!</p>
+      </div>
+    `}
+  `;
+}
+
+// --------------------------------------------------------------------------
+// VISTA: DIRECTORIO DE USUARIOS
+// --------------------------------------------------------------------------
 function usersView() {
-  const search=filters.search.toLowerCase();
-  const users=state.users.filter(u=>u.role==="participant").filter(u=>!search||`${u.name||""} ${u.email||""}`.toLowerCase().includes(search));
-  return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">PARTICIPANTES</span><h2>Personas registradas</h2></div><div class="panel-heading-actions"><span class="muted">${users.length} resultados</span><button id="exportUsersBtn" class="btn btn-soft btn-small" type="button">⬇ Exportar CSV</button></div></div><div class="filter-row"><input id="userSearch" placeholder="Buscar por nombre o correo…" value="${escapeHTML(filters.search)}"></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Persona</th><th>Correo</th><th>Desafío</th><th>Progreso</th><th>Estado</th><th></th></tr></thead><tbody>${users.map(u=>`<tr><td><div class="user-cell"><span class="avatar">${initials(u.name)}</span><div><b>${escapeHTML(u.name)}</b><small class="muted">Registrado ${formatDate(u.createdAt)}</small></div></div></td><td>${escapeHTML(u.email)}</td><td>${Number(u.completed)>=3?"Completado":`Desafío ${u.currentChallenge||1}`}</td><td>${Number(u.completed||0)}/3</td><td>${Number(u.completed)>=3?statusBadge("approved"):"<span class='status-badge status-neutral'>En progreso</span>"}</td><td><button class="btn btn-soft btn-small" data-user="${u.id}">Ver</button></td></tr>`).join("")}</tbody></table></div></section>`;
+  const search = filters.search.toLowerCase();
+  const list = state.users.filter(u => {
+    return !search ||
+      (u.name && u.name.toLowerCase().includes(search)) ||
+      (u.email && u.email.toLowerCase().includes(search));
+  });
+
+  return `
+    <div class="card mb-lg" style="padding: var(--space-lg);">
+      <div class="flex items-center justify-between mb-md" style="flex-wrap: wrap; gap: var(--space-sm);">
+        <div>
+          <span class="eyebrow">DIRECTORIO CIUDADANO</span>
+          <h2>Usuarios registrados (${list.length})</h2>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btnExportUsers" type="button">⬇ Exportar a CSV</button>
+      </div>
+
+      <div class="filter-bar" style="margin-bottom: 0;">
+        <input class="filter-input" id="userAdminSearch" placeholder="🔍 Buscar por nombre o correo electrónico..." value="${escapeHTML(filters.search)}">
+      </div>
+    </div>
+
+    <div class="card" style="padding: 0; overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-subtle); background-color: var(--bg-surface-secondary); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+            <th style="padding: 12px 16px;">Usuario</th>
+            <th style="padding: 12px 16px;">Correo</th>
+            <th style="padding: 12px 16px;">Rol</th>
+            <th style="padding: 12px 16px;">Registro</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(u => `
+            <tr style="border-bottom: 1px solid var(--border-subtle);">
+              <td style="padding: 12px 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div class="post-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">${initials(u.name)}</div>
+                  <strong>${escapeHTML(u.name || "Participante")}</strong>
+                </div>
+              </td>
+              <td style="padding: 12px 16px; color: var(--text-secondary);">${escapeHTML(u.email || "—")}</td>
+              <td style="padding: 12px 16px;">
+                <span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-outline'}" style="font-size: 0.75rem;">
+                  ${u.role === 'admin' ? '🛡️ Admin' : '🌱 Miembro'}
+                </span>
+              </td>
+              <td style="padding: 12px 16px; font-size: 0.8rem; color: var(--text-muted);">${formatDateShort(u.createdAt)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
-function filteredEvidence(){return state.evidences.filter(e=>{const user=state.users.find(u=>u.id===e.userId),search=filters.search.toLowerCase();return (!search||`${e.userName||""} ${e.userEmail||""} ${e.challengeNumber}`.toLowerCase().includes(search))&&(filters.challenge==="all"||Number(filters.challenge)===Number(e.challengeNumber))&&(filters.status==="all"||filters.status===e.status)&&(filters.completed==="all"||(filters.completed==="yes"?Number(user?.completed)>=3:Number(user?.completed)<3));}).sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt));}
-function evidenceView(){const list=filteredEvidence();return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">MODERACIÓN</span><h2>Evidencias</h2></div><div class="panel-heading-actions"><span class="muted">${list.length} evidencias</span><button id="exportEvidenceBtn" class="btn btn-soft btn-small" type="button">⬇ Exportar CSV</button></div></div><div class="filter-row"><input id="evidenceSearch" placeholder="Buscar participante…" value="${escapeHTML(filters.search)}"><select id="evidenceChallenge"><option value="all">Todos los desafíos</option>${CHALLENGES.map(c=>`<option value="${c.number}" ${filters.challenge==c.number?"selected":""}>Desafío ${c.number}</option>`).join("")}</select><select id="evidenceStatus"><option value="all">Todos los estados</option><option value="pending" ${filters.status==="pending"?"selected":""}>Pendientes</option><option value="approved" ${filters.status==="approved"?"selected":""}>Aprobadas</option><option value="rejected" ${filters.status==="rejected"?"selected":""}>Rechazadas</option></select></div>${list.length?`<div class="evidence-grid">${list.map(e=>`<article class="evidence-admin-card"><button class="evidence-image-btn" data-view-evidence="${e.id}" aria-label="Abrir evidencia"><img src="${escapeHTML(e.imageURL||"")}" alt="Evidencia de ${escapeHTML(e.userName||"usuario")}"></button><div class="evidence-admin-body"><div class="evidence-admin-meta"><div><h3>${escapeHTML(e.userName||"Usuario")}</h3><small>Desafío ${e.challengeNumber} · ${formatDate(e.submittedAt)}</small></div>${statusBadge(e.status)}</div><p>${escapeHTML(CHALLENGES[e.challengeNumber-1]?.title||"")}</p><div class="evidence-actions"><button class="btn btn-ghost btn-small" data-view-evidence="${e.id}">VER</button>${e.status==="pending"?`<button class="btn btn-success btn-small" data-approve="${e.id}">APROBAR</button><button class="btn btn-danger btn-small" data-reject="${e.id}">RECHAZAR</button>`:""}</div></div></article>`).join("")}</div>`:`<div class="empty-state">No hay evidencias que coincidan.</div>`}</section>`;}
-function completedView(){const users=state.users.filter(u=>u.role==="participant"&&Number(u.completed)>=3);return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">RECONOCIMIENTOS</span><h2>Participantes completados</h2></div><strong>${users.length}</strong></div>${users.length?`<div class="evidence-history">${users.map(u=>`<article class="history-item"><div class="avatar">${initials(u.name)}</div><div><h3>${escapeHTML(u.name)}</h3><p>${escapeHTML(u.email)} · 3/3 desafíos</p></div><div class="history-side"><span class="completion-badge">🏆 Completado</span></div></article>`).join("")}</div>`:`<div class="empty-state">Todavía no hay participantes con 3/3.</div>`}</section>`;}
-function settingsView(){return `<section class="settings-grid"><article class="settings-card"><span class="eyebrow">DATOS</span><h2>Firebase + Supabase</h2><p>Firebase mantiene autenticación, usuarios, estados y moderación. Supabase Storage almacena las fotografías.</p><div class="code-note">Firebase: bwc2026-f956e · Admin: ${escapeHTML(ADMIN_EMAIL)} · Bucket: evidence</div></article><article class="settings-card"><span class="eyebrow">ADMINISTRACIÓN</span><h2>Cuenta de moderación</h2><p>El acceso administrativo se valida contra el correo exacto <b>${escapeHTML(ADMIN_EMAIL)}</b> mediante las reglas de Firebase.</p><p class="muted">Para una instalación pública de mayor seguridad, migra el rol a custom claims administrados en backend.</p></article><article class="settings-card"><span class="eyebrow">FOTOS</span><h2>Supabase Storage</h2><p>Las fotos nuevas se suben a <b>evidence/&lt;firebaseUid&gt;/...</b>. El bucket debe existir y estar configurado según <b>supabase.sql</b>.</p><div class="code-note">js/supabase-config.js</div></article><article class="settings-card"><span class="eyebrow">TIEMPO REAL</span><h2>Actividad viva</h2><p>El panel escucha usuarios, evidencias y actividad en tiempo real. Cada aprobación o rechazo queda registrada con fecha y moderador.</p></article></section>`;}
-function activityView(){const list=state.activity;return `<section class="panel-card"><div class="panel-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2>Actividad completa</h2></div><span class="muted">${list.length} eventos</span></div>${list.length?`<div class="activity-feed">${list.map(a=>`<div class="activity-item"><span class="activity-dot activity-${escapeHTML(a.type||"other")}">${activityIcon(a.type)}</span><div><p>${activityText(a)}</p><small>${formatDate(a.createdAt)}${a.moderatorComment?` · ${escapeHTML(a.moderatorComment)}`:""}</small></div></div>`).join("")}</div>`:`<div class="empty-state">Aquí aparecerán envíos, aprobaciones y rechazos de todas las personas.</div>`}</section>`;}
-function toCSVValue(value){const s=String(value??"");return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;}
-function downloadCSV(filename,rows){const csv=rows.map(row=>row.map(toCSVValue).join(",")).join("\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
-function exportUsersCSV(){const users=state.users.filter(u=>u.role==="participant");downloadCSV("bwc-usuarios.csv",[["Nombre","Correo","Desafio actual","Completados","Registrado"],...users.map(u=>[u.name,u.email,u.currentChallenge,u.completed,formatDate(u.createdAt)])]);showToast("Descargando CSV de usuarios…");}
-function exportEvidenceCSV(){const list=filteredEvidence();downloadCSV("bwc-evidencias.csv",[["Persona","Correo","Desafio","Estado","Enviado","Comentario","Imagen"],...list.map(e=>[e.userName,e.userEmail,e.challengeNumber,e.status,formatDate(e.submittedAt),e.moderatorComment||"",e.imageURL||""])]);showToast("Descargando CSV de evidencias…");}
-function render(){renderShell();const root=document.getElementById("adminViewRoot");root.innerHTML=currentView==="dashboard"?dashboardView():currentView==="users"?usersView():currentView==="evidence"?evidenceView():currentView==="activity"?activityView():currentView==="completed"?completedView():settingsView();bindViewEvents();document.getElementById("exportUsersBtn")?.addEventListener("click",exportUsersCSV);document.getElementById("exportEvidenceBtn")?.addEventListener("click",exportEvidenceCSV);}
-function bindViewEvents(){document.querySelectorAll(".admin-nav-btn").forEach(btn=>btn.onclick=()=>{currentView=btn.dataset.view;filters.search="";render();});document.querySelectorAll("[data-action='view-evidence']").forEach(btn=>btn.onclick=()=>{currentView="evidence";render();});document.querySelectorAll("[data-view-evidence]").forEach(btn=>btn.onclick=()=>openEvidence(btn.dataset.viewEvidence));document.querySelectorAll("[data-approve]").forEach(btn=>btn.onclick=()=>openApprove(btn.dataset.approve));document.querySelectorAll("[data-reject]").forEach(btn=>btn.onclick=()=>openReject(btn.dataset.reject));document.querySelectorAll("[data-user]").forEach(btn=>btn.onclick=()=>openUser(btn.dataset.user));const debounce=(fn,ms=180)=>{let t;return e=>{clearTimeout(t);t=setTimeout(()=>fn(e),ms)}};const bindFilter=(id,key)=>document.getElementById(id)?.addEventListener("input",debounce(e=>{filters[key]=e.target.value;render();}));const bindSelect=(id,key)=>document.getElementById(id)?.addEventListener("change",e=>{filters[key]=e.target.value;render();});bindFilter("userSearch","search");bindFilter("evidenceSearch","search");bindSelect("evidenceChallenge","challenge");bindSelect("evidenceStatus","status");}
-function closeModal(){document.getElementById("adminModalRoot").innerHTML="";}
-function openEvidence(id){const e=state.evidences.find(x=>x.id===id);if(!e)return;document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal" data-close-modal><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">EVIDENCIA · DESAFÍO ${e.challengeNumber}</span><h2>${escapeHTML(e.userName||"Usuario")}</h2><p class="muted">${formatDate(e.submittedAt)}</p></div><button class="modal-close" data-close>✕</button></div><img class="modal-evidence-image" src="${escapeHTML(e.imageURL||"")}" alt="Evidencia enviada"><div class="challenge-callout"><b>${statusBadge(e.status)}</b><p>${e.moderatorComment?escapeHTML(e.moderatorComment):"Sin comentario del moderador."}</p><small>Archivo: ${escapeHTML(e.originalFileName||"fotografía")} · ${Math.max(1,Math.round(Number(e.fileSize||0)/1024))} KB · ${escapeHTML(e.storageProvider||"supabase")}</small></div>${e.status==="pending"?`<div class="evidence-actions"><button class="btn btn-success btn-full" data-modal-approve="${e.id}">Aprobar</button><button class="btn btn-danger btn-full" data-modal-reject="${e.id}">Rechazar</button></div>`:""}</div></div>`;document.querySelector("[data-close]")?.addEventListener("click",closeModal);document.querySelector("[data-close-modal]")?.addEventListener("click",e=>{if(e.target.hasAttribute("data-close-modal"))closeModal();});document.querySelector("[data-modal-approve]")?.addEventListener("click",()=>openApprove(id));document.querySelector("[data-modal-reject]")?.addEventListener("click",()=>openReject(id));}
-function openApprove(id){const e=state.evidences.find(x=>x.id===id);if(!e||e.status!=="pending")return;document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">CONFIRMAR</span><h2>Aprobar evidencia</h2><p class="muted">${escapeHTML(e.userName||"Usuario")} · Desafío ${e.challengeNumber}</p></div><button class="modal-close" data-close>✕</button></div><p>El participante avanzará al siguiente desafío después de guardar esta decisión.</p><div class="evidence-actions"><button class="btn btn-ghost btn-full" data-close>Cancelar</button><button class="btn btn-success btn-full" data-confirm-approve>Aprobar evidencia</button></div></div></div>`;document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);document.querySelector("[data-confirm-approve]").onclick=()=>approveEvidence(id);}
-async function logActivity(data){try{await addDoc(collection(db,"activity"),{...data,createdAt:new Date().toISOString()});}catch(error){console.error("activity log",error);}}
-async function approveEvidence(id){const admin=await requireAdmin();if(!admin)return;try{let changedUser=null;await runTransaction(db,async tx=>{const evRef=doc(db,"evidences",id),evSnap=await tx.get(evRef);if(!evSnap.exists()||evSnap.data().status!=="pending")throw new Error("Esta evidencia ya fue revisada.");const e=evSnap.data(),userRef=doc(db,"users",e.userId),userSnap=await tx.get(userRef);if(!userSnap.exists())throw new Error("No encontramos el usuario asociado.");const user=userSnap.data();const currentChallenge=Number(user.currentChallenge??(Number(user.completed||0)>=3?4:Number(user.completed||0)+1));const nextCompleted=Math.max(Number(user.completed||0),Number(e.challengeNumber));tx.update(evRef,{status:"approved",reviewedAt:new Date().toISOString(),reviewedBy:admin.user.uid,moderatorComment:"Evidencia aprobada."});if(Number(e.challengeNumber)===currentChallenge&&Number(user.completed)<3){tx.update(userRef,{completed:nextCompleted,currentChallenge:nextCompleted>=3?4:nextCompleted+1,updatedAt:new Date().toISOString()});changedUser={name:user.name||e.userName,challengeNumber:Number(e.challengeNumber),nextCompleted};}});await logActivity({type:"approved",actorUid:admin.user.uid,actorName:admin.profile?.name||admin.user.email,userId:state.evidences.find(x=>x.id===id)?.userId||"",userName:state.evidences.find(x=>x.id===id)?.userName||"Usuario",challengeNumber:state.evidences.find(x=>x.id===id)?.challengeNumber||0});closeModal();showToast(changedUser?`Aprobada. ${changedUser.name} avanzó al siguiente desafío.`:"Evidencia aprobada.");}catch(error){console.error(error);closeModal();showToast(error.message||"No se pudo aprobar la evidencia.");}}
-function openReject(id){const e=state.evidences.find(x=>x.id===id);if(!e||e.status!=="pending")return;document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">RECHAZAR EVIDENCIA</span><h2>Motivo del rechazo</h2><p class="muted">${escapeHTML(e.userName||"Usuario")} · Desafío ${e.challengeNumber}</p></div><button class="modal-close" data-close>✕</button></div><textarea id="rejectReason" maxlength="500" placeholder="Escribe un comentario para el participante…"></textarea><div class="evidence-actions"><button class="btn btn-ghost btn-full" data-close>Cancelar</button><button class="btn btn-danger btn-full" data-confirm-reject>Confirmar rechazo</button></div></div></div>`;document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);document.querySelector("[data-confirm-reject]").onclick=()=>rejectEvidence(id);}
-async function rejectEvidence(id){const admin=await requireAdmin();if(!admin)return;const comment=document.getElementById("rejectReason")?.value.trim()||"La evidencia necesita una nueva fotografía o una explicación más clara de la acción realizada.";const e=state.evidences.find(x=>x.id===id);try{await updateDoc(doc(db,"evidences",id),{status:"rejected",reviewedAt:new Date().toISOString(),reviewedBy:admin.user.uid,moderatorComment:comment});await logActivity({type:"rejected",actorUid:admin.user.uid,actorName:admin.profile?.name||admin.user.email,userId:e?.userId||"",userName:e?.userName||"Usuario",challengeNumber:e?.challengeNumber||0,moderatorComment:comment});closeModal();showToast("Evidencia rechazada. La persona puede enviarla nuevamente.");}catch(error){console.error(error);closeModal();showToast(error.message||"No se pudo rechazar la evidencia.");}}
-function openUser(id){const u=state.users.find(x=>x.id===id);if(!u)return;const ev=state.evidences.filter(e=>e.userId===id).sort((a,b)=>timeValue(b.submittedAt)-timeValue(a.submittedAt));document.getElementById("adminModalRoot").innerHTML=`<div class="detail-modal"><div class="modal-card"><div class="modal-header"><div><span class="eyebrow">PERFIL</span><h2>${escapeHTML(u.name||"Usuario")}</h2><p class="muted">${escapeHTML(u.email||"")}</p></div><button class="modal-close" data-close>✕</button></div><div class="profile-summary"><div><small>Progreso</small><strong>${Number(u.completed||0)}/3</strong></div><div><small>Desafío actual</small><strong>${Number(u.completed)>=3?"Completado":Number(u.currentChallenge||1)}</strong></div></div><h3>Historial de evidencias</h3>${ev.length?`<div class="evidence-history">${ev.map(e=>`<article class="history-item"><img src="${escapeHTML(e.imageURL||"")}" alt="Evidencia"><div><h3>Desafío ${e.challengeNumber}</h3><p>${formatDate(e.submittedAt)}</p></div><div class="history-side">${statusBadge(e.status)}</div></article>`).join("")}</div>`:`<div class="empty-state">No hay evidencias.</div>`}</div></div>`;document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeModal);}
-async function start(){const admin=await requireAdmin();if(!admin)return;window.BWC_PROFILE=admin.profile;state={users:[],evidences:[],activity:[]};unsubscribeUsers=onSnapshot(collection(db,"users"),snap=>{state.users=snap.docs.map(d=>normalizeUserDoc({id:d.id,...d.data()}));render();},err=>{console.error(err);showToast("No se pudieron leer los usuarios.");});unsubscribeEvidences=onSnapshot(collection(db,"evidences"),snap=>{state.evidences=snap.docs.map(d=>normalizeEvidenceDoc({id:d.id,...d.data()}));render();},err=>{console.error(err);showToast("No se pudieron leer las evidencias.");});unsubscribeActivity=onSnapshot(query(collection(db,"activity"),orderBy("createdAt","desc"),limit(80)),snap=>{state.activity=snap.docs.map(d=>normalizeActivityDoc({id:d.id,...d.data()}));render();},err=>{console.error(err);showToast("No se pudo leer la actividad.");});render();}
-document.addEventListener("DOMContentLoaded",()=>start().catch(error=>{console.error(error);showToast("No se pudo abrir el panel de moderación.");}));
-window.addEventListener("beforeunload",()=>{unsubscribeUsers?.();unsubscribeEvidences?.();unsubscribeActivity?.();});
+
+// --------------------------------------------------------------------------
+// VISTA: BITÁCORA DE ACTIVIDAD
+// --------------------------------------------------------------------------
+function activityView() {
+  const list = state.activity;
+
+  return `
+    <div class="card mb-lg" style="padding: var(--space-lg);">
+      <span class="eyebrow">AUDITORÍA Y TRAZABILIDAD</span>
+      <h2>Bitácora de eventos en tiempo real (${list.length})</h2>
+    </div>
+
+    ${list.length ? `
+      <div class="card" style="padding: var(--space-lg);">
+        <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+          ${list.map(a => `
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-md); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--border-subtle);">
+              <div>
+                <p style="margin-bottom: 2px; font-size: 0.925rem;">${formatActivitySummary(a)}</p>
+                ${a.moderatorComment ? `<small class="text-muted">Nota: "${escapeHTML(a.moderatorComment)}"</small>` : ""}
+              </div>
+              <small class="text-muted" style="white-space: nowrap;">${formatDate(a.createdAt)}</small>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    ` : `
+      <div class="card text-center p-xl">
+        <p class="text-muted">No hay eventos en la bitácora todavía.</p>
+      </div>
+    `}
+  `;
+}
+
+// --------------------------------------------------------------------------
+// VISTA: CONFIGURACIÓN Y ESTADO DEL SISTEMA
+// --------------------------------------------------------------------------
+function settingsView() {
+  return `
+    <div class="card mb-lg" style="padding: var(--space-lg);">
+      <span class="eyebrow">ARQUITECTURA DE SISTEMA</span>
+      <h2>Configuración del entorno ECRA</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
+      <div class="card" style="padding: var(--space-lg);">
+        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">🔥 Firebase Platform</h3>
+        <p class="text-muted" style="font-size: 0.875rem;">
+          Autenticación con Email/Contraseña y Google Sign-In, base de datos Cloud Firestore y Reglas de Seguridad granulares.
+        </p>
+        <div style="background-color: var(--bg-surface-secondary); padding: 8px 12px; border-radius: var(--radius-xs); font-family: monospace; font-size: 0.8rem;">
+          Project ID: bwc2026-f956e<br>
+          Admin Autorizado: ${escapeHTML(ADMIN_EMAIL)}
+        </div>
+      </div>
+
+      <div class="card" style="padding: var(--space-lg);">
+        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">📦 Supabase Storage</h3>
+        <p class="text-muted" style="font-size: 0.875rem;">
+          Almacenamiento en la nube para las fotografías y evidencias de los participantes.
+        </p>
+        <div style="background-color: var(--bg-surface-secondary); padding: 8px 12px; border-radius: var(--radius-xs); font-family: monospace; font-size: 0.8rem;">
+          Bucket: evidence<br>
+          Directorio: evidence/&lt;userId&gt;/...
+        </div>
+      </div>
+
+      <div class="card" style="padding: var(--space-lg);">
+        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">🌿 Catálogo de Retos</h3>
+        <p class="text-muted" style="font-size: 0.875rem;">
+          8 retos de sostenibilidad accesibles para todo público, sin barreras económicas ni riesgos.
+        </p>
+        <div style="background-color: var(--bg-surface-secondary); padding: 8px 12px; border-radius: var(--radius-xs); font-family: monospace; font-size: 0.8rem;">
+          Total Retos: ${CHALLENGES.length}<br>
+          Categorías de Foros: 9
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// --------------------------------------------------------------------------
+// MODAL: REVISAR EVIDENCIA
+// --------------------------------------------------------------------------
+function openEvidenceReviewModal(evidenceId) {
+  const e = state.evidences.find(x => x.id === evidenceId);
+  if (!e) return;
+
+  const ch = CHALLENGES.find(c => c.number === Number(e.challengeNumber)) || { title: `Reto #${e.challengeNumber}`, icon: "🌱" };
+
+  const modalRoot = document.getElementById("adminModalRoot");
+  modalRoot.innerHTML = `
+    <div class="modal-overlay" data-close-backdrop>
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div>
+            <span class="eyebrow">${ch.icon} RETO #${e.challengeNumber}</span>
+            <h2>Revisar evidencia de ${escapeHTML(e.userName || "Participante")}</h2>
+            <small class="text-muted">${formatDate(e.submittedAt)} · Correo: ${escapeHTML(e.userEmail || "—")}</small>
+          </div>
+          <button class="modal-close-btn" data-close-btn type="button">✕</button>
+        </div>
+
+        <div style="margin-bottom: var(--space-md); max-height: 380px; overflow: hidden; border-radius: var(--radius-md); background: #000; text-align: center;">
+          <img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia" style="max-height: 380px; width: auto; max-width: 100%; object-fit: contain;">
+        </div>
+
+        ${e.comment ? `
+          <div style="background-color: var(--bg-surface-secondary); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: var(--space-md); font-size: 0.9rem;">
+            <strong>Comentario del participante:</strong> ${escapeHTML(e.comment)}
+          </div>
+        ` : ""}
+
+        <div class="form-group">
+          <label class="form-label" for="modCommentInput">Comentario de retroalimentación para el participante</label>
+          <textarea class="form-textarea" id="modCommentInput" placeholder="Ej: ¡Excelente trabajo separando materiales! o Por favor envía una foto donde se aprecie mejor el trabajo..." rows="2">${escapeHTML(e.moderatorComment || "")}</textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
+          <button class="btn btn-ghost" data-close-btn type="button">Cancelar</button>
+          <button class="btn btn-danger" id="btnRejectEvidence" type="button">🔴 Rechazar evidencia</button>
+          <button class="btn btn-primary" id="btnApproveEvidence" type="button">🟢 Aprobar evidencia</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const close = () => { modalRoot.innerHTML = ""; };
+  modalRoot.querySelector("[data-close-btn]")?.addEventListener("click", close);
+  modalRoot.querySelector("[data-close-backdrop]")?.addEventListener("click", (evt) => {
+    if (evt.target.classList.contains("modal-overlay")) close();
+  });
+
+  modalRoot.querySelector("#btnApproveEvidence")?.addEventListener("click", async () => {
+    const comment = modalRoot.querySelector("#modCommentInput").value.trim() || "¡Excelente evidencia! Reto aprobado satisfactoriamente.";
+    await approveEvidence(e.id, comment);
+    close();
+  });
+
+  modalRoot.querySelector("#btnRejectEvidence")?.addEventListener("click", async () => {
+    const comment = modalRoot.querySelector("#modCommentInput").value.trim() || "La fotografía no permite verificar con claridad la acción realizada. Por favor vuelve a enviarla.";
+    await rejectEvidence(e.id, comment);
+    close();
+  });
+}
+
+async function approveEvidence(id, moderatorComment) {
+  const admin = await requireAdmin();
+  if (!admin) return;
+
+  try {
+    const evRef = doc(db, "evidences", id);
+    const ev = state.evidences.find(x => x.id === id);
+
+    await updateDoc(evRef, {
+      status: "approved",
+      reviewedAt: nowISO(),
+      reviewedBy: admin.user.uid,
+      moderatorComment
+    });
+
+    // Registrar reto como completado en user_challenges
+    if (ev?.userId && ev?.challengeId) {
+      await updateDoc(doc(db, "user_challenges", `${ev.userId}_${ev.challengeId}`), {
+        status: "completed",
+        updatedAt: nowISO()
+      }).catch(async () => {
+        // Si no existía, crearlo
+        await addDoc(collection(db, "user_challenges"), {
+          userId: ev.userId,
+          challengeId: ev.challengeId,
+          status: "completed",
+          updatedAt: nowISO()
+        });
+      });
+    }
+
+    await logActivity({
+      type: "approved",
+      actorUid: admin.user.uid,
+      actorName: admin.profile?.name || admin.user.email,
+      userId: ev?.userId || "",
+      userName: ev?.userName || "Participante",
+      challengeNumber: ev?.challengeNumber || 1,
+      moderatorComment
+    });
+
+    showToast("Evidencia aprobada exitosamente.");
+  } catch (err) {
+    console.error("Error al aprobar evidencia:", err);
+    showToast("No se pudo aprobar la evidencia.");
+  }
+}
+
+async function rejectEvidence(id, moderatorComment) {
+  const admin = await requireAdmin();
+  if (!admin) return;
+
+  try {
+    const evRef = doc(db, "evidences", id);
+    const ev = state.evidences.find(x => x.id === id);
+
+    await updateDoc(evRef, {
+      status: "rejected",
+      reviewedAt: nowISO(),
+      reviewedBy: admin.user.uid,
+      moderatorComment
+    });
+
+    await logActivity({
+      type: "rejected",
+      actorUid: admin.user.uid,
+      actorName: admin.profile?.name || admin.user.email,
+      userId: ev?.userId || "",
+      userName: ev?.userName || "Participante",
+      challengeNumber: ev?.challengeNumber || 1,
+      moderatorComment
+    });
+
+    showToast("Evidencia rechazada con comentarios.");
+  } catch (err) {
+    console.error("Error al rechazar evidencia:", err);
+    showToast("No se pudo rechazar la evidencia.");
+  }
+}
+
+async function logActivity(data) {
+  try {
+    await addDoc(collection(db, "activity"), {
+      ...data,
+      createdAt: nowISO(),
+      createdAtServer: serverTimestamp()
+    });
+  } catch (e) {
+    console.error("No se pudo registrar actividad:", e);
+  }
+}
+
+// --------------------------------------------------------------------------
+// EXPORTACIÓN A CSV
+// --------------------------------------------------------------------------
+function toCSVValue(value) {
+  const s = String(value ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadCSV(filename, rows) {
+  const csv = rows.map(r => r.map(toCSVValue).join(",")).join("\n");
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportUsersCSV() {
+  const rows = [
+    ["Nombre", "Correo", "Rol", "Fecha de Registro"],
+    ...state.users.map(u => [u.name, u.email, u.role || "participant", formatDate(u.createdAt)])
+  ];
+  downloadCSV("ecra-directorio-usuarios.csv", rows);
+  showToast("Descargando directorio de usuarios en CSV...");
+}
+
+function exportEvidencesCSV() {
+  const rows = [
+    ["Participante", "Correo", "Reto", "Estado", "Fecha Envío", "Comentario Participante", "Nota Moderador", "URL Foto"],
+    ...state.evidences.map(e => [
+      e.userName,
+      e.userEmail,
+      e.challengeNumber,
+      e.status,
+      formatDate(e.submittedAt),
+      e.comment || "",
+      e.moderatorComment || "",
+      e.imageURL || ""
+    ])
+  ];
+  downloadCSV("ecra-evidencias-ambientales.csv", rows);
+  showToast("Descargando registro de evidencias en CSV...");
+}
+
+// --------------------------------------------------------------------------
+// RENDERIZADO Y ENLACE DE EVENTOS
+// --------------------------------------------------------------------------
+function render() {
+  renderShell();
+  const root = document.getElementById("adminViewRoot");
+  if (!root) return;
+
+  if (currentView === "dashboard") root.innerHTML = dashboardView();
+  else if (currentView === "evidence") root.innerHTML = evidenceView();
+  else if (currentView === "forums") root.innerHTML = forumsView();
+  else if (currentView === "reports") root.innerHTML = reportsView();
+  else if (currentView === "users") root.innerHTML = usersView();
+  else if (currentView === "activity") root.innerHTML = activityView();
+  else if (currentView === "settings") root.innerHTML = settingsView();
+
+  bindEvents();
+}
+
+function bindEvents() {
+  // Navegación
+  document.querySelectorAll(".admin-nav-item").forEach(btn => {
+    btn.onclick = () => {
+      currentView = btn.dataset.view;
+      filters.search = "";
+      render();
+    };
+  });
+
+  document.querySelectorAll("[data-action='goto-view']").forEach(btn => {
+    btn.onclick = () => {
+      currentView = btn.dataset.target;
+      render();
+    };
+  });
+
+  // Modal de evidencia
+  document.querySelectorAll("[data-action='open-evidence']").forEach(btn => {
+    btn.onclick = () => openEvidenceReviewModal(btn.dataset.id);
+  });
+
+  // Eliminar publicación desde foros admin
+  document.querySelectorAll("[data-action='admin-delete-post']").forEach(btn => {
+    btn.onclick = async () => {
+      const ok = confirm("¿Deseas eliminar permanentemente esta publicación?");
+      if (!ok) return;
+      try {
+        await deleteDoc(doc(db, "forumPosts", btn.dataset.id));
+        showToast("Publicación eliminada.");
+      } catch (err) {
+        console.error(err);
+        showToast("No se pudo eliminar la publicación.");
+      }
+    };
+  });
+
+  // Acciones en reportes
+  document.querySelectorAll("[data-action='report-delete-post']").forEach(btn => {
+    btn.onclick = async () => {
+      const ok = confirm("¿Eliminar publicación reportada y cerrar el reporte?");
+      if (!ok) return;
+      try {
+        await deleteDoc(doc(db, "forumPosts", btn.dataset.postId));
+        await updateDoc(doc(db, "reports", btn.dataset.reportId), { status: "resolved", resolvedAt: nowISO() });
+        showToast("Publicación eliminada y reporte resuelto.");
+      } catch (err) {
+        console.error(err);
+        showToast("Error al procesar la acción.");
+      }
+    };
+  });
+
+  document.querySelectorAll("[data-action='report-dismiss']").forEach(btn => {
+    btn.onclick = async () => {
+      try {
+        await updateDoc(doc(db, "reports", btn.dataset.reportId), { status: "dismissed", dismissedAt: nowISO() });
+        showToast("Reporte desestimado.");
+      } catch (err) {
+        console.error(err);
+        showToast("Error al desestimar reporte.");
+      }
+    };
+  });
+
+  // Exportar CSV
+  document.getElementById("btnExportUsers")?.addEventListener("click", exportUsersCSV);
+  document.getElementById("btnExportEvidences")?.addEventListener("click", exportEvidencesCSV);
+
+  // Filtros de Evidencia
+  document.getElementById("evFilterSearch")?.addEventListener("input", (e) => {
+    filters.search = e.target.value;
+    render();
+  });
+  document.getElementById("evFilterChallenge")?.addEventListener("change", (e) => {
+    filters.challenge = e.target.value;
+    render();
+  });
+  document.getElementById("evFilterStatus")?.addEventListener("change", (e) => {
+    filters.status = e.target.value;
+    render();
+  });
+
+  // Filtro de Usuarios
+  document.getElementById("userAdminSearch")?.addEventListener("input", (e) => {
+    filters.search = e.target.value;
+    render();
+  });
+
+  // Filtro de Foros
+  document.getElementById("forumAdminSearch")?.addEventListener("input", (e) => {
+    filters.search = e.target.value;
+    render();
+  });
+}
+
+// --------------------------------------------------------------------------
+// ARRANQUE Y LISTENERS EN TIEMPO REAL
+// --------------------------------------------------------------------------
+async function startAdmin() {
+  const admin = await requireAdmin();
+  if (!admin) return;
+
+  window.ECRA_PROFILE = admin.profile;
+
+  // Escuchar usuarios
+  unsubscribers.push(onSnapshot(collection(db, "users"), snap => {
+    state.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }));
+
+  // Escuchar evidencias
+  unsubscribers.push(onSnapshot(collection(db, "evidences"), snap => {
+    state.evidences = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }));
+
+  // Escuchar publicaciones de foros
+  unsubscribers.push(onSnapshot(query(collection(db, "forumPosts"), orderBy("createdAt", "desc")), snap => {
+    state.forumPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }));
+
+  // Escuchar reportes
+  unsubscribers.push(onSnapshot(collection(db, "reports"), snap => {
+    state.reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }));
+
+  // Escuchar bitácora de actividad
+  unsubscribers.push(onSnapshot(query(collection(db, "activity"), orderBy("createdAt", "desc"), limit(60)), snap => {
+    state.activity = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }));
+
+  render();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  startAdmin().catch(err => {
+    console.error("Error al iniciar panel de moderación:", err);
+    showToast("No se pudo iniciar el panel administrativo.");
+  });
+
+  document.getElementById("adminLogoutBtn")?.addEventListener("click", () => {
+    window.ECRA.signOutAndGoLogin();
+  });
+});
+
+window.addEventListener("beforeunload", () => {
+  unsubscribers.forEach(unsub => unsub?.());
+});

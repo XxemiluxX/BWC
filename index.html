@@ -3,69 +3,430 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ECRA — retos de sostenibilidad y participación comunitaria.">
-  <title>ECRA</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23173d2c'/%3E%3Cpath d='M20 8c-6.4 3-9.8 8.1-9.8 13.1A9.8 9.8 0 0 0 20 30.9a9.8 9.8 0 0 0 9.8-9.8C29.8 16.1 26.4 11 20 8Z' fill='%235eaa7c'/%3E%3Cpath d='M20 12.4c-3.8 2.3-5.7 5.7-5.7 9.1' stroke='%230f251a' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
-  <meta name="theme-color" content="#173d2c">
+  <meta name="description" content="ECRA — Plataforma comunitaria para promover la sostenibilidad, retos ambientales prácticos, diálogo ciudadano y proyectos sostenibles.">
+  <title>ECRA — Sostenibilidad y Comunidad</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23123322'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23358b5e' stroke-width='2'/%3E%3Cpath d='M20 9c-4.5 3-7 7.5-7 11.5 0 4 3 7.5 7 7.5s7-3.5 7-7.5C27 16.5 24.5 12 20 9Z' fill='%2349ab77'/%3E%3Cpath d='M20 13c-2.5 2-4 5-4 7.5' stroke='%23123322' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#123322">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <script>(function(){try{var t=localStorage.getItem('bwc_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+  <script>(function(){try{var t=localStorage.getItem('ecra_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 </head>
-<body class="landing">
-  <header class="site-header">
-    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bwcGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#3d8b63"/><stop offset="1" stop-color="#173d2c"/></linearGradient></defs><rect width="40" height="40" rx="11" fill="url(#bwcGrad)"/><path d="M20 8c-6.4 3-9.8 8.1-9.8 13.1A9.8 9.8 0 0 0 20 30.9a9.8 9.8 0 0 0 9.8-9.8C29.8 16.1 26.4 11 20 8Z" fill="#eaf7ef"/><path d="M20 12.4c-3.8 2.3-5.7 5.7-5.7 9.1" stroke="#2f8a61" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span><span>ECRA</span></a>
-    <nav class="header-actions"><button class="theme-toggle" data-theme-toggle type="button" aria-label="Activar modo oscuro">🌙</button>
-      <a class="btn btn-ghost" href="login.html">Iniciar sesión</a>
-      <a class="btn btn-primary" href="register.html">Comenzar Challenge</a>
-    </nav>
+<body>
+  <!-- Encabezado Sticky con Navegación Dinámica -->
+    <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="index.html" aria-label="Página de inicio de ECRA">
+        <span class="brand-mark">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="40" height="40" rx="10" fill="#123322"/>
+            <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
+            <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
+            <path d="M20 13C17.5 15 16 18 16 20.5" stroke="#123322" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>ECRA</span>
+      </a>
+
+      <nav class="nav-links" id="mainNav">
+        <a class="nav-link active" href="index.html">Inicio</a>
+        <a class="nav-link" href="challenges.html">Retos Ambientales</a>
+        <a class="nav-link" href="forums.html">Foros Comunitarios</a>
+        <a class="nav-link" href="login.html">Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="register.html">Participar</a>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">🌙</button>
+      </div>
+    </div>
   </header>
 
-  <main class="hero container">
-    <section class="hero-copy reveal">
-      <span class="eyebrow">🌎 RETOS · COMUNIDAD · SOSTENIBILIDAD</span>
-      <h1>Pequeñas acciones.<br><span>Un mundo mejor.</span></h1>
-      <p>Completa tres desafíos, demuestra tus acciones con fotografías y contribuye de forma activa a tu comunidad.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="register.html">Comenzar Challenge <span>→</span></a>
-        <a class="btn btn-ghost btn-lg" href="login.html">Ya tengo una cuenta</a>
-      </div>
-      <div class="mini-stats">
-        <div><strong>03</strong><span>desafíos</span></div>
-        <div><strong>01</strong><span>comunidad</span></div>
-        <div><strong>∞</strong><span>impacto</span></div>
+  <main>
+    <!-- Hero Editorial con Fotografía Ambiental Auténtica -->
+    <section class="section section-hero">
+      <div class="container hero-editorial-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">🌱 Plataforma de Acción y Sostenibilidad Comunitaria</span>
+          <h1 class="hero-title">
+            Pequeñas acciones locales. <br>
+            <em>Un impacto colectivo real.</em>
+          </h1>
+          <p class="lead">
+            <strong>ECRA</strong> es un espacio abierto para convertir la preocupación ambiental en acciones concretas. Descubre retos sostenibles que puedes aplicar hoy, visibiliza problemas de tu comunidad y colabora con vecinos en proyectos que transforman nuestro entorno.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="challenges.html">
+              Explorar retos ambientales <span>→</span>
+            </a>
+            <a class="btn btn-secondary btn-lg" href="forums.html">
+              Visitar foros comunitarios
+            </a>
+          </div>
+
+          <div class="hero-trust-row">
+            <span class="hero-trust-item">✓ Acceso abierto a todo público</span>
+            <span class="hero-trust-item">✓ Retos seguros y sin costo</span>
+            <span class="hero-trust-item">✓ Proyectos con seguimiento real</span>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <svg class="seal" viewBox="0 0 128 128" aria-hidden="true"><defs><path id="ring" d="M64 64m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0"/></defs><text><textPath href="#ring">ACCIÓN LOCAL • IMPACTO COLECTIVO • </textPath></text><circle cx="64" cy="64" r="8"/></svg>
+          <div class="hero-photo-frame">
+            <div class="hero-photo-inner">
+              <img src="nacientes-palmichal-1024x768.webp" alt="Nacientes Palmichal, Costa Rica — Conservación de cuencas hidrográficas y biodiversidad" loading="eager">
+              <div class="hero-photo-badge">
+                <b>Fotografía comunitaria: Nacientes Palmichal</b>
+                <span>Conservación de cuencas de agua dulce, bosque y biodiversidad rural en Costa Rica.</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="hero-art reveal delay-1" aria-label="Ilustración de sostenibilidad">
-      <div class="orb orb-one"></div><div class="orb orb-two"></div>
-      <div class="earth-card">
-        <div class="earth">🌍</div>
-        <div class="floating-card card-top"><span>♻️</span><div><b>Acción sostenible</b><small>Tu evidencia cuenta</small></div></div>
-        <div class="floating-card card-bottom"><span>💚</span><div><b>Comunidad</b><small>Cada acción suma</small></div></div>
+    <!-- Cinta de Métricas Comunitarias Calculadas con Datos Reales -->
+    <section class="metrics-strip">
+      <div class="container metrics-grid">
+        <div class="metric-item">
+          <div class="metric-value" id="statChallengesCount">8</div>
+          <div class="metric-label">Retos ambientales activos</div>
+          <div class="metric-note">Prácticos, seguros y sin costo</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value" id="statInitiativesCount">—</div>
+          <div class="metric-label">Iniciativas en foros</div>
+          <div class="metric-note">Campañas, propuestas y proyectos</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value" id="statParticipantsCount">—</div>
+          <div class="metric-label">Vecinos y participantes</div>
+          <div class="metric-note">Comunidad unida por el cambio</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value" id="statActionsCompleted">—</div>
+          <div class="metric-label">Acciones completadas</div>
+          <div class="metric-note">Impacto tangible verificado</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Recicla</span><span>Protege las nacientes</span><span>Siembra biodiversidad</span><span>Ahorra agua</span><span>Organiza tu barrio</span><span>Consume con conciencia</span><span>Recicla</span><span>Protege las nacientes</span><span>Siembra biodiversidad</span><span>Ahorra agua</span><span>Organiza tu barrio</span><span>Consume con conciencia</span></div></div>
+
+    <!-- Significado de ECRA -->
+    <section class="section acronym">
+      <div class="container">
+        <div class="acro-head">
+          <span class="eyebrow">El nombre</span>
+          <h2>ECRA significa <em>Ecología, Cambios, Retos y Acción</em></h2>
+        </div>
+        <div class="acro-grid">
+          <article class="acro-card">
+            <span class="acro-letter" aria-hidden="true">E</span>
+            <h3>Ecología</h3>
+            <p>Cuidar el agua, los bosques y la biodiversidad que sostienen nuestra vida y la de nuestra comunidad.</p>
+          </article>
+          <article class="acro-card">
+            <span class="acro-letter" aria-hidden="true">C</span>
+            <h3>Cambios</h3>
+            <p>Transformar hábitos cotidianos en cambios reales que se notan en el hogar, la escuela y el barrio.</p>
+          </article>
+          <article class="acro-card">
+            <span class="acro-letter" aria-hidden="true">R</span>
+            <h3>Retos</h3>
+            <p>Desafíos prácticos y medibles que te llevan de la intención a la práctica, paso a paso.</p>
+          </article>
+          <article class="acro-card">
+            <span class="acro-letter" aria-hidden="true">A</span>
+            <h3>Acción</h3>
+            <p>Pasar a los hechos junto a tus vecinos, con proyectos reales y seguimiento de su impacto.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cómo Funciona ECRA (3 Pilares) -->
+    <section class="section">
+      <div class="container">
+        <div class="text-center mb-xl" style="max-width: 680px; margin-left: auto; margin-right: auto;">
+          <span class="eyebrow">Metodología de impacto</span>
+          <h2>Cómo funciona ECRA</h2>
+          <p class="lead">
+            Diseñado para que cualquier persona, sin importar su edad o presupuesto, pueda pasar de la intención a la práctica ciudadana.
+          </p>
+        </div>
+
+        <div class="pillars-grid">
+          <div class="pillar-card">
+            <span class="pillar-num">01</span>
+            <div class="pillar-icon">🎯</div>
+            <h3>1. Elige un reto accesible</h3>
+            <p>
+              Explora desafíos clasificados por dificultad: separación de residuos, ahorro de agua en el hogar, protección de polinizadores o reducción de plástico. Puedes iniciarlos de inmediato sin registro obligatorio.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <span class="pillar-num">02</span>
+            <div class="pillar-icon">💬</div>
+            <h3>2. Plantea tu iniciativa en los foros</h3>
+            <p>
+              ¿Hay un botadero clandestino en tu barrio? ¿Quieres organizar una reforestación? Crea una publicación clasificada por estado y comunidad para encontrar apoyo y abrir el diálogo.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <span class="pillar-num">03</span>
+            <div class="pillar-icon">🤝</div>
+            <h3>3. Colabora y mide el progreso</h3>
+            <p>
+              Únete a proyectos de otros vecinos con la opción «Quiero colaborar». Registra tus horas, comparte avances con fotografías y construye una comunidad más resiliente y limpia.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Muestra de Retos Ambientales Destacados -->
+    <section class="section" style="background-color: var(--bg-surface-secondary);">
+      <div class="container">
+        <div class="flex items-center justify-between mb-xl" style="flex-wrap: wrap; gap: var(--space-md);">
+          <div>
+            <span class="eyebrow">Acción inmediata</span>
+            <h2>Retos ambientales destacados</h2>
+            <p style="margin-bottom: 0;">Actividades prácticas que marcan una diferencia directa en tu entorno.</p>
+          </div>
+          <a href="challenges.html" class="btn btn-secondary">Ver los 8 retos →</a>
+        </div>
+
+        <div class="challenges-grid" id="homeChallengesPreview">
+          <!-- Cargado dinámicamente con los retos reales de ECRA -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Foros e Iniciativas Comunitarias -->
+    <section class="section">
+      <div class="container">
+        <div class="flex items-center justify-between mb-xl" style="flex-wrap: wrap; gap: var(--space-md);">
+          <div>
+            <span class="eyebrow">Diálogo ciudadano</span>
+            <h2>Iniciativas y foros de la comunidad</h2>
+            <p style="margin-bottom: 0;">Descubre lo que vecinos y grupos locales están proponiendo hoy.</p>
+          </div>
+          <div style="display: flex; gap: var(--space-xs);">
+            <a href="forums.html" class="btn btn-primary">+ Proponer iniciativa</a>
+          </div>
+        </div>
+
+        <div id="homePostsPreview" class="posts-grid">
+          <!-- Cargado dinámicamente desde Firestore -->
+          <div class="card" style="text-align: center; padding: var(--space-2xl); grid-column: 1 / -1;">
+            <p class="text-muted">Cargando iniciativas comunitarias en vivo…</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Llamado a la Acción Principal -->
+    <section class="section container">
+      <div class="banner-highlight">
+        <div style="max-width: 680px;">
+          <span class="eyebrow" style="color: var(--forest-200);">Tu comunidad te necesita</span>
+          <h2 style="font-size: clamp(1.8rem, 3.2vw, 2.5rem); margin-bottom: var(--space-sm);">¿Tienes una idea o problema ambiental que visibilizar?</h2>
+          <p class="lead" style="margin-bottom: var(--space-lg);">
+            Registrarte en ECRA toma menos de un minuto. Publica tu propuesta, encuentra vecinos dispuestos a colaborar y guarda el registro de tus retos ecológicos.
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);">
+            <a class="btn btn-accent btn-lg" href="register.html">Crear cuenta gratuita</a>
+            <a class="btn btn-secondary btn-lg" href="forums.html" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">Explorar publicaciones</a>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
-  <section class="features section container">
-    <div class="section-heading">
-      <span class="eyebrow">CÓMO FUNCIONA</span>
-      <h2>Convierte tus acciones en impacto.</h2>
-    </div>
-    <div class="feature-grid">
-      <article class="feature-card reveal"><span class="feature-number">01</span><div class="icon-box">🎯</div><h3>Completa un reto</h3><p>Realiza una acción concreta para cuidar tu entorno, el planeta o tu comunidad.</p></article>
-      <article class="feature-card reveal delay-1"><span class="feature-number">02</span><div class="icon-box">📷</div><h3>Sube tu evidencia</h3><p>Comparte una fotografía. Tu evidencia quedará pendiente de revisión.</p></article>
-      <article class="feature-card reveal delay-2"><span class="feature-number">03</span><div class="icon-box">🏆</div><h3>Avanza y celebra</h3><p>Cuando tu evidencia sea aprobada, desbloquea automáticamente el siguiente desafío.</p></article>
-    </div>
-  </section>
+  <!-- Pie de Página Estandarizado ECRA -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid">
+        <div class="footer-brand-col">
+          <div class="brand">
+            <span class="brand-mark">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="#123322"/>
+                <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
+                <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
+              </svg>
+            </span>
+            <span>ECRA</span>
+          </div>
+          <p style="font-size: 0.9rem; margin-top: var(--space-xs);">
+            Plataforma comunitaria e independiente para promover la sostenibilidad, la educación ambiental y las acciones positivas en los barrios.
+          </p>
+        </div>
 
-  <section class="cta-strip container">
-    <div><span class="eyebrow">TU PRIMER PASO</span><h2>Una mejor comunidad empieza contigo.</h2></div>
-    <a class="btn btn-primary" href="register.html">Crear mi cuenta →</a>
-  </section>
+        <div>
+          <h4 class="footer-heading">Navegación</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="challenges.html">Retos Ambientales</a></li>
+            <li><a href="forums.html">Foros Comunitarios</a></li>
+            <li><a href="profile.html">Mi Perfil</a></li>
+          </ul>
+        </div>
 
-  <footer class="site-footer container"><span>© 2026 ECRA</span><span>Construyendo comunidad, una acción a la vez. 🌿</span></footer>
-  <script type="module" src="js/app.js"></script>
+        <div>
+          <h4 class="footer-heading">Áreas de Acción</h4>
+          <ul class="footer-links">
+            <li><a href="challenges.html?cat=waste">Reciclaje y Residuos</a></li>
+            <li><a href="challenges.html?cat=water">Protección de Agua</a></li>
+            <li><a href="challenges.html?cat=wildlife">Flora y Biodiversidad</a></li>
+            <li><a href="forums.html?cat=problem">Reporte Comunitario</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Contacto</h4>
+          <div class="footer-contact-item">
+            <span>📞</span>
+            <span>Teléfono: <strong>87506973</strong></span>
+          </div>
+          <div class="footer-contact-item">
+            <span>✉️</span>
+            <a href="mailto:mongemoraemiliano60@gmail.com" style="text-decoration: underline;">mongemoraemiliano60@gmail.com</a>
+          </div>
+          <p style="font-size: 0.8rem; margin-top: var(--space-xs);">
+            ¿Tienes una propuesta o consulta? Escríbenos o llámanos directamente.
+          </p>
+        </div>
+      </div>
+
+      <!-- Aviso Legal Obligatorio de Independencia -->
+      <div class="footer-disclaimer-box">
+        <strong>Aviso de independencia del proyecto:</strong> ECRA es un proyecto independiente desarrollado en el marco de una iniciativa personal de sostenibilidad. No está afiliado, patrocinado ni respaldado oficialmente por United World Colleges (UWC).
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>© 2026 ECRA. Proyecto de sostenibilidad y participación ciudadana.</span>
+        <span>Hecho con dedicación por y para las comunidades 🌿</span>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toastRoot" class="toast-root"></div>
+
+  <!-- Script modular de inicio -->
+  <script type="module">
+    import "./js/app.js";
+    import { CHALLENGES, getRealCommunityMetrics, escapeHTML, formatDateShort } from "./js/app.js";
+    import { db } from "./js/firebase-client.js";
+    import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    // Cargar estadísticas reales
+    async function initStats() {
+      const stats = await getRealCommunityMetrics();
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      setVal("statChallengesCount", stats.catalogCount || CHALLENGES.length);
+      setVal("statInitiativesCount", stats.initiativesCount > 0 ? stats.initiativesCount : "1+");
+      setVal("statParticipantsCount", stats.participantsCount > 0 ? stats.participantsCount : "Abierto");
+      setVal("statActionsCompleted", stats.challengesCompleted > 0 ? stats.challengesCompleted : "En marcha");
+    }
+
+    // Renderizar previsualización de 3 retos destacados
+    function renderChallengesPreview() {
+      const container = document.getElementById("homeChallengesPreview");
+      if (!container) return;
+      const subset = CHALLENGES.slice(0, 3);
+      container.innerHTML = subset.map(c => `
+        <article class="challenge-card">
+          <div>
+            <div class="challenge-header">
+              <div class="challenge-icon-box">${c.icon}</div>
+              <div class="challenge-badge-row">
+                <span class="badge badge-difficulty">${c.difficulty}</span>
+                <span class="badge badge-duration">${c.duration}</span>
+              </div>
+            </div>
+            <h3 class="challenge-title">${escapeHTML(c.title)}</h3>
+            <p class="challenge-summary">${escapeHTML(c.summary)}</p>
+          </div>
+          <div class="challenge-footer">
+            <span class="badge" style="background: var(--bg-surface-secondary);">${escapeHTML(c.categoryLabel)}</span>
+            <a href="challenges.html" class="btn btn-primary btn-sm">Ver instrucciones →</a>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    // Renderizar iniciativas recientes desde Firestore
+    async function renderPostsPreview() {
+      const container = document.getElementById("homePostsPreview");
+      if (!container) return;
+
+      try {
+        const snap = await getDocs(query(collection(db, "forumPosts"), orderBy("createdAt", "desc"), limit(3)));
+        const posts = snap.docs.filter(d => !d.data().deleted).map(d => ({ id: d.id, ...d.data() }));
+
+        if (posts.length === 0) {
+          container.innerHTML = `
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: var(--space-xl);">
+              <div style="font-size: 2.2rem; margin-bottom: var(--space-xs);">🌱</div>
+              <h3>¡Sé el primero en compartir una iniciativa!</h3>
+              <p class="text-muted" style="max-width: 520px; margin: 0 auto var(--space-md) auto;">
+                Los foros están abiertos a propuestas de reforestación, limpieza, denuncias ambientales o proyectos de tu vecindario.
+              </p>
+              <a href="forums.html" class="btn btn-primary">+ Crear publicación en foros</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = posts.map(p => `
+          <article class="post-card">
+            <div>
+              <div class="post-header">
+                <div class="post-avatar">${p.authorName?.charAt(0).toUpperCase() || "U"}</div>
+                <div class="post-meta">
+                  <div class="post-author">${escapeHTML(p.authorName || "Vecino ECRA")}</div>
+                  <div class="post-date">${formatDateShort(p.createdAt)}</div>
+                </div>
+                <span class="status-badge status-progress">${escapeHTML(p.type || "Iniciativa")}</span>
+              </div>
+              <h3 class="post-title">${escapeHTML(p.title)}</h3>
+              <p class="post-description">${escapeHTML(p.description)}</p>
+            </div>
+            <div class="post-footer">
+              <div class="post-stats-group">
+                <span>💬 ${p.commentsCount || 0}</span>
+                <span>🤝 ${p.participantsCount || 0} interesados</span>
+              </div>
+              <a href="forums.html" class="btn btn-secondary btn-sm">Ver foro →</a>
+            </div>
+          </article>
+        `).join("");
+      } catch (err) {
+        console.warn("No se pudieron cargar posts en inicio:", err);
+        container.innerHTML = `
+          <div class="card" style="grid-column: 1 / -1; text-align: center; padding: var(--space-lg);">
+            <p class="text-muted">Explora y comparte tus iniciativas en los foros comunitarios.</p>
+            <a href="forums.html" class="btn btn-secondary">Abrir foros comunitarios →</a>
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initStats();
+      renderChallengesPreview();
+      renderPostsPreview();
+    });
+  </script>
 </body>
 </html>

@@ -11,7 +11,7 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-const { ensureUserProfile } = window.BWC;
+const { ensureUserProfile } = window.ECRA;
 
 // Si la persona ya inició sesión y visita login/register, la mandamos directo a su panel.
 let redirectChecked = false;

@@ -1,4 +1,4 @@
-// Configuración pública de Supabase para Better World Challenge.
+// Configuración pública de Supabase para ECRA.
 // Esta clave es una Publishable key y puede usarse desde el navegador.
 // NUNCA pongas aquí una service_role/secret key.
 export const supabaseConfig = {

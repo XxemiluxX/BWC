@@ -1,4 +1,4 @@
-# Better World Challenge
+# ECRA
 
 Plataforma web de 3 retos de sostenibilidad con Firebase Authentication, Firestore y Firebase Storage.
 
@@ -44,7 +44,7 @@ Plataforma web de 3 retos de sostenibilidad con Firebase Authentication, Firesto
 
 El proyecto usa:
 
-- Project ID: `bwc2026-f956e`
+- Project ID: `ecra2026-f956e`
 - Authentication: Email/Password y Google.
 - Firestore.
 - Storage.
@@ -69,7 +69,7 @@ Con Firebase CLI instalado:
 
 ```bash
 firebase login
-firebase use bwc2026-f956e
+firebase use ecra2026-f956e
 firebase deploy
 ```
 
