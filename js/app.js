@@ -82,7 +82,7 @@ export const CHALLENGES = [
   {
     id: "challenge-4",
     number: 4,
-    title: "Concientización de energía y consumo eléctrico",
+    title: "Auditoría de energía y apagón de vampiros eléctricos",
     shortTitle: "Ahorro de energía",
     category: "energy",
     categoryLabel: "Energía y consumo",
@@ -173,6 +173,386 @@ export const CHALLENGES = [
       "Invita a un amigo o colega a registrarse en ECRA para realizar un reto en conjunto."
     ],
     whyItMatters: "El cambio cultural empieza con conversaciones honestas y cotidianas. La educación ambiental compartida multiplica el impacto colectivo."
+  },
+  {
+    id: "challenge-9",
+    number: 9,
+    title: "La broza al compost: aprovecha hojas secas y restos de poda",
+    shortTitle: "Broza y compost",
+    category: "waste",
+    categoryLabel: "Suelo y materia orgánica",
+    difficulty: "Fácil",
+    duration: "20-30 min",
+    icon: "🍂",
+    summary: "Recoge la broza de tu patio o parque y úsala como material seco para tu compost o como cobertura del suelo.",
+    instruction: "Junta la broza (hojas secas, ramitas finas y restos de poda sin enfermedades) que normalmente se barre, se quema o se tira. Úsala como material 'marrón' en tu compostera: alterna una capa de broza con una capa de restos de cocina y cubre siempre lo fresco con una capa seca. Lo que sobre, extiéndelo como cobertura alrededor de tus plantas para conservar la humedad.",
+    concreteActions: [
+      "Tritura o corta la broza en trozos pequeños para que se descomponga más rápido.",
+      "Alterna capas: 2 partes de broza por cada parte de restos de cocina, y tapa los restos frescos con broza para evitar olores y moscas.",
+      "No uses hojas de plantas enfermas, ramas muy gruesas ni broza con restos de pesticidas."
+    ],
+    whyItMatters: "Quemar o botar la broza desperdicia un recurso gratuito. Convertirla en compost devuelve nutrientes al suelo, retiene agua y evita humo y residuos en el vertedero."
+  },
+  {
+    id: "challenge-10",
+    number: 10,
+    title: "Mini huerta en casa: siembra tus aromáticas y hortalizas",
+    shortTitle: "Huerta casera",
+    category: "consumption",
+    categoryLabel: "Huerta y alimentación",
+    difficulty: "Fácil",
+    duration: "40 min",
+    icon: "🥬",
+    summary: "Siembra culantro, albahaca, chile o lechuga en macetas, botellas o un cantero pequeño.",
+    instruction: "Reutiliza envases (botellas cortadas, baldes, cajas de madera) para armar una pequeña huerta. Llénalos con tierra mezclada con compost, siembra al menos dos especies que consumas en casa y colócalos donde reciban buena luz. Riega con agua reutilizada cuando sea posible.",
+    concreteActions: [
+      "Haz agujeros de drenaje en el fondo de cada envase para evitar que se pudran las raíces.",
+      "Elige plantas fáciles: culantro, albahaca, hierbabuena, lechuga o chile dulce.",
+      "Anota la fecha de siembra y toma una foto cada semana para ver cómo crece."
+    ],
+    whyItMatters: "Cultivar aunque sea una parte de lo que comes reduce empaques y transporte, y te acerca al origen real de los alimentos."
+  },
+  {
+    id: "challenge-11",
+    number: 11,
+    title: "Aceite de cocina usado: guárdalo, no lo viertas",
+    shortTitle: "Aceite usado",
+    category: "water",
+    categoryLabel: "Agua y nacientes",
+    difficulty: "Fácil",
+    duration: "15 min",
+    icon: "🛢️",
+    summary: "Evita que el aceite usado termine en el desagüe y llévalo a un punto de recolección.",
+    instruction: "Deja enfriar por completo el aceite que usaste para cocinar, fíltralo con un colador y guárdalo en una botella plástica con tapa. Investiga si en tu comunidad, municipalidad o comercio cercano reciben aceite usado, y acuérdate de entregarlo cuando se llene.",
+    concreteActions: [
+      "Nunca viertas el aceite en el fregadero, el inodoro ni el suelo.",
+      "Limpia las sartenes con papel o un trapo antes de lavarlas para que no entre grasa al desagüe.",
+      "Pregunta en tu centro educativo o junta vecinal si existe un punto de acopio o si se puede organizar uno."
+    ],
+    whyItMatters: "Un solo litro de aceite puede contaminar miles de litros de agua y obstruir tuberías y alcantarillas."
+  },
+  {
+    id: "challenge-12",
+    number: 12,
+    title: "Segunda vida: reutiliza frascos, botellas y envases",
+    shortTitle: "Reutilizar envases",
+    category: "waste",
+    categoryLabel: "Reciclaje y residuos",
+    difficulty: "Fácil",
+    duration: "30 min",
+    icon: "🫙",
+    summary: "Convierte envases que ibas a botar en organizadores, macetas, lámparas o recipientes de almacenamiento.",
+    instruction: "Escoge tres envases limpios (frascos de vidrio, botellas plásticas, latas con bordes lisos) y dales un nuevo uso en casa: porta lápices, macetas, recipientes para granos, comederos para aves o botes para tornillos. Documenta el antes y el después.",
+    concreteActions: [
+      "Lava bien los envases y retira las etiquetas con agua tibia.",
+      "Lija o cubre los bordes filosos de latas y vidrio antes de usarlos.",
+      "Comparte tu idea en los foros de ECRA para inspirar a otras personas."
+    ],
+    whyItMatters: "Reutilizar alarga la vida de los materiales y evita el gasto de energía y recursos que implica fabricar o reciclar un envase nuevo."
+  },
+  {
+    id: "challenge-13",
+    number: 13,
+    title: "Cosecha de agua de lluvia en casa",
+    shortTitle: "Agua de lluvia",
+    category: "water",
+    categoryLabel: "Agua y nacientes",
+    difficulty: "Media",
+    duration: "45-60 min",
+    icon: "🌧️",
+    summary: "Instala un sistema sencillo para recoger agua de lluvia y usarla para regar o limpiar.",
+    instruction: "Coloca un balde o barril con tapa o malla bajo una canoa, bajante o borde del techo para captar agua de lluvia. Úsala para regar plantas, lavar patios o limpiar. Mantén el recipiente siempre tapado para evitar criaderos de mosquitos.",
+    concreteActions: [
+      "Cubre el recipiente con malla fina o tapa para impedir que los zancudos pongan huevos.",
+      "Vacía y lava el recipiente cada cierto tiempo si no se usa el agua.",
+      "No uses esta agua para beber ni cocinar sin un tratamiento adecuado."
+    ],
+    whyItMatters: "Aprovechar la lluvia reduce la presión sobre el agua potable, que es limitada y se trata con energía y recursos."
+  },
+  {
+    id: "challenge-14",
+    number: 14,
+    title: "Detective del recibo: descubre cuánta agua usas",
+    shortTitle: "Recibo de agua",
+    category: "water",
+    categoryLabel: "Agua y nacientes",
+    difficulty: "Fácil",
+    duration: "25 min",
+    icon: "🧾",
+    summary: "Lee el medidor o el recibo de agua, identifica dónde se te va más y fíjate una meta de ahorro.",
+    instruction: "Revisa el consumo de tu último recibo de agua o lee el medidor antes y después de un día normal. Identifica las tres actividades que más gastan (ducha, lavado de ropa, riego) y elige una meta realista de reducción para los próximos siete días.",
+    concreteActions: [
+      "Cierra todas las llaves y verifica si el medidor sigue girando: puede indicar una fuga oculta.",
+      "Usa un balde para recoger el agua fría mientras sale la caliente y úsala para regar o limpiar.",
+      "Comparte con tu familia la meta y revisen juntos el siguiente recibo."
+    ],
+    whyItMatters: "Medir es el primer paso para ahorrar: sin datos es difícil saber dónde se desperdicia el agua."
+  },
+  {
+    id: "challenge-15",
+    number: 15,
+    title: "Tendedero solar: seca tu ropa al sol",
+    shortTitle: "Secado al sol",
+    category: "energy",
+    categoryLabel: "Energía y consumo",
+    difficulty: "Fácil",
+    duration: "Todo el día",
+    icon: "☀️",
+    summary: "Evita la secadora durante una semana y aprovecha el sol y el viento para secar la ropa.",
+    instruction: "Durante siete días seguidos, seca tu ropa en un tendedero al aire libre o en un espacio ventilado en lugar de usar secadora eléctrica. Si no tienes secadora, ayuda a otras personas de tu hogar a organizar un espacio de secado que funcione también en días lluviosos.",
+    concreteActions: [
+      "Sacude la ropa antes de colgarla para que se seque más rápido y quede con menos arrugas.",
+      "Cuelga primero las prendas más gruesas, en las zonas con más sol y ventilación.",
+      "Si llueve, usa un tendedero interior cerca de una ventana abierta."
+    ],
+    whyItMatters: "El sol seca gratis y sin emisiones. La secadora es uno de los electrodomésticos que más electricidad consume."
+  },
+  {
+    id: "challenge-16",
+    number: 16,
+    title: "Cocina eficiente: menos gas, menos electricidad",
+    shortTitle: "Cocina eficiente",
+    category: "energy",
+    categoryLabel: "Energía y consumo",
+    difficulty: "Fácil",
+    duration: "Todo el día",
+    icon: "🍳",
+    summary: "Adopta hábitos sencillos al cocinar para gastar menos energía sin cambiar tu menú.",
+    instruction: "Durante una semana, cocina con tapa, usa ollas del tamaño adecuado al fuego, descongela con anticipación y aprovecha el calor residual al apagar. Si es posible, cocina varios alimentos a la vez y evita abrir el horno sin necesidad.",
+    concreteActions: [
+      "Tapa siempre las ollas: el agua hierve más rápido y se gasta menos energía.",
+      "Apaga el fuego unos minutos antes de terminar y deja que el calor residual termine la cocción.",
+      "Descongela los alimentos en el refrigerador la noche anterior."
+    ],
+    whyItMatters: "Cocinar representa una parte importante del consumo energético del hogar. Pequeños hábitos reducen gasto y emisiones."
+  },
+  {
+    id: "challenge-17",
+    number: 17,
+    title: "Un día sin carro: camina, pedalea o comparte el viaje",
+    shortTitle: "Movilidad sostenible",
+    category: "energy",
+    categoryLabel: "Movilidad sostenible",
+    difficulty: "Media",
+    duration: "Todo el día",
+    icon: "🚲",
+    summary: "Elige caminar, usar bicicleta, transporte público o compartir vehículo en tus traslados de un día.",
+    instruction: "Escoge un día y planifica tus trayectos para no usar carro ni moto de manera individual: camina las distancias cortas, usa bicicleta o transporte público, o comparte el viaje con otras personas. Toma nota de lo que descubres en el camino.",
+    concreteActions: [
+      "Revisa con anticipación horarios y rutas de bus o la ruta más segura para caminar o pedalear.",
+      "Agrupa mandados para hacer menos viajes.",
+      "Respeta siempre las normas de tránsito, usa casco y ropa visible si vas en bicicleta."
+    ],
+    whyItMatters: "El transporte es una fuente importante de emisiones; moverse de forma distinta también mejora la salud y reduce el ruido y la congestión."
+  },
+  {
+    id: "challenge-18",
+    number: 18,
+    title: "Tarde sin pantallas: conecta con la naturaleza",
+    shortTitle: "Desconexión digital",
+    category: "education",
+    categoryLabel: "Tecnología y ambiente",
+    difficulty: "Fácil",
+    duration: "1-2 horas",
+    icon: "📵",
+    summary: "Apaga las pantallas un rato y dedica ese tiempo a observar, cuidar o disfrutar tu entorno natural.",
+    instruction: "Reserva una tarde libre de pantallas recreativas y úsala para una actividad ambiental: caminar por un sendero o parque, regar tu huerta, observar aves o recoger residuos. Al volver, anota qué notaste que normalmente se te pasa por alto.",
+    concreteActions: [
+      "Avisa a tu familia o amistades para que sepan que estarás desconectado/a un rato.",
+      "Lleva una libreta para anotar lo que ves, oyes y sientes.",
+      "Comparte tu experiencia después en los foros de ECRA o con tus compañeros."
+    ],
+    whyItMatters: "Reducir el uso excesivo de aparatos electrónicos y volver a mirar nuestro entorno nos ayuda a comprender mejor lo que queremos cuidar."
+  },
+  {
+    id: "challenge-19",
+    number: 19,
+    title: "Residuos electrónicos: dales el destino correcto",
+    shortTitle: "Residuos electrónicos",
+    category: "waste",
+    categoryLabel: "Reciclaje y residuos",
+    difficulty: "Media",
+    duration: "30-40 min",
+    icon: "🔋",
+    summary: "Reúne pilas, cargadores y aparatos en desuso y averigua dónde entregarlos de forma segura.",
+    instruction: "Haz un inventario de pilas gastadas, cables, cargadores, celulares viejos y pequeños aparatos que ya no uses. Guárdalos en una caja aparte (nunca en la basura común) e investiga qué centros de acopio, campañas o empresas de tu zona reciben residuos electrónicos.",
+    concreteActions: [
+      "Guarda las pilas en un recipiente no metálico y seco, y no las perfores ni las quemes.",
+      "Antes de entregar un celular o computadora, respalda y borra tu información personal.",
+      "Si algo aún funciona, considera donarlo o repararlo antes de desecharlo."
+    ],
+    whyItMatters: "Los aparatos electrónicos contienen materiales valiosos y sustancias contaminantes; un manejo correcto evita que dañen el suelo y el agua."
+  },
+  {
+    id: "challenge-20",
+    number: 20,
+    title: "Ropa con segunda oportunidad: repara, intercambia o dona",
+    shortTitle: "Ropa circular",
+    category: "consumption",
+    categoryLabel: "Consumo responsable",
+    difficulty: "Fácil",
+    duration: "45 min",
+    icon: "👕",
+    summary: "Da nueva vida a tu ropa en lugar de desecharla: remienda, intercambia o dona.",
+    instruction: "Revisa tu clóset y separa tres grupos: prendas que se pueden arreglar, prendas en buen estado que ya no usas y trapos aprovechables. Repara lo que puedas, organiza un intercambio con amistades o familia, y dona lo demás a alguien que lo necesite.",
+    concreteActions: [
+      "Aprende un arreglo básico: coser un botón, un dobladillo o un pequeño roto.",
+      "Convierte camisetas muy gastadas en trapos de limpieza o bolsas de tela.",
+      "Antes de comprar ropa nueva, pregúntate si realmente la necesitas."
+    ],
+    whyItMatters: "Producir ropa requiere grandes cantidades de agua, energía y materias primas; alargar su vida útil reduce ese impacto."
+  },
+  {
+    id: "challenge-21",
+    number: 21,
+    title: "Cero desperdicio: cocina con lo que ya tienes",
+    shortTitle: "Cero desperdicio de alimentos",
+    category: "consumption",
+    categoryLabel: "Huerta y alimentación",
+    difficulty: "Fácil",
+    duration: "40 min",
+    icon: "🥘",
+    summary: "Prepara una comida aprovechando sobras, frutas maduras o verduras que estaban por echarse a perder.",
+    instruction: "Revisa tu refrigerador y despensa e identifica los alimentos que se deben consumir primero. Planifica y cocina una comida (sopa, arroz, picadillo, batido o pan) que los aproveche. Guarda las sobras en recipientes con fecha.",
+    concreteActions: [
+      "Usa primero lo que vence antes: ordena el refrigerador con lo más antiguo al frente.",
+      "Aprovecha tallos, cáscaras limpias y frutas muy maduras en caldos, jugos o postres.",
+      "Lo que no pueda comerse (cáscaras, restos vegetales) llévalo a tu compost."
+    ],
+    whyItMatters: "Cuando se desperdicia comida también se desperdician el agua, la tierra y la energía que se usaron para producirla."
+  },
+  {
+    id: "challenge-22",
+    number: 22,
+    title: "Siembra un árbol nativo",
+    shortTitle: "Árbol nativo",
+    category: "wildlife",
+    categoryLabel: "Protección de biodiversidad",
+    difficulty: "Media",
+    duration: "1 hora",
+    icon: "🌳",
+    summary: "Planta un árbol de una especie nativa de tu zona en un lugar adecuado y comprométete a cuidarlo.",
+    instruction: "Consigue una plántula de especie nativa en un vivero local, junta vecinal o programa de reforestación. Elige con permiso un lugar adecuado, lejos de cables y tuberías, haz un hueco amplio, siembra con cuidado, riégalo y marca el sitio para darle seguimiento.",
+    concreteActions: [
+      "Consulta en un vivero o con una persona experta qué especies nativas se adaptan a tu zona.",
+      "Pide autorización si vas a sembrar en un espacio comunal o público.",
+      "Riega periódicamente y retira la maleza alrededor durante los primeros meses."
+    ],
+    whyItMatters: "Los árboles nativos dan alimento y refugio a la fauna local, protegen el suelo y ayudan a regular el agua y la temperatura."
+  },
+  {
+    id: "challenge-23",
+    number: 23,
+    title: "Conteo de aves en tu patio o barrio",
+    shortTitle: "Conteo de aves",
+    category: "wildlife",
+    categoryLabel: "Protección de biodiversidad",
+    difficulty: "Fácil",
+    duration: "30 min",
+    icon: "🐦",
+    summary: "Observa durante 30 minutos y registra cuántas especies de aves logras identificar.",
+    instruction: "Elige un lugar tranquilo (patio, parque, ventana o camino) y observa durante 30 minutos en la mañana o al final de la tarde. Anota las aves que veas o escuches, con su cantidad aproximada. Si no sabes el nombre, descríbelas o tómales una foto sin molestarlas.",
+    concreteActions: [
+      "Mantente quieto/a y en silencio para no espantar a las aves.",
+      "Usa una guía de aves de tu país o una aplicación gratuita de identificación.",
+      "Repite el conteo en otra época del año y compara los resultados."
+    ],
+    whyItMatters: "Conocer las aves de tu entorno es una forma sencilla de valorar la biodiversidad y detectar cambios en el ecosistema."
+  },
+  {
+    id: "challenge-24",
+    number: 24,
+    title: "Ecoladrillo: encierra plástico limpio en una botella",
+    shortTitle: "Ecoladrillo",
+    category: "waste",
+    categoryLabel: "Reciclaje y residuos",
+    difficulty: "Media",
+    duration: "Varios días",
+    icon: "🧱",
+    summary: "Rellena una botella con plásticos blandos limpios y secos para fabricar un ladrillo reutilizable.",
+    instruction: "Junta empaques plásticos blandos (bolsas, envolturas) bien limpios y secos. Córtalos en trozos y compáctalos dentro de una botella plástica con ayuda de un palo hasta que quede firme. Úsala en un proyecto comunitario o entrégala a una iniciativa que los reciba.",
+    concreteActions: [
+      "Asegúrate de que el plástico esté completamente seco para evitar humedad y moho dentro de la botella.",
+      "Compacta por capas con un palo de madera hasta que la botella quede dura.",
+      "Averigua si en tu comunidad hay un proyecto que construya con ecoladrillos."
+    ],
+    whyItMatters: "Sirve para dar un uso útil a plásticos que normalmente no se reciclan, aunque lo ideal siempre será consumir menos plástico."
+  },
+  {
+    id: "challenge-25",
+    number: 25,
+    title: "Caminata de limpieza en una quebrada, río o playa",
+    shortTitle: "Limpieza de quebrada",
+    category: "community",
+    categoryLabel: "Espacios públicos",
+    difficulty: "Media",
+    duration: "1-2 horas",
+    icon: "🌊",
+    summary: "Organiza o únete a una jornada para retirar basura de las orillas de un cuerpo de agua.",
+    instruction: "Reúne a un grupo, lleven guantes, bolsas y recipientes para clasificar lo que recojan. Eviten entrar al agua o zonas inseguras y trabajen solo en las orillas accesibles. Separen reciclables, ordinarios y objetos peligrosos, y registren qué tipo de residuo es el más frecuente.",
+    concreteActions: [
+      "Avisa a un adulto o a la autoridad local, y no vayas solo/a.",
+      "No recojas vidrios rotos, jeringas ni residuos peligrosos con las manos: repórtalos a las autoridades.",
+      "Toma fotos del antes y el después y publícalas en los foros de ECRA."
+    ],
+    whyItMatters: "La basura que llega a quebradas y ríos termina en el mar, afecta la vida acuática y contamina el agua que usan muchas comunidades."
+  },
+  {
+    id: "challenge-26",
+    number: 26,
+    title: "Limpiadores caseros: menos químicos en el desagüe",
+    shortTitle: "Limpieza natural",
+    category: "water",
+    categoryLabel: "Agua y nacientes",
+    difficulty: "Fácil",
+    duration: "30 min",
+    icon: "🧴",
+    summary: "Prepara un limpiador sencillo con ingredientes cotidianos para reducir productos agresivos.",
+    instruction: "Prepara un limpiador multiusos con ingredientes básicos de cocina (por ejemplo, vinagre diluido en agua o bicarbonato de sodio) y úsalo para limpiar superficies. Reutiliza un envase con atomizador y rotúlalo claramente.",
+    concreteActions: [
+      "Nunca mezcles vinagre con cloro ni con otros productos de limpieza: pueden generar gases peligrosos.",
+      "Rotula el envase y guárdalo fuera del alcance de niños y mascotas.",
+      "Prueba el limpiador primero en una zona pequeña, sobre todo en superficies delicadas."
+    ],
+    whyItMatters: "Reducir químicos fuertes que van al desagüe protege las fuentes de agua y la salud de quienes limpian."
+  },
+  {
+    id: "challenge-27",
+    number: 27,
+    title: "Lleva ECRA a tu escuela, colegio o grupo",
+    shortTitle: "ECRA en tu institución",
+    category: "education",
+    categoryLabel: "Educación y concientización",
+    difficulty: "Media",
+    duration: "30-45 min",
+    icon: "🏫",
+    summary: "Presenta un reto de ECRA a tu grupo y propongan una acción conjunta.",
+    instruction: "Conversa con un docente, directivo o líder de tu grupo y propón dedicar un espacio corto para presentar un reto ambiental. Elijan juntos una acción para hacer en grupo (por ejemplo, un punto de reciclaje o una limpieza) y definan quién se encarga de qué.",
+    concreteActions: [
+      "Prepara una explicación breve de máximo 10 minutos sobre qué es ECRA y cómo participar.",
+      "Propón un reto concreto que el grupo pueda completar en una semana.",
+      "Acuerden una forma de compartir los resultados con otras personas de la institución."
+    ],
+    whyItMatters: "Las instituciones educativas y los grupos de interés común multiplican el alcance de las acciones y llegan a quienes no tienen acceso directo a internet."
+  },
+  {
+    id: "challenge-28",
+    number: 28,
+    title: "Reto sin internet: un mural ambiental para tu comunidad",
+    shortTitle: "Mural sin conexión",
+    category: "education",
+    categoryLabel: "Educación y concientización",
+    difficulty: "Fácil",
+    duration: "1 hora",
+    icon: "📌",
+    summary: "Crea un cartel o mural informativo con un consejo ambiental para quienes no tienen conexión a internet.",
+    instruction: "Elabora en papel, cartón reutilizado o una pared autorizada un cartel con un consejo ambiental práctico (separar residuos, ahorrar agua o compostar). Colócalo en un lugar visible de tu comunidad, escuela o comercio, con permiso, y comparte un mensaje claro y positivo.",
+    concreteActions: [
+      "Usa materiales reutilizados: cartón, hojas usadas por un lado o pintura que te sobre.",
+      "Escribe un mensaje corto, con letra grande y un dibujo que se entienda de lejos.",
+      "Incluye una invitación a participar en ECRA o a unirse a un reto grupal."
+    ],
+    whyItMatters: "No todos los hogares tienen internet; llevar la información al espacio físico hace que el cuidado ambiental llegue a más personas."
   }
 ];
 
@@ -518,6 +898,7 @@ export function syncNavigationHeader(user, profile) {
     <a class="nav-link ${currentPath === "index.html" || currentPath === "" ? "active" : ""}" href="index.html">Inicio</a>
     <a class="nav-link ${currentPath === "challenges.html" || currentPath === "challenge.html" ? "active" : ""}" href="challenges.html">Retos Ambientales</a>
     <a class="nav-link ${currentPath === "forums.html" ? "active" : ""}" href="forums.html">Foros Comunitarios</a>
+    <a class="nav-link ${currentPath === "ranking.html" ? "active" : ""}" href="ranking.html">Clasificación</a>
   `;
 
   if (user && profile) {

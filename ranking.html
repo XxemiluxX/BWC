@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clasificación de ECRA: las personas que más retos ambientales han completado, retos más realizados y niveles de la comunidad.">
+  <title>Clasificación — ECRA</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23123322'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23358b5e' stroke-width='2'/%3E%3Cpath d='M20 9c-4.5 3-7 7.5-7 11.5 0 4 3 7.5 7 7.5s7-3.5 7-7.5C27 16.5 24.5 12 20 9Z' fill='%2349ab77'/%3E%3Cpath d='M20 13c-2.5 2-4 5-4 7.5' stroke='%23123322' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#123322">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>(function(){try{var t=localStorage.getItem('ecra_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+</head>
+<body>
+  <!-- Encabezado Sticky -->
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="index.html" aria-label="Inicio ECRA">
+        <span class="brand-mark">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="40" height="40" rx="10" fill="#123322"/>
+            <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
+            <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
+          </svg>
+        </span>
+        <span>ECRA</span>
+      </a>
+
+      <nav class="nav-links">
+        <a class="nav-link" href="index.html">Inicio</a>
+        <a class="nav-link" href="challenges.html">Retos Ambientales</a>
+        <a class="nav-link" href="forums.html">Foros Comunitarios</a>
+        <a class="nav-link active" href="ranking.html">Clasificación</a>
+        <a class="nav-link" href="login.html">Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="register.html">Participar</a>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="section container">
+    <div class="page-intro text-center mb-xl">
+      <span class="eyebrow">Clasificación comunitaria</span>
+      <h1>Quienes más retos han cumplido</h1>
+      <p class="lead">
+        Cada reto cuenta cuando un moderador aprueba tu evidencia. Mira quién va al frente, qué retos son los favoritos y en qué nivel está la comunidad.
+      </p>
+    </div>
+
+    <div id="rankStats" class="rank-stats"></div>
+
+    <div id="rankFilters" class="rank-filters filter-chips-row" role="group" aria-label="Filtrar clasificación por categoría"></div>
+
+    <div class="rank-layout">
+      <div id="rankMain" class="rank-main" aria-live="polite"></div>
+      <aside id="rankAside" class="rank-aside" aria-label="Estadísticas de la comunidad"></aside>
+    </div>
+  </main>
+
+  <!-- Pie de Página Estandarizado -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid">
+        <div class="footer-brand-col">
+          <div class="brand">
+            <span class="brand-mark">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="10" fill="#123322"/>
+                <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
+                <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
+              </svg>
+            </span>
+            <span>ECRA</span>
+          </div>
+          <p style="font-size: 0.9rem; margin-top: var(--space-xs);">
+            Plataforma comunitaria e independiente para promover la sostenibilidad, la educación ambiental y las acciones positivas en los barrios.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Navegación</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="challenges.html">Retos Ambientales</a></li>
+            <li><a href="forums.html">Foros Comunitarios</a></li>
+            <li><a href="profile.html">Mi Perfil</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Áreas de Acción</h4>
+          <ul class="footer-links">
+            <li><a href="challenges.html?cat=waste">Reciclaje y Residuos</a></li>
+            <li><a href="challenges.html?cat=water">Protección de Agua</a></li>
+            <li><a href="challenges.html?cat=wildlife">Flora y Biodiversidad</a></li>
+            <li><a href="forums.html">Foros Ciudadanos</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Contacto</h4>
+          <div class="footer-contact-item">
+            <span>📞</span>
+            <span>Teléfono: <strong>87506973</strong></span>
+          </div>
+          <div class="footer-contact-item">
+            <span>✉️</span>
+            <a href="mailto:mongemoraemiliano60@gmail.com" style="text-decoration: underline;">mongemoraemiliano60@gmail.com</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aviso Legal Obligatorio de Independencia -->
+      <div class="footer-disclaimer-box">
+        <strong>Aviso de independencia del proyecto:</strong> ECRA es un proyecto independiente desarrollado en el marco de una iniciativa personal de sostenibilidad. No está afiliado, patrocinado ni respaldado oficialmente por United World Colleges (UWC).
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>© 2026 ECRA. Todos los derechos reservados.</span>
+        <span>Acciones locales para un futuro sostenible 🌿</span>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toastRoot" class="toast-root"></div>
+
+  <script type="module" src="js/ranking.js"></script>
+</body>
+</html>

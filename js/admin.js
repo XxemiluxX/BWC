@@ -579,7 +579,7 @@ function settingsView() {
       <div class="card" style="padding: var(--space-lg);">
         <h3 style="font-size: 1.15rem; margin-bottom: 8px;">🌿 Catálogo de Retos</h3>
         <p class="text-muted" style="font-size: 0.875rem;">
-          8 retos de sostenibilidad accesibles para todo público, sin barreras económicas ni riesgos.
+          ${CHALLENGES.length} retos de sostenibilidad accesibles para todo público, sin barreras económicas ni riesgos.
         </p>
         <div style="background-color: var(--bg-surface-secondary); padding: 8px 12px; border-radius: var(--radius-xs); font-family: monospace; font-size: 0.8rem;">
           Total Retos: ${CHALLENGES.length}<br>

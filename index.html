@@ -27,13 +27,13 @@
           </svg>
         </span>
         <span>ECRA</span>
-        <span class="brand-tag">2026</span>
       </a>
 
       <nav class="nav-links" id="mainNav">
         <a class="nav-link active" href="index.html">Inicio</a>
         <a class="nav-link" href="challenges.html">Retos Ambientales</a>
         <a class="nav-link" href="forums.html">Foros Comunitarios</a>
+        <a class="nav-link" href="ranking.html">Clasificación</a>
         <a class="nav-link" href="login.html">Iniciar sesión</a>
         <a class="btn btn-primary btn-sm" href="register.html">Participar</a>
       </nav>
@@ -92,7 +92,7 @@
     <section class="metrics-strip">
       <div class="container metrics-grid">
         <div class="metric-item">
-          <div class="metric-value" id="statChallengesCount">8</div>
+          <div class="metric-value" id="statChallengesCount">28</div>
           <div class="metric-label">Retos ambientales activos</div>
           <div class="metric-note">Prácticos, seguros y sin costo</div>
         </div>
@@ -156,6 +156,53 @@
       </div>
     </section>
 
+    <!-- Significado de ECRA y origen del proyecto -->
+    <section class="section ecra-meaning" aria-labelledby="ecraMeaningTitle">
+      <div class="container ecra-grid">
+        <article class="card ecra-acronym">
+          <span class="eyebrow">El nombre</span>
+          <h2 id="ecraMeaningTitle">¿Qué significa ECRA?</h2>
+          <p class="text-muted" style="margin-bottom: 0;">Cuatro palabras que resumen el camino de cada participante.</p>
+          <ul class="acronym-list">
+            <li>
+              <span class="acronym-letter" aria-hidden="true">E</span>
+              <div><strong>Ecología</strong><span>Cuidar el entorno y todo lo que vive en él.</span></div>
+            </li>
+            <li>
+              <span class="acronym-letter" aria-hidden="true">C</span>
+              <div><strong>Cambios</strong><span>Pequeños cambios de hábito que, sumados, transforman una comunidad.</span></div>
+            </li>
+            <li>
+              <span class="acronym-letter" aria-hidden="true">R</span>
+              <div><strong>Retos</strong><span>Desafíos prácticos y accesibles que cualquier persona puede cumplir.</span></div>
+            </li>
+            <li>
+              <span class="acronym-letter" aria-hidden="true">A</span>
+              <div><strong>Acción</strong><span>Pasar de la intención a la práctica, con evidencia y seguimiento.</span></div>
+            </li>
+          </ul>
+        </article>
+
+        <article class="card ecra-origin">
+          <span class="eyebrow">Nuestro origen</span>
+          <h2>ECRA nació de esta idea</h2>
+          <p class="origin-quote">
+            El uso excesivo de aparatos electrónicos y la contaminación que se genera por la no comprensión ambiental son retos que se pueden ver en las comunidades; no obstante, ¿por qué no utilizamos una para contrarrestar la otra?
+          </p>
+          <p>
+            Por medio de mi sitio web en desarrollo “ECRA” busco que la concientización y los aportes al medio ambiente nos permitan estar conectados, no solo en una comunidad, sino incluso en entornos mucho más grandes. Mediante la implementación de retos y acciones sostenibles busco generar un impacto, incluso para las personas que no cuentan con medios de transporte a centros de actividades ecológicas.
+          </p>
+          <p>
+            Tengo presente que no en todos los hogares se dispone de conexión a internet, por eso busco la colaboración de instituciones educativas y grupos de interés común que se unan a este proyecto sostenible.
+          </p>
+          <div class="origin-footer">
+            <span class="origin-sign">Nota del creador de ECRA</span>
+            <a class="btn btn-secondary btn-sm" href="mailto:mongemoraemiliano60@gmail.com?subject=Quiero%20sumar%20mi%20instituci%C3%B3n%20a%20ECRA">Suma tu institución →</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <!-- Muestra de Retos Ambientales Destacados -->
     <section class="section" style="background-color: var(--bg-surface-secondary);">
       <div class="container">
@@ -165,7 +212,10 @@
             <h2>Retos ambientales destacados</h2>
             <p style="margin-bottom: 0;">Actividades prácticas que marcan una diferencia directa en tu entorno.</p>
           </div>
-          <a href="challenges.html" class="btn btn-secondary">Ver los 8 retos →</a>
+          <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs);">
+            <a href="ranking.html" class="btn btn-ghost">🏆 Ver clasificación</a>
+            <a href="challenges.html" class="btn btn-secondary" id="allChallengesLink">Ver los 28 retos →</a>
+          </div>
         </div>
 
         <div class="challenges-grid" id="homeChallengesPreview">
@@ -241,6 +291,7 @@
             <li><a href="index.html">Inicio</a></li>
             <li><a href="challenges.html">Retos Ambientales</a></li>
             <li><a href="forums.html">Foros Comunitarios</a></li>
+            <li><a href="ranking.html">Clasificación</a></li>
             <li><a href="profile.html">Mi Perfil</a></li>
           </ul>
         </div>
@@ -263,7 +314,7 @@
           </div>
           <div class="footer-contact-item">
             <span>✉️</span>
-            <a href="mailto:proyecto.ecracr@gmail.com" style="text-decoration: underline;">proyecto.ecracr@gmail.com</a>
+            <a href="mailto:mongemoraemiliano60@gmail.com" style="text-decoration: underline;">mongemoraemiliano60@gmail.com</a>
           </div>
           <p style="font-size: 0.8rem; margin-top: var(--space-xs);">
             ¿Tienes una propuesta o consulta? Escríbenos o llámanos directamente.
@@ -273,7 +324,7 @@
 
       <!-- Aviso Legal Obligatorio de Independencia -->
       <div class="footer-disclaimer-box">
-        <strong>Aviso de independencia del proyecto:</strong> ECRA (2026) es un proyecto independiente desarrollado en el marco de una iniciativa personal de sostenibilidad. No está afiliado, patrocinado ni respaldado oficialmente por United World Colleges (UWC).
+        <strong>Aviso de independencia del proyecto:</strong> ECRA es un proyecto independiente desarrollado en el marco de una iniciativa personal de sostenibilidad. No está afiliado, patrocinado ni respaldado oficialmente por United World Colleges (UWC).
       </div>
 
       <div class="footer-bottom-bar">
@@ -300,6 +351,7 @@
         if (el) el.textContent = val;
       };
       setVal("statChallengesCount", stats.catalogCount || CHALLENGES.length);
+      setVal("allChallengesLink", `Ver los ${CHALLENGES.length} retos →`);
       setVal("statInitiativesCount", stats.initiativesCount > 0 ? stats.initiativesCount : "1+");
       setVal("statParticipantsCount", stats.participantsCount > 0 ? stats.participantsCount : "Abierto");
       setVal("statActionsCompleted", stats.challengesCompleted > 0 ? stats.challengesCompleted : "En marcha");
