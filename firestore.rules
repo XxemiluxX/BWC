@@ -35,9 +35,15 @@ service cloud.firestore {
     // Progreso de retos individuales por usuario
     match /user_challenges/{docId} {
       allow read: if true;
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow delete: if signedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Un reto solo se marca "completed" tras aprobar una evidencia (foto o video): lo hace el administrador.
+      allow create: if isAdmin()
+        || (signedIn() && request.resource.data.userId == request.auth.uid
+            && request.resource.data.status != 'completed');
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.userId == request.auth.uid
+            && resource.data.status != 'completed'
+            && request.resource.data.status != 'completed');
+      allow delete: if isAdmin();
     }
 
     // Publicaciones en foros comunitarios
@@ -82,7 +88,12 @@ service cloud.firestore {
     // Evidencias fotográficas
     match /evidences/{evidenceId} {
       allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      // Toda evidencia debe traer su archivo (foto o video) y nace "pending"; solo el admin la aprueba.
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.imageURL is string
+        && request.resource.data.imageURL.size() > 0;
       allow update, delete: if isAdmin();
     }
 

@@ -46,6 +46,19 @@ function timeValue(value) {
   return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
 
+// ¿La evidencia es un video? (nuevas evidencias traen mediaType; las antiguas son fotos)
+function isVideoEvidence(e) {
+  return e?.mediaType === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(e?.imageURL || "");
+}
+
+function evidenceMediaHTML(e, style, { controls = false } = {}) {
+  const url = escapeHTML(e.imageURL || "");
+  if (isVideoEvidence(e)) {
+    return `<video src="${url}${controls ? "" : "#t=0.1"}" ${controls ? "controls" : "muted"} playsinline preload="metadata" style="${style} background: #000;"></video>`;
+  }
+  return `<img src="${url}" alt="Evidencia" style="${style}">`;
+}
+
 function evidenceStatusBadge(status) {
   if (status === "approved") {
     return `<span class="status-badge status-approved">🟢 Aprobada</span>`;
@@ -160,7 +173,7 @@ function dashboardView() {
             ${recentEvidences.map(e => `
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px; border-radius: var(--radius-sm); background-color: var(--bg-surface-secondary); border: 1px solid var(--border-subtle);">
                 <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                  <img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia" style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-xs); flex-shrink: 0;">
+                  ${evidenceMediaHTML(e, "width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-xs); flex-shrink: 0;")}
                   <div style="min-width: 0;">
                     <strong style="display: block; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(e.userName || "Participante")}</strong>
                     <small class="text-muted" style="font-size: 0.75rem;">Reto #${e.challengeNumber || 1} · ${formatDateShort(e.submittedAt)}</small>
@@ -238,7 +251,7 @@ function evidenceView() {
       <div class="flex items-center justify-between mb-md" style="flex-wrap: wrap; gap: var(--space-sm);">
         <div>
           <span class="eyebrow">MODERACIÓN DE IMPACTO</span>
-          <h2>Evidencias fotográficas enviadas (${list.length})</h2>
+          <h2>Evidencias enviadas (fotos y videos) (${list.length})</h2>
         </div>
         <button class="btn btn-secondary btn-sm" id="btnExportEvidences" type="button">⬇ Exportar a CSV</button>
       </div>
@@ -271,7 +284,7 @@ function evidenceView() {
           return `
             <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
               <div style="position: relative; height: 180px; background-color: var(--bg-surface-secondary);">
-                <img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia" style="width: 100%; height: 100%; object-fit: cover;">
+                ${evidenceMediaHTML(e, "width: 100%; height: 100%; object-fit: cover;")}
                 <div style="position: absolute; top: 8px; right: 8px;">${evidenceStatusBadge(e.status)}</div>
               </div>
 
@@ -537,7 +550,7 @@ function settingsView() {
   return `
     <div class="card mb-lg" style="padding: var(--space-lg);">
       <span class="eyebrow">ARQUITECTURA DE SISTEMA</span>
-      <h2>Configuración del entorno Better World Challenge</h2>
+      <h2>Configuración del entorno ECRA</h2>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
@@ -555,7 +568,7 @@ function settingsView() {
       <div class="card" style="padding: var(--space-lg);">
         <h3 style="font-size: 1.15rem; margin-bottom: 8px;">📦 Supabase Storage</h3>
         <p class="text-muted" style="font-size: 0.875rem;">
-          Almacenamiento en la nube para las fotografías y evidencias de los participantes.
+          Almacenamiento en la nube para las fotos, videos y evidencias de los participantes.
         </p>
         <div style="background-color: var(--bg-surface-secondary); padding: 8px 12px; border-radius: var(--radius-xs); font-family: monospace; font-size: 0.8rem;">
           Bucket: evidence<br>
@@ -600,7 +613,7 @@ function openEvidenceReviewModal(evidenceId) {
         </div>
 
         <div style="margin-bottom: var(--space-md); max-height: 380px; overflow: hidden; border-radius: var(--radius-md); background: #000; text-align: center;">
-          <img src="${escapeHTML(e.imageURL || "")}" alt="Evidencia" style="max-height: 380px; width: auto; max-width: 100%; object-fit: contain;">
+          ${evidenceMediaHTML(e, "max-height: 380px; width: auto; max-width: 100%; object-fit: contain;", { controls: true })}
         </div>
 
         ${e.comment ? `
@@ -611,7 +624,7 @@ function openEvidenceReviewModal(evidenceId) {
 
         <div class="form-group">
           <label class="form-label" for="modCommentInput">Comentario de retroalimentación para el participante</label>
-          <textarea class="form-textarea" id="modCommentInput" placeholder="Ej: ¡Excelente trabajo separando materiales! o Por favor envía una foto donde se aprecie mejor el trabajo..." rows="2">${escapeHTML(e.moderatorComment || "")}</textarea>
+          <textarea class="form-textarea" id="modCommentInput" placeholder="Ej: ¡Excelente trabajo separando materiales! o Por favor envía una foto o video donde se aprecie mejor el trabajo..." rows="2">${escapeHTML(e.moderatorComment || "")}</textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
@@ -636,7 +649,7 @@ function openEvidenceReviewModal(evidenceId) {
   });
 
   modalRoot.querySelector("#btnRejectEvidence")?.addEventListener("click", async () => {
-    const comment = modalRoot.querySelector("#modCommentInput").value.trim() || "La fotografía no permite verificar con claridad la acción realizada. Por favor vuelve a enviarla.";
+    const comment = modalRoot.querySelector("#modCommentInput").value.trim() || "La evidencia (foto o video) no permite verificar con claridad la acción realizada. Por favor vuelve a enviarla.";
     await rejectEvidence(e.id, comment);
     close();
   });

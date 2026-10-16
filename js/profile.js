@@ -301,17 +301,12 @@ function renderChallengesPanel() {
 
           <div style="display: flex; gap: 6px; margin-top: 4px;">
             ${currentStatus === "completed" ? `
-              <button class="btn btn-secondary btn-sm" data-action="set-status" data-ch="${ch.id}" data-st="in_progress" style="flex: 1;" type="button">
-                Marcar en progreso
-              </button>
+              <span class="status-badge status-approved" style="flex: 1; justify-content: center;">🟢 Reto completado</span>
             ` : `
-              <button class="btn btn-primary btn-sm" data-action="set-status" data-ch="${ch.id}" data-st="completed" style="flex: 1;" type="button">
-                ✓ Marcar completado
-              </button>
+              <a class="btn btn-primary btn-sm" href="challenge.html?id=${ch.id}" title="Para completar el reto debes enviar una foto o un video" style="flex: 1; text-align: center;">
+                📸 Enviar foto o video
+              </a>
             `}
-            <a class="btn btn-secondary btn-sm" href="challenge.html?id=${ch.id}" title="Subir evidencia fotográfica" style="padding: 6px 10px;">
-              📸 Evidencia
-            </a>
           </div>
         </div>
       </div>
@@ -324,26 +319,6 @@ function renderChallengesPanel() {
   if (percentText) percentText.textContent = `${percent}% (${completedCount}/${CHALLENGES.length})`;
   if (progressBar) progressBar.style.width = `${percent}%`;
   if (metricEl) metricEl.textContent = `${completedCount} / ${CHALLENGES.length}`;
-
-  // Eventos de botones de estado
-  grid.querySelectorAll("[data-action='set-status']").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const chId = btn.dataset.ch;
-      const newStatus = btn.dataset.st;
-      btn.disabled = true;
-
-      try {
-        await setChallengeProgress(currentUser.id, chId, newStatus);
-        userChallengesMap[chId] = newStatus;
-        showToast(newStatus === "completed" ? "¡Felicitaciones por completar el reto!" : "Reto actualizado a en progreso.");
-        renderChallengesPanel();
-      } catch (err) {
-        console.error(err);
-        showToast("No se pudo actualizar el progreso del reto.");
-        btn.disabled = false;
-      }
-    });
-  });
 }
 
 // Renderizar Panel 2: Mis Publicaciones
@@ -463,7 +438,7 @@ function renderEvidencesPanel() {
     container.innerHTML = `
       <div class="card" style="grid-column: 1 / -1; text-align: center; padding: var(--space-2xl);">
         <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">📸</div>
-        <h3>No has enviado evidencias fotográficas</h3>
+        <h3>No has enviado evidencias (fotos o videos)</h3>
         <p class="text-muted" style="margin-bottom: var(--space-md);">
           Documenta tus acciones ecológicas (reciclaje, limpieza, compostaje, etc.) para que un moderador certifique tu impacto positivo.
         </p>
@@ -482,7 +457,9 @@ function renderEvidencesPanel() {
     return `
       <div class="card" style="overflow: hidden; padding: 0; display: flex; flex-direction: column;">
         <div style="height: 190px; background-color: var(--bg-surface-secondary); position: relative; overflow: hidden;">
-          <img src="${escapeHTML(ev.imageURL || "")}" alt="Evidencia de ${escapeHTML(ch.title)}" style="width: 100%; height: 100%; object-fit: cover;">
+          ${(ev.mediaType === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(ev.imageURL || ""))
+            ? `<video src="${escapeHTML(ev.imageURL || "")}" controls playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover; background: #000;"></video>`
+            : `<img src="${escapeHTML(ev.imageURL || "")}" alt="Evidencia de ${escapeHTML(ch.title)}" style="width: 100%; height: 100%; object-fit: cover;">`}
           <div style="position: absolute; top: 10px; right: 10px;">
             ${evidenceStatusBadge(ev.status)}
           </div>

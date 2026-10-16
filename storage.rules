@@ -15,8 +15,8 @@ service firebase.storage {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow write: if signedIn()
         && request.auth.uid == uid
-        && request.resource.contentType.matches('image/.*')
-        && request.resource.size < 8 * 1024 * 1024;
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*'))
+        && request.resource.size < 50 * 1024 * 1024;
       allow delete: if isAdmin();
     }
   }

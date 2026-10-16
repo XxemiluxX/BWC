@@ -76,13 +76,11 @@ export function openChallengeDetailModal(challengeId) {
     actionsHTML = `
       <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-lg); border-top: 1px solid var(--border-subtle); padding-top: var(--space-md);">
         ${!isCompleted ? `
-          <button id="markCompleteBtn" class="btn btn-primary" type="button">
-            ${isInProgress ? "✓ Marcar como completado" : "✓ He completado este reto"}
-          </button>
+          <a id="sendEvidenceBtn" href="challenge.html?id=${c.id}" class="btn btn-primary">
+            📷 Enviar foto o video para completar
+          </a>
         ` : `
-          <button id="markInProgressBtn" class="btn btn-secondary btn-sm" type="button">
-            Reabrir reto
-          </button>
+          <span class="status-badge status-approved">🟢 Reto completado</span>
         `}
 
         ${!isInProgress && !isCompleted ? `
@@ -91,10 +89,8 @@ export function openChallengeDetailModal(challengeId) {
           </button>
         ` : ""}
 
-        <a href="challenge.html?id=${c.id}" class="btn btn-ghost" style="margin-left: auto;">
-          📷 Subir fotografía de evidencia
-        </a>
       </div>
+      ${!isCompleted ? `<p class="text-muted" style="font-size: 0.8rem; margin: 8px 0 0;">Para completar el reto debes enviar una foto o un video como evidencia. Se marca como completado cuando un moderador la aprueba.</p>` : ""}
     `;
   } else {
     actionsHTML = `
@@ -142,18 +138,6 @@ export function openChallengeDetailModal(challengeId) {
   `);
 
   // Eventos de botones dentro del modal
-  modal.root.querySelector("#markCompleteBtn")?.addEventListener("click", async () => {
-    try {
-      await setChallengeProgress(currentUser.id, c.id, "completed");
-      showToast(`¡Excelente trabajo! Has completado: "${c.title}"`, "success");
-      modal.close();
-      await refreshState();
-    } catch (err) {
-      console.error(err);
-      showToast("No se pudo actualizar el estado. Revisa tu conexión.", "error");
-    }
-  });
-
   modal.root.querySelector("#startChallengeBtn")?.addEventListener("click", async () => {
     try {
       await setChallengeProgress(currentUser.id, c.id, "in_progress");
@@ -163,18 +147,6 @@ export function openChallengeDetailModal(challengeId) {
     } catch (err) {
       console.error(err);
       showToast("No se pudo iniciar el reto.", "error");
-    }
-  });
-
-  modal.root.querySelector("#markInProgressBtn")?.addEventListener("click", async () => {
-    try {
-      await setChallengeProgress(currentUser.id, c.id, "in_progress");
-      showToast("El reto vuelve a estar en progreso.");
-      modal.close();
-      await refreshState();
-    } catch (err) {
-      console.error(err);
-      showToast("No se pudo cambiar el estado.", "error");
     }
   });
 }
