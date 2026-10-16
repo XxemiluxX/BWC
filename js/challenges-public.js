@@ -126,7 +126,7 @@ export function openChallengeDetailModal(challengeId) {
           </div>
 
           <div style="background-color: var(--forest-50); border: 1px solid var(--forest-100); border-radius: var(--radius-md); padding: var(--space-md);">
-            <h4 style="color: var(--text-primary); margin-bottom: 8px;">Paso a paso para realizarlo:</h4>
+            <h4 style="color: var(--tint-text); margin-bottom: 8px;">Paso a paso para realizarlo:</h4>
             ${checklistHTML}
           </div>
 

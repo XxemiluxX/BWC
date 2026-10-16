@@ -114,7 +114,7 @@ function dashboardView() {
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl);">
       <div class="card" style="padding: var(--space-lg); text-align: center;">
         <span class="eyebrow" style="margin-bottom: 4px;">Comunidad</span>
-        <strong style="font-size: 2rem; color: var(--forest-700); display: block;">${s.usersCount}</strong>
+        <strong style="font-size: 2rem; color: var(--accent-text); display: block;">${s.usersCount}</strong>
         <span class="text-muted" style="font-size: 0.8rem;">Participantes registrados</span>
       </div>
 
@@ -132,7 +132,7 @@ function dashboardView() {
 
       <div class="card" style="padding: var(--space-lg); text-align: center;">
         <span class="eyebrow" style="margin-bottom: 4px;">Foros Ciudadanos</span>
-        <strong style="font-size: 2rem; color: var(--forest-600); display: block;">${s.postsCount}</strong>
+        <strong style="font-size: 2rem; color: var(--accent-text); display: block;">${s.postsCount}</strong>
         <span class="text-muted" style="font-size: 0.8rem;">Iniciativas activas</span>
       </div>
 
@@ -279,9 +279,9 @@ function evidenceView() {
                 <div>
                   <div style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 2px;">${formatDate(e.submittedAt)}</div>
                   <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">${escapeHTML(e.userName || "Participante")}</strong>
-                  <div style="font-size: 0.825rem; color: var(--forest-700); margin-bottom: 6px;">${ch.icon} Reto #${e.challengeNumber}: ${escapeHTML(ch.title)}</div>
+                  <div style="font-size: 0.825rem; color: var(--accent-text); margin-bottom: 6px;">${ch.icon} Reto #${e.challengeNumber}: ${escapeHTML(ch.title)}</div>
                   ${e.comment ? `<p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;">"${escapeHTML(e.comment)}"</p>` : ""}
-                  ${e.moderatorComment ? `<div style="background-color: var(--forest-50); padding: 6px 8px; border-radius: var(--radius-xs); font-size: 0.775rem; color: var(--forest-950);">Nota: ${escapeHTML(e.moderatorComment)}</div>` : ""}
+                  ${e.moderatorComment ? `<div style="background-color: var(--forest-50); padding: 6px 8px; border-radius: var(--radius-xs); font-size: 0.775rem; color: var(--tint-text);">Nota: ${escapeHTML(e.moderatorComment)}</div>` : ""}
                 </div>
 
                 <div style="margin-top: var(--space-md); border-top: 1px solid var(--border-subtle); padding-top: var(--space-xs); display: flex; justify-content: flex-end; gap: 6px;">
@@ -537,7 +537,7 @@ function settingsView() {
   return `
     <div class="card mb-lg" style="padding: var(--space-lg);">
       <span class="eyebrow">ARQUITECTURA DE SISTEMA</span>
-      <h2>Configuración del entorno ECRA</h2>
+      <h2>Configuración del entorno Better World Challenge</h2>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
@@ -760,7 +760,7 @@ function exportUsersCSV() {
     ["Nombre", "Correo", "Rol", "Fecha de Registro"],
     ...state.users.map(u => [u.name, u.email, u.role || "participant", formatDate(u.createdAt)])
   ];
-  downloadCSV("ecra-directorio-usuarios.csv", rows);
+  downloadCSV("bwc-directorio-usuarios.csv", rows);
   showToast("Descargando directorio de usuarios en CSV...");
 }
 
@@ -778,7 +778,7 @@ function exportEvidencesCSV() {
       e.imageURL || ""
     ])
   ];
-  downloadCSV("ecra-evidencias-ambientales.csv", rows);
+  downloadCSV("bwc-evidencias-ambientales.csv", rows);
   showToast("Descargando registro de evidencias en CSV...");
 }
 

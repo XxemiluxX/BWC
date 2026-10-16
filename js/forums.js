@@ -42,6 +42,30 @@ let filters = {
   sort: "newest"
 };
 
+// Resuelve (o reintenta resolver) el usuario actual. Si el perfil de Firestore no carga,
+// se usa la sesión de Firebase Auth para que "crear publicación" no mande a login por error.
+async function ensureCurrentUser() {
+  if (currentUser) return currentUser;
+  try {
+    currentUser = await getCurrentProfile();
+  } catch (e) {
+    console.warn("No se pudo cargar el perfil en Firestore:", e);
+  }
+  if (!currentUser) {
+    try {
+      const authUser = await waitForAuth();
+      if (authUser) {
+        currentUser = {
+          id: authUser.uid,
+          name: authUser.displayName || authUser.email?.split("@")[0] || "Miembro de ECRA",
+          email: authUser.email || ""
+        };
+      }
+    } catch (e) { /* sin sesión */ }
+  }
+  return currentUser;
+}
+
 // Generar insignia de estado
 function statusBadge(statusKey) {
   const s = FORUM_STATUSES[statusKey] || FORUM_STATUSES.proposal;
@@ -177,10 +201,11 @@ async function loadPosts() {
 }
 
 // Modal para crear nueva publicación
-function openCreatePostModal() {
+async function openCreatePostModal() {
+  await ensureCurrentUser();
   if (!currentUser) {
     showToast("Debes iniciar sesión para publicar en los foros.");
-    window.location.href = "login.html";
+    setTimeout(() => { window.location.href = "login.html"; }, 900);
     return;
   }
 
@@ -320,7 +345,9 @@ function openCreatePostModal() {
     } catch (err) {
       console.error("Error al crear publicación:", err);
       msg.className = "form-message error";
-      msg.textContent = "Ocurrió un error al guardar la publicación en Firestore. Verifica tu conexión.";
+      msg.textContent = err?.code === "permission-denied"
+        ? "Firestore rechazó la publicación por permisos. Publica las reglas de firestore.rules en el proyecto de Firebase que usa la app."
+        : "Ocurrió un error al guardar la publicación. Verifica tu conexión e inténtalo de nuevo.";
       submitBtn.disabled = false;
       submitBtn.textContent = "Publicar iniciativa";
     }
@@ -366,8 +393,8 @@ async function openPostDetail(postId) {
     <!-- Callout de Participación si existe -->
     ${post.participation ? `
       <div style="background-color: var(--forest-50); border: 1px solid var(--forest-200); border-radius: var(--radius-md); padding: var(--space-md); margin-bottom: var(--space-lg);">
-        <strong style="color: var(--text-primary); display: block; margin-bottom: 4px;">🤝 ¿Cómo puedes colaborar en esta iniciativa?</strong>
-        <p style="margin: 0; font-size: 0.925rem; color: var(--forest-950);">${escapeHTML(post.participation)}</p>
+        <strong style="color: var(--tint-text); display: block; margin-bottom: 4px;">🤝 ¿Cómo puedes colaborar en esta iniciativa?</strong>
+        <p style="margin: 0; font-size: 0.925rem; color: var(--tint-text);">${escapeHTML(post.participation)}</p>
       </div>
     ` : ""}
 
@@ -926,13 +953,14 @@ function syncCategoryChips(activeCat) {
 async function initForumsPage() {
   const deepLinkId = initFilters();
 
-  try {
-    currentUser = await getCurrentProfile();
-  } catch (e) {
-    currentUser = null;
-  }
+  await ensureCurrentUser();
 
   await loadPosts();
+
+  // forums.html?new=1 abre directamente el formulario de nueva publicación
+  if (new URLSearchParams(window.location.search).get("new") === "1") {
+    openCreatePostModal();
+  }
 
   // Si había un id en la URL, abrirlo directamente
   if (deepLinkId) {

@@ -212,7 +212,7 @@ async function render() {
       if (uploadError) throw uploadError;
 
       fill.style.width = "75%";
-      progressText.textContent = "Guardando registro en ECRA…";
+      progressText.textContent = "Guardando registro en Better World Challenge…";
 
       const { data: publicData } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);
       const imageURL = publicData.publicUrl;

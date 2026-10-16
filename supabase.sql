@@ -1,4 +1,4 @@
--- ECRA · Supabase Storage
+-- Better World Challenge · Supabase Storage
 -- Ejecuta este SQL en Supabase → SQL Editor.
 -- El bucket es público para que el panel web pueda mostrar las fotografías.
 -- NUNCA pongas una service_role/secret key en el navegador.
@@ -15,8 +15,7 @@ on conflict (id) do update set public = true, file_size_limit = 5242880, allowed
 -- que valide el Firebase ID token y genere una URL de subida firmada.
 
 drop policy if exists "BWC evidence jpeg uploads" on storage.objects;
-drop policy if exists "ECRA evidence jpeg uploads" on storage.objects;
-create policy "ECRA evidence jpeg uploads"
+create policy "BWC evidence jpeg uploads"
 on storage.objects
 for insert
 to anon, authenticated

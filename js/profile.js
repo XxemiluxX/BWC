@@ -502,7 +502,7 @@ function renderEvidencesPanel() {
             ` : ""}
 
             ${ev.moderatorComment ? `
-              <div style="background-color: var(--forest-50); border: 1px solid var(--forest-200); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 0.8rem; color: var(--forest-950); margin-top: 6px;">
+              <div style="background-color: var(--forest-50); border: 1px solid var(--forest-200); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 0.8rem; color: var(--tint-text); margin-top: 6px;">
                 <strong>Nota del moderador:</strong> ${escapeHTML(ev.moderatorComment)}
               </div>
             ` : ""}

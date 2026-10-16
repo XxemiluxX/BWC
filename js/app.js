@@ -389,7 +389,9 @@ export function showToast(message, type = "info") {
   }, 3400);
 }
 
-// Modal accesible e interactivo con cierre ESC y fuera de foco
+// Modal accesible e interactivo con cierre ESC y clic fuera.
+// Si el contenido no trae su propio .modal-overlay, se envuelve aquí: antes los
+// modales de foros/perfil se pintaban sin contenedor al final de la página y no se veían.
 export function openModal(html) {
   let root = document.getElementById("modalRoot") || document.getElementById("adminModalRoot");
   if (!root) {
@@ -397,14 +399,23 @@ export function openModal(html) {
     root.id = "modalRoot";
     document.body.appendChild(root);
   }
-  root.innerHTML = html;
+
+  const hasOverlay = /class="[^"]*\bmodal-overlay\b/.test(html);
+  root.innerHTML = hasOverlay
+    ? html
+    : `<div class="modal-overlay" data-close-modal><div class="modal-dialog" role="dialog" aria-modal="true">${html}</div></div>`;
   root.setAttribute("aria-hidden", "false");
 
-  const close = () => {
+  const escHandler = (e) => {
+    if (e.key === "Escape") close();
+  };
+
+  function close() {
     root.innerHTML = "";
     root.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
-  };
+    document.removeEventListener("keydown", escHandler);
+  }
 
   document.body.style.overflow = "hidden";
   root.querySelectorAll("[data-close]").forEach(btn => btn.addEventListener("click", close));
@@ -413,14 +424,11 @@ export function openModal(html) {
       if (e.target === overlay) close();
     });
   });
-
-  const escHandler = (e) => {
-    if (e.key === "Escape") {
-      close();
-      document.removeEventListener("keydown", escHandler);
-    }
-  };
   document.addEventListener("keydown", escHandler);
+
+  // Enfoca el primer campo para poder escribir de inmediato
+  const firstField = root.querySelector("input:not([type=hidden]), textarea, select");
+  if (firstField) setTimeout(() => firstField.focus({ preventScroll: true }), 60);
 
   return { close, root };
 }
@@ -676,6 +684,63 @@ document.addEventListener("DOMContentLoaded", () => {
   togglePasswordVisibility();
 });
 
+// --------------------------------------------------------------------------
+// EFECTOS VISUALES: luz que sigue al puntero y revelado al hacer scroll
+// --------------------------------------------------------------------------
+const SPOTLIGHT_SELECTOR = ".card, .pillar-card, .challenge-card, .post-card, .metric-card, .progress-card, .admin-stat-card";
+const REVEAL_SELECTOR = ".pillar-card, .challenge-card, .post-card, .metric-item, .metric-card, .card, .banner-highlight, .filter-bar, .profile-hero-card, .empty-state";
+
+function initSpotlight() {
+  const move = (e) => {
+    const el = e.target.closest?.(SPOTLIGHT_SELECTOR);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+  document.addEventListener("pointermove", move, { passive: true });
+  document.addEventListener("pointerdown", move, { passive: true });
+}
+
+function initScrollReveal() {
+  if (!("IntersectionObserver" in window)) return;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+  const seen = new WeakSet();
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("rv-in");
+      io.unobserve(entry.target);
+    });
+  }, { threshold: 0.08, rootMargin: "0px 0px -6% 0px" });
+
+  const register = (root) => {
+    const nodes = root.matches?.(REVEAL_SELECTOR) ? [root, ...root.querySelectorAll(REVEAL_SELECTOR)] : root.querySelectorAll(REVEAL_SELECTOR);
+    let i = 0;
+    nodes.forEach(el => {
+      if (seen.has(el) || el.closest("#modalRoot, #adminModalRoot, .modal-overlay, #toastRoot")) return;
+      seen.add(el);
+      el.classList.add("rv");
+      el.style.setProperty("--rv-delay", `${Math.min(i++, 6) * 70}ms`);
+      io.observe(el);
+    });
+  };
+
+  document.documentElement.classList.add("rv-ready");
+  register(document.body);
+
+  // Contenido que se inyecta después (retos, publicaciones, vistas de admin…)
+  new MutationObserver((mutations) => {
+    mutations.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) register(n); }));
+  }).observe(document.body, { childList: true, subtree: true });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initSpotlight();
+  initScrollReveal();
+});
+
 // Exposición en espacio de nombres ECRA
 window.ECRA = {
   auth,
@@ -709,70 +774,3 @@ window.ECRA = {
   setChallengeProgress,
   getRealCommunityMetrics
 };
-
-// Revelado suave al entrar en pantalla (decorativo, una sola vez)
-function initReveal() {
-  if (!("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const targets = document.querySelectorAll(".pillar-card, .metric-item, .banner-highlight, .card-warm, .acro-card, .acro-head, .section:not(.section-hero) .eyebrow, .section:not(.section-hero) h1, .section:not(.section-hero) .lead, .filter-bar, .footer-top-grid > div, .footer-grid > div, .footer-disclaimer-box, .profile-hero-card, .auth-box");
-  if (!targets.length) return;
-  targets.forEach(el => {
-    el.setAttribute("data-reveal", "");
-    el.style.setProperty("--i", Array.prototype.indexOf.call(el.parentElement.children, el));
-  });
-  document.documentElement.classList.add("js-reveal");
-  const io = new IntersectionObserver(entries => entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); const t = e.target; setTimeout(() => { t.removeAttribute("data-reveal"); t.classList.remove("in"); }, 1100); }
-  }), { rootMargin: "0px 0px -8% 0px" });
-  targets.forEach(el => io.observe(el));
-}
-document.addEventListener("DOMContentLoaded", initReveal);
-
-// Movimiento extra: entrada escalonada de rejillas dinámicas, contadores y foco de luz
-function initMotion() {
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const grids = document.querySelectorAll(".challenges-grid, .posts-grid");
-  const mo = new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(n => {
-    if (n.nodeType !== 1 || !n.matches?.(".challenge-card, .post-card, .card")) return;
-    const i = Array.prototype.indexOf.call(n.parentElement.children, n);
-    if (i < 8) n.style.animation = `rise 320ms var(--ease-out) ${i * 35}ms backwards`;
-  })));
-  grids.forEach(g => mo.observe(g, { childList: true }));
-
-  document.querySelectorAll(".metric-value").forEach(el => {
-    new MutationObserver(() => {
-      const n = parseInt(el.textContent, 10);
-      if (el.dataset.busy || !/^\d+$/.test(el.textContent.trim()) || n < 1) return;
-      el.dataset.busy = "1";
-      const t0 = performance.now();
-      const step = now => {
-        const p = Math.min((now - t0) / 1000, 1), e = 1 - Math.pow(1 - p, 4);
-        el.textContent = p < 1 ? Math.round(n * e) : n;
-        if (p < 1) requestAnimationFrame(step); else setTimeout(() => delete el.dataset.busy, 50);
-      };
-      requestAnimationFrame(step);
-    }).observe(el, { childList: true, characterData: true, subtree: true });
-  });
-
-  document.addEventListener("pointermove", e => {
-    const c = e.target.closest?.(".acro-card, .pillar-card, .challenge-card");
-    if (!c) return;
-    const r = c.getBoundingClientRect();
-    c.style.setProperty("--mx", `${e.clientX - r.left}px`);
-    c.style.setProperty("--my", `${e.clientY - r.top}px`);
-  }, { passive: true });
-}
-document.addEventListener("DOMContentLoaded", initMotion);
-
-// Inclinación 3D sutil en tarjetas (solo mouse, respeta reduced-motion)
-(function initTilt() {
-  if (!matchMedia("(hover: hover) and (pointer: fine)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  let cur = null;
-  const reset = el => { if (el) { el.style.transform = ""; } };
-  document.addEventListener("pointermove", e => {
-    const c = e.target.closest?.(".acro-card, .pillar-card");
-    if (c !== cur) { reset(cur); cur = c; }
-    if (!c) return;
-    const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
-    c.style.transform = `perspective(800px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg) translateY(-3px)`;
-  }, { passive: true });
-})();
