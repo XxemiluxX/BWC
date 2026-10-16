@@ -245,7 +245,9 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  /* `clip` evita crear un contenedor de desplazamiento que impida que el
+     encabezado sticky permanezca visible al bajar por la página. */
+  overflow-x: clip;
 }
 
 /* Aurora de fondo: orbes de color desenfocados que se mueven despacio */
@@ -2332,4 +2334,24 @@ html.rv-ready .rv.rv-in { animation: rise 750ms var(--ease-out) backwards; anima
     scroll-behavior: auto !important;
   }
   html.rv-ready .rv:not(.rv-in) { opacity: 1; translate: none; }
+}
+
+/* Ajuste móvil: el botón de primera iniciativa debe permanecer dentro de su tarjeta */
+#noPosts > .card {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+#noPosts .btn[data-action="open-create"] {
+  box-sizing: border-box;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  #noPosts > .card { padding: var(--space-xl) var(--space-md); }
+  #noPosts .btn[data-action="open-create"] { width: 100%; }
 }

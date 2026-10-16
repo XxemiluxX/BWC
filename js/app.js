@@ -18,7 +18,7 @@ import {
 export const THEME_KEY = "ecra_theme_v2";
 export const ADMIN_EMAIL = "mongemoraemiliano60@gmail.com";
 export const CONTACT_PHONE = "87506973";
-export const CONTACT_EMAIL = "mongemoraemiliano60@gmail.com";
+export const CONTACT_EMAIL = "proyecto.ecracr@gmail.com";
 
 // Catálogo completo de retos de sostenibilidad ambiental accesibles, prácticos y seguros
 export const CHALLENGES = [
