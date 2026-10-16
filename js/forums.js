@@ -66,6 +66,38 @@ async function ensureCurrentUser() {
   return currentUser;
 }
 
+
+// UID real de Firebase Auth: es el que comparan las reglas de Firestore (authorId == request.auth.uid).
+function authUid() {
+  return auth.currentUser?.uid || currentUser?.id || null;
+}
+
+// Evita que el botón se quede en "Guardando..." para siempre si Firestore no responde
+// (base de datos no creada, reglas sin publicar o sin conexión).
+function withTimeout(promise, ms = 15000) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(Object.assign(new Error("timeout"), { code: "timeout" })), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function firestoreErrorMessage(err, action = "guardar") {
+  switch (err?.code) {
+    case "permission-denied":
+      return `Firestore rechazó la acción por permisos. Publica las reglas de firestore.rules en Firebase (Firestore → Reglas → Publicar) o ejecuta: firebase deploy --only firestore:rules`;
+    case "unauthenticated":
+      return "Tu sesión expiró. Inicia sesión de nuevo e inténtalo otra vez.";
+    case "timeout":
+    case "unavailable":
+      return `No hubo respuesta de Firestore al ${action}. Revisa tu conexión y que la base de datos Cloud Firestore esté creada en el proyecto de Firebase.`;
+    case "failed-precondition":
+      return "Firestore necesita un índice o la base de datos aún no está lista. Revisa la consola de Firebase.";
+    default:
+      return `Ocurrió un error al ${action} (${err?.code || "desconocido"}). Inténtalo de nuevo.`;
+  }
+}
+
 // Generar insignia de estado
 function statusBadge(statusKey) {
   const s = FORUM_STATUSES[statusKey] || FORUM_STATUSES.proposal;
@@ -317,11 +349,18 @@ async function openCreatePostModal() {
       return;
     }
 
+    const authorId = authUid();
+    if (!authorId) {
+      msg.className = "form-message error";
+      msg.textContent = "No se detectó tu sesión. Inicia sesión de nuevo para publicar.";
+      return;
+    }
+
     submitBtn.disabled = true;
     submitBtn.textContent = "Guardando...";
 
     try {
-      const docRef = await addDoc(collection(db, "forumPosts"), {
+      const docRef = await withTimeout(addDoc(collection(db, "forumPosts"), {
         title,
         category,
         type,
@@ -329,14 +368,14 @@ async function openCreatePostModal() {
         status,
         description,
         participation,
-        authorId: currentUser.id,
+        authorId,
         authorName: currentUser.name || "Miembro de ECRA",
         authorEmail: currentUser.email || "",
         commentsCount: 0,
         participantsCount: 0,
         createdAt: nowISO(),
         createdAtServer: serverTimestamp()
-      });
+      }));
 
       modal.close();
       showToast("¡Iniciativa publicada exitosamente en los foros!");
@@ -345,9 +384,7 @@ async function openCreatePostModal() {
     } catch (err) {
       console.error("Error al crear publicación:", err);
       msg.className = "form-message error";
-      msg.textContent = err?.code === "permission-denied"
-        ? "Firestore rechazó la publicación por permisos. Publica las reglas de firestore.rules en el proyecto de Firebase que usa la app."
-        : "Ocurrió un error al guardar la publicación. Verifica tu conexión e inténtalo de nuevo.";
+      msg.textContent = firestoreErrorMessage(err, "guardar la publicación");
       submitBtn.disabled = false;
       submitBtn.textContent = "Publicar iniciativa";
     }
@@ -528,7 +565,7 @@ async function openPostDetail(postId) {
     try {
       await addDoc(collection(db, "forumComments"), {
         postId: post.id,
-        authorId: currentUser.id,
+        authorId: authUid(),
         authorName: currentUser.name || "Miembro de la comunidad",
         text,
         createdAt: nowISO(),
@@ -552,7 +589,7 @@ async function openPostDetail(postId) {
       loadCommentsForDetail(post.id, modal.root);
     } catch (err) {
       console.error("Error al publicar comentario:", err);
-      showToast("No se pudo guardar el comentario.");
+      showToast(firestoreErrorMessage(err, "guardar el comentario"));
       submitBtn.disabled = false;
     }
   });
@@ -601,13 +638,12 @@ async function loadCommentsForDetail(postId, rootEl) {
   if (!listEl) return;
 
   try {
-    const q = query(
-      collection(db, "forumComments"),
-      where("postId", "==", postId),
-      orderBy("createdAt", "asc")
-    );
+    // Sin orderBy en Firestore: where + orderBy en campos distintos exige un índice compuesto.
+    const q = query(collection(db, "forumComments"), where("postId", "==", postId));
     const snap = await getDocs(q);
-    const comments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const comments = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => timeValue(a.createdAt) - timeValue(b.createdAt));
 
     if (comments.length === 0) {
       listEl.innerHTML = `
@@ -722,7 +758,7 @@ function openVolunteerModal(postId, onSuccess) {
       await addDoc(collection(db, "forumParticipations"), {
         postId: post.id,
         postTitle: post.title,
-        userId: currentUser.id,
+        userId: authUid(),
         userName: currentUser.name || "Colaborador",
         contributionType: type,
         note,
@@ -743,7 +779,7 @@ function openVolunteerModal(postId, onSuccess) {
       await loadPosts();
     } catch (err) {
       console.error("Error al registrar participación:", err);
-      showToast("No se pudo registrar tu colaboración.");
+      showToast(firestoreErrorMessage(err, "registrar tu colaboración"));
       submitBtn.disabled = false;
       submitBtn.textContent = "Confirmar mi participación";
     }
