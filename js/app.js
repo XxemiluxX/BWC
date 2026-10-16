@@ -177,19 +177,19 @@ export const CHALLENGES = [
   {
     id: "challenge-9",
     number: 9,
-    title: "La broza al compost: aprovecha hojas secas y restos de poda",
-    shortTitle: "Broza y compost",
+    title: "La broza al compost: aprovecha restos de la broza de tu café",
+    shortTitle: "Broza al compost",
     category: "waste",
     categoryLabel: "Suelo y materia orgánica",
     difficulty: "Fácil",
     duration: "20-30 min",
-    icon: "🍂",
-    summary: "Recoge la broza de tu patio o parque y úsala como material seco para tu compost o como cobertura del suelo.",
-    instruction: "Junta la broza (hojas secas, ramitas finas y restos de poda sin enfermedades) que normalmente se barre, se quema o se tira. Úsala como material 'marrón' en tu compostera: alterna una capa de broza con una capa de restos de cocina y cubre siempre lo fresco con una capa seca. Lo que sobre, extiéndelo como cobertura alrededor de tus plantas para conservar la humedad.",
+    icon: "☕",
+    summary: "Utiliza el desecho de la broza de tu café como material organico en tu compostera.",
+    instruction: "Junta la broza con cascaras de huevo que normalmente se tira y vuelve esos desechos en nutrientes para tus plantas. Úsala como material organico y extiéndelo como cobertura alrededor de tus plantas para conservar la humedad.",
     concreteActions: [
-      "Tritura o corta la broza en trozos pequeños para que se descomponga más rápido.",
-      "Alterna capas: 2 partes de broza por cada parte de restos de cocina, y tapa los restos frescos con broza para evitar olores y moscas.",
-      "No uses hojas de plantas enfermas, ramas muy gruesas ni broza con restos de pesticidas."
+      "Combina la broza y cascaras de huevo, al triturarlas tendras compost orgánico.",
+      "Almacenalo en algun recipiente con tapa, siempre procurando evitar moscas y otros insectos busquen hospedarse en tu compost organico.",
+      "No envies esos desechos que pueden dar nutrientes a tus plantas a contenedores de basura."
     ],
     whyItMatters: "Quemar o botar la broza desperdicia un recurso gratuito. Convertirla en compost devuelve nutrientes al suelo, retiene agua y evita humo y residuos en el vertedero."
   },
