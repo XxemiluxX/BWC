@@ -82,7 +82,7 @@ export const CHALLENGES = [
   {
     id: "challenge-4",
     number: 4,
-    title: "Auditoría de energía y apagón de vampiros eléctricos",
+    title: "Concientización de energía y consumo eléctrico",
     shortTitle: "Ahorro de energía",
     category: "energy",
     categoryLabel: "Energía y consumo",
