@@ -245,7 +245,9 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  /* `clip` evita crear un contenedor de desplazamiento que impida que el
+     encabezado sticky permanezca visible al bajar por la página. */
+  overflow-x: clip;
 }
 
 /* Aurora de fondo: orbes de color desenfocados que se mueven despacio */
