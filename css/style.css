@@ -2072,6 +2072,94 @@ html.rv-ready .rv.rv-in { animation: rise 750ms var(--ease-out) backwards; anima
 
 
 /* =========================================================
+   28. CARRUSEL DE FOTOGRAFÍAS (inicio)
+   ========================================================= */
+
+.hero-slides {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  outline-offset: -3px;
+}
+.hero-slides::-webkit-scrollbar { display: none; }
+.hero-slide { position: relative; flex: 0 0 100%; margin: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+.hero-slide img { display: block; }
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(8, 24, 16, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-ui), scale var(--duration-normal) var(--ease-spring);
+}
+.carousel-prev { left: 12px; }
+.carousel-next { right: 12px; }
+@media (hover: hover) and (pointer: fine) { .carousel-btn:hover { background: rgba(8, 24, 16, 0.8); scale: 1.08; } }
+.carousel-btn:active { scale: 0.92; }
+.carousel-btn:focus-visible, .carousel-dot:focus-visible { outline: 3px solid var(--forest-300); outline-offset: 2px; }
+
+.carousel-dots {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 2;
+  display: flex;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(8, 24, 16, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.carousel-dot {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.carousel-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  translate: -50% -50%;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.55);
+  transition: width var(--duration-normal) var(--ease-spring), background-color var(--duration-fast) var(--ease-ui);
+}
+.carousel-dot.active::after { width: 20px; background: #fff; }
+
+.hero-carousel.is-single .carousel-btn,
+.hero-carousel.is-single .carousel-dots { display: none; }
+
+@media (max-width: 640px) {
+  .carousel-btn { width: 38px; height: 38px; }
+  .carousel-prev { left: 8px; }
+  .carousel-next { right: 8px; }
+}
+
+
+/* =========================================================
    24. RESPONSIVE
    ========================================================= */
 

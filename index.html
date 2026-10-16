@@ -76,12 +76,27 @@
 
         <div class="hero-visual">
           <div class="hero-photo-frame">
-            <div class="hero-photo-inner">
-              <img src="nacientes-palmichal-1024x768.webp" alt="Nacientes Palmichal, Costa Rica — Conservación de cuencas hidrográficas y biodiversidad" loading="eager">
-              <div class="hero-photo-badge">
-                <b>Fotografía comunitaria: Nacientes Palmichal</b>
-                <span>Conservación de cuencas de agua dulce, bosque y biodiversidad rural en Costa Rica.</span>
+            <!--
+              Carrusel de fotografías. Para añadir una foto, copia un bloque <figure class="hero-slide">
+              completo, cambia src, alt y el texto del pie. Las flechas y los puntos se crean solos.
+            -->
+            <div class="hero-photo-inner hero-carousel" data-carousel role="group" aria-roledescription="carrusel" aria-label="Fotografías comunitarias">
+              <div class="hero-slides" data-carousel-track tabindex="0" aria-live="polite">
+                <figure class="hero-slide" aria-label="Fotografía 1">
+                  <img src="nacientes-palmichal-1024x768.webp" alt="Nacientes Palmichal, Costa Rica — Conservación de cuencas hidrográficas y biodiversidad" loading="eager">
+                  <figcaption class="hero-photo-badge">
+                    <b>Fotografía comunitaria: Nacientes Palmichal</b>
+                    <span>Conservación de cuencas de agua dulce, bosque y biodiversidad rural en Costa Rica.</span>
+                  </figcaption>
+                </figure>
               </div>
+              <button class="carousel-btn carousel-prev" type="button" data-carousel-prev aria-label="Foto anterior">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+              </button>
+              <button class="carousel-btn carousel-next" type="button" data-carousel-next aria-label="Foto siguiente">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+              </button>
+              <div class="carousel-dots" data-carousel-dots></div>
             </div>
           </div>
         </div>
@@ -339,6 +354,7 @@
   <!-- Script modular de inicio -->
   <script type="module">
     import "./js/app.js";
+    import "./js/carousel.js";
     import { CHALLENGES, getRealCommunityMetrics, escapeHTML, formatDateShort } from "./js/app.js";
     import { db } from "./js/firebase-client.js";
     import { collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
