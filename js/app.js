@@ -84,7 +84,7 @@ export const CHALLENGES = [
   {
     id: "challenge-4",
     number: 4,
-    title: "Caza vampiros eléctricos: desconecta lo que no usas",
+    title: "Apagones electricos, desconecta lo que no usas",
     shortTitle: "Ahorro de energía",
     category: "energy",
     categoryLabel: "Luz y energía",
