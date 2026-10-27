@@ -34,8 +34,8 @@
         <a class="nav-link" href="challenges.html">Retos Ambientales</a>
         <a class="nav-link" href="forums.html">Foros Comunitarios</a>
         <a class="nav-link" href="ranking.html">Clasificación</a>
-        <a class="nav-link" href="login.html">Iniciar sesión</a>
-        <a class="btn btn-primary btn-sm" href="register.html">Participar</a>
+        <a class="nav-link" href="login.html" data-auth-guest>Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="register.html" data-auth-guest>Participar</a>
       </nav>
 
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -83,20 +83,6 @@
             <div class="hero-photo-inner hero-carousel" data-carousel role="group" aria-roledescription="carrusel" aria-label="Fotografías comunitarias">
               <div class="hero-slides" data-carousel-track tabindex="0" aria-live="polite">
                 <figure class="hero-slide">
-                  <img src="fotos/nacientes-palmichal-1024x768.webp" alt="Espacio natural de Nacientes de Palmichal rodeado de vegetación" loading="eager">
-                  <figcaption class="hero-photo-badge">
-                    <b>Nacientes de Palmichal</b>
-                    <span>Un entorno natural que nos recuerda la importancia de cuidar el agua y los bosques de la comunidad.</span>
-                  </figcaption>
-                </figure>
-                <figure class="hero-slide">
-                  <img src="fotos/nacientes.jpg" alt="Rótulo de una microcuenca en Palmichal" loading="lazy">
-                  <figcaption class="hero-photo-badge">
-                    <b>Protección de las nacientes</b>
-                    <span>Las microcuencas son esenciales para conservar las fuentes de agua que abastecen a las comunidades.</span>
-                  </figcaption>
-                </figure>
-                <figure class="hero-slide">
                   <img src="fotos/rio.jpg" alt="Cascada de agua clara entre rocas y bosque tropical" loading="lazy">
                   <figcaption class="hero-photo-badge">
                     <b>Ríos y agua limpia</b>
@@ -141,6 +127,23 @@
               <div class="carousel-dots" data-carousel-dots></div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aviso de bienvenida para visitantes sin sesión -->
+    <section class="welcome-auth-section container" data-auth-guest aria-labelledby="welcomeAuthTitle">
+      <div class="welcome-auth-notice">
+        <div class="welcome-auth-copy">
+          <span class="welcome-auth-icon" aria-hidden="true">🌿</span>
+          <div>
+            <h2 id="welcomeAuthTitle">¡Te damos la bienvenida a Better World Challenge!</h2>
+            <p>Te recomendamos iniciar sesión para guardar tu progreso, enviar evidencias de los retos y participar en los foros comunitarios.</p>
+          </div>
+        </div>
+        <div class="welcome-auth-actions">
+          <a class="btn btn-secondary btn-sm" href="login.html" data-auth-guest>Iniciar sesión</a>
+          <a class="btn btn-primary btn-sm" href="register.html" data-auth-guest>Crear cuenta</a>
         </div>
       </div>
     </section>
@@ -314,7 +317,7 @@
             Registrarte en ECRA toma menos de un minuto. Publica tu propuesta, encuentra vecinos dispuestos a colaborar y guarda el registro de tus retos ecológicos.
           </p>
           <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);">
-            <a class="btn btn-accent btn-lg" href="register.html">Crear cuenta gratuita</a>
+            <a class="btn btn-accent btn-lg" href="register.html" data-auth-guest>Crear cuenta gratuita</a>
             <a class="btn btn-secondary btn-lg" href="forums.html" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">Explorar publicaciones</a>
           </div>
         </div>

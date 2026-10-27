@@ -2073,6 +2073,50 @@ html.rv-ready .rv.rv-in { animation: rise 750ms var(--ease-out) backwards; anima
 }
 
 
+
+/* Contenido exclusivo para visitantes: se revela cuando Firebase resuelve la sesión. */
+html:not([data-auth-ready="true"]) [data-auth-guest] { visibility: hidden; }
+html[data-authenticated="true"] [data-auth-guest] { display: none !important; }
+
+/* Aviso de bienvenida para visitantes, en la identidad verde/naranja del proyecto. */
+.welcome-auth-section { padding-top: 0; padding-bottom: var(--space-8); }
+.welcome-auth-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding: var(--space-lg) var(--space-xl);
+  border: 1px solid var(--glass-border);
+  border-left: 4px solid var(--accent-500, #f28a35);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(115deg, var(--bg-surface), var(--bg-surface-secondary));
+  box-shadow: var(--shadow-md);
+}
+.welcome-auth-copy { display: flex; align-items: flex-start; gap: var(--space-md); min-width: 0; }
+.welcome-auth-icon { font-size: 1.7rem; line-height: 1.2; }
+.welcome-auth-notice h2 { margin: 0 0 5px; font-size: clamp(1.05rem, 1.7vw, 1.3rem); }
+.welcome-auth-notice p { margin: 0; color: var(--text-secondary); font-size: .9rem; line-height: 1.55; }
+.welcome-auth-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; gap: var(--space-sm); }
+
+/* Consentimiento informado para evidencias visuales. */
+.privacy-consent-panel {
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface-secondary);
+}
+.privacy-consent-label { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; line-height: 1.55; }
+.privacy-consent-label > input[type="checkbox"] { flex: 0 0 auto; width: 19px; height: 19px; margin: 3px 0 0; accent-color: var(--accent-500, #f28a35); cursor: pointer; }
+.privacy-consent-label > span { display: grid; gap: 5px; min-width: 0; }
+.privacy-consent-label strong { color: var(--text-primary); }
+.privacy-consent-label span span { color: var(--text-secondary); font-size: .9rem; }
+.privacy-consent-details { margin: var(--space-md) 0 0 31px; color: var(--text-secondary); font-size: .875rem; line-height: 1.6; }
+.privacy-consent-details summary { width: fit-content; color: var(--tint-text); font-weight: 700; cursor: pointer; }
+.privacy-consent-copy { padding-top: var(--space-sm); }
+.privacy-consent-copy p:last-child { margin-bottom: 0; }
+.privacy-consent-copy a { color: var(--tint-text); text-decoration: underline; overflow-wrap: anywhere; }
+
 /* =========================================================
    28. CARRUSEL DE FOTOGRAFÍAS (inicio)
    ========================================================= */
@@ -2082,12 +2126,18 @@ html.rv-ready .rv.rv-in { animation: rise 750ms var(--ease-out) backwards; anima
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  align-items: stretch;
   scrollbar-width: none;
   outline-offset: -3px;
 }
 .hero-slides::-webkit-scrollbar { display: none; }
-.hero-slide { position: relative; flex: 0 0 100%; margin: 0; scroll-snap-align: start; scroll-snap-stop: always; }
-.hero-slide img { display: block; }
+.hero-slide { position: relative; display: flex; flex-direction: column; min-width: 0; flex: 0 0 100%; margin: 0; scroll-snap-align: start; scroll-snap-stop: always; }
+.hero-slide img { display: block; width: 100%; height: clamp(250px, 32vw, 410px); object-fit: cover; transition: filter 500ms ease, transform 650ms cubic-bezier(.2,.75,.25,1); }
+.hero-slide.is-active img { animation: carousel-image-enter 550ms cubic-bezier(.2,.75,.25,1) both; }
+@keyframes carousel-image-enter { from { opacity: .82; transform: scale(1.018); } to { opacity: 1; transform: scale(1); } }
+.hero-slide .hero-photo-badge { flex: 1 0 auto; }
 
 .carousel-btn {
   position: absolute;
@@ -2155,9 +2205,16 @@ html.rv-ready .rv.rv-in { animation: rise 750ms var(--ease-out) backwards; anima
 .hero-carousel.is-single .carousel-dots { display: none; }
 
 @media (max-width: 640px) {
+  .hero-slide img { height: clamp(210px, 62vw, 300px); }
+  .hero-photo-badge span { font-size: .78rem; line-height: 1.4; }
   .carousel-btn { width: 38px; height: 38px; }
   .carousel-prev { left: 8px; }
   .carousel-next { right: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slides { scroll-behavior: auto; }
+  .hero-slide img { transition: none; animation: none !important; }
 }
 
 
@@ -2253,6 +2310,11 @@ html.rv-ready .rv.rv-in { animation: rise 750ms var(--ease-out) backwards; anima
   .profile-hero-card { padding: var(--space-6) var(--space-5); }
   .admin-stats { grid-template-columns: 1fr 1fr; }
   .brand-tag { display: none; }
+  .welcome-auth-notice { align-items: stretch; flex-direction: column; padding: var(--space-lg); gap: var(--space-md); }
+  .welcome-auth-actions { width: 100%; }
+  .welcome-auth-actions .btn { flex: 1 1 auto; justify-content: center; }
+  .privacy-consent-panel { padding: var(--space-md); }
+  .privacy-consent-details { margin-left: 0; }
 }
 
 /* Celular: la foto del hero nunca queda tapada por el texto */
@@ -2264,6 +2326,7 @@ html.rv-ready .rv.rv-in { animation: rise 750ms var(--ease-out) backwards; anima
   .hero-photo-inner img { border-radius: calc(var(--radius-lg) - 8px); aspect-ratio: 4 / 3; }
   .hero-photo-badge {
     position: static;
+    flex: 1 0 auto;
     margin: 8px 2px 2px;
     padding: 12px 14px;
     background: var(--glass-bg-strong);

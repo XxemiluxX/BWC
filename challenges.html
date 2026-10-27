@@ -33,8 +33,8 @@
         <a class="nav-link active" href="challenges.html">Retos Ambientales</a>
         <a class="nav-link" href="forums.html">Foros Comunitarios</a>
         <a class="nav-link" href="ranking.html">Clasificación</a>
-        <a class="nav-link" href="login.html">Iniciar sesión</a>
-        <a class="btn btn-primary btn-sm" href="register.html">Participar</a>
+        <a class="nav-link" href="login.html" data-auth-guest>Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="register.html" data-auth-guest>Participar</a>
       </nav>
 
       <div style="display: flex; align-items: center; gap: 8px;">
@@ -107,9 +107,9 @@
             Si deseas subir fotos o videos como evidencia para revisión de moderadores y desbloquear insignias en tu perfil, puedes registrarte o entrar con tu cuenta de Google.
           </p>
         </div>
-        <div style="display: flex; gap: var(--space-sm);">
-          <a class="btn btn-primary" href="register.html">Crear cuenta</a>
-          <a class="btn btn-secondary" href="login.html">Iniciar sesión</a>
+        <div style="display: flex; gap: var(--space-sm);" data-auth-guest>
+          <a class="btn btn-primary" href="register.html" data-auth-guest>Crear cuenta</a>
+          <a class="btn btn-secondary" href="login.html" data-auth-guest>Iniciar sesión</a>
         </div>
       </div>
     </div>

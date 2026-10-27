@@ -220,7 +220,7 @@ function renderMe(board) {
           <strong>¿Dónde quedarías tú?</strong>
           <p>Inicia sesión para ver tu posición y empezar a sumar retos.</p>
         </div>
-        <a class="btn btn-primary btn-sm" href="login.html?returnUrl=${encodeURIComponent("ranking.html")}">Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="login.html?returnUrl=${encodeURIComponent("ranking.html")}" data-auth-guest>Iniciar sesión</a>
       </div>`;
   }
   const mine = board.rows.find(r => r.uid === state.myUid);
