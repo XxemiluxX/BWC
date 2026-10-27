@@ -12,8 +12,6 @@ import {
   addDoc,
   onSnapshot,
   query,
-  orderBy,
-  limit,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
@@ -43,6 +41,69 @@ let state = {
 };
 
 let unsubscribers = [];
+const adminDataLabels = {
+  users: "usuarios",
+  evidences: "evidencias",
+  forumPosts: "publicaciones de los foros",
+  reports: "reportes",
+  activity: "bitácora de actividad"
+};
+const loadedAdminSources = new Set();
+const adminSourceErrors = {};
+
+function adminSourceErrorText(source, error) {
+  const code = String(error?.code || "").toLowerCase();
+  const label = adminDataLabels[source] || source;
+  if (code.includes("permission-denied")) {
+    return `Firebase denegó la lectura de ${label}. Verifica que ingresaste con la cuenta administradora configurada y que las reglas de Firestore publicadas correspondan a este proyecto.`;
+  }
+  if (code.includes("unauthenticated")) {
+    return `La sesión de Firebase expiró al cargar ${label}. Vuelve a iniciar sesión como administradora.`;
+  }
+  if (code.includes("failed-precondition")) {
+    return `Firebase no pudo completar la consulta de ${label}. Revisa el índice indicado en la consola de Firebase.`;
+  }
+  if (code.includes("unavailable") || code.includes("deadline-exceeded")) {
+    return `No se pudo conectar con Firebase para cargar ${label}. Comprueba la conexión e inténtalo de nuevo.`;
+  }
+  return `No se pudieron cargar ${label}${code ? ` (${code})` : ""}. Revisa la consola del navegador para ver el detalle.`;
+}
+
+function adminDataStatusHTML() {
+  const failures = Object.entries(adminSourceErrors).filter(([, error]) => error);
+  if (failures.length) {
+    return `<div role="alert" class="card" style="margin-bottom: var(--space-lg); padding: var(--space-lg); border: 1px solid var(--status-rejected-border, #d55); background: var(--status-rejected-bg, #fff5f5);">
+      <strong style="display:block; margin-bottom:8px;">No se pudieron cargar algunos datos administrativos</strong>
+      <ul style="margin:0 0 12px 18px; padding:0;">${failures.map(([source, error]) => `<li style="margin:6px 0;">${escapeHTML(adminSourceErrorText(source, error))}</li>`).join("")}</ul>
+      <button class="btn btn-secondary btn-sm" id="adminRetryData" type="button">Reintentar carga</button>
+    </div>`;
+  }
+  if (loadedAdminSources.size < Object.keys(adminDataLabels).length) {
+    return `<div class="card" role="status" style="margin-bottom: var(--space-lg); padding: var(--space-md); color: var(--text-muted);">Conectando con Firebase y cargando los datos administrativos…</div>`;
+  }
+  return "";
+}
+
+function listenAdminData(source, reference, applySnapshot) {
+  const unsubscribe = onSnapshot(reference, snapshot => {
+    try {
+      applySnapshot(snapshot);
+      loadedAdminSources.add(source);
+      delete adminSourceErrors[source];
+      render();
+    } catch (error) {
+      adminSourceErrors[source] = error;
+      console.error(`Error al procesar los datos de ${source}:`, error);
+      render();
+    }
+  }, error => {
+    loadedAdminSources.add(source);
+    adminSourceErrors[source] = error;
+    console.error(`No se pudieron cargar los datos de ${source}:`, error);
+    render();
+  });
+  unsubscribers.push(unsubscribe);
+}
 
 function timeValue(value) {
   const d = value?.toDate ? value.toDate() : new Date(value);
@@ -945,18 +1006,22 @@ function render() {
   const root = document.getElementById("adminViewRoot");
   if (!root) return;
 
-  if (currentView === "dashboard") root.innerHTML = dashboardView();
-  else if (currentView === "evidence") root.innerHTML = evidenceView();
-  else if (currentView === "forums") root.innerHTML = forumsView();
-  else if (currentView === "reports") root.innerHTML = reportsView();
-  else if (currentView === "users") root.innerHTML = usersView();
-  else if (currentView === "activity") root.innerHTML = activityView();
-  else if (currentView === "settings") root.innerHTML = settingsView();
+  let viewHTML = "";
+  if (currentView === "dashboard") viewHTML = dashboardView();
+  else if (currentView === "evidence") viewHTML = evidenceView();
+  else if (currentView === "forums") viewHTML = forumsView();
+  else if (currentView === "reports") viewHTML = reportsView();
+  else if (currentView === "users") viewHTML = usersView();
+  else if (currentView === "activity") viewHTML = activityView();
+  else if (currentView === "settings") viewHTML = settingsView();
 
+  root.innerHTML = `${adminDataStatusHTML()}${viewHTML}`;
   bindEvents();
 }
 
 function bindEvents() {
+  document.getElementById("adminRetryData")?.addEventListener("click", () => window.location.reload());
+
   // Navegación
   document.querySelectorAll(".admin-nav-item").forEach(btn => {
     btn.onclick = () => {
@@ -1061,41 +1126,35 @@ async function startAdmin() {
 
   window.ECRA_PROFILE = admin.profile;
 
-  // Escuchar usuarios
-  unsubscribers.push(onSnapshot(collection(db, "users"), snap => {
-    state.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    render();
-  }));
+  // Todas las fuentes llevan manejo de error. Antes, si Firebase denegaba una consulta,
+  // el panel se quedaba mostrando ceros/estados vacíos sin explicar qué colección falló.
+  listenAdminData("users", collection(db, "users"), snap => {
+    state.users = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+  });
 
-  // Escuchar evidencias
-  unsubscribers.push(onSnapshot(collection(db, "evidences"), snap => {
-    // El ID real de Firestore debe prevalecer sobre un posible campo `id` de registros antiguos.
-    // Algunos documentos históricos guardaban su propio `id`, lo que provocaba que updateDoc
-    // apuntara a un documento inexistente y mostrara "No se pudo aprobar la evidencia".
+  listenAdminData("evidences", collection(db, "evidences"), snap => {
+    // El ID real de Firestore prevalece sobre cualquier campo id guardado en documentos antiguos.
     state.evidences = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-    render();
-  }, error => {
-    console.error("No se pudieron cargar las evidencias:", error);
-    showToast("No se pudieron actualizar las evidencias. Revisa los permisos de Firebase.", "error");
-  }));
+  });
 
-  // Escuchar publicaciones de foros
-  unsubscribers.push(onSnapshot(query(collection(db, "forumPosts"), orderBy("createdAt", "desc")), snap => {
-    state.forumPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    render();
-  }));
+  // Ordenar en el cliente evita depender de consultas orderBy que pueden ocultar registros
+  // antiguos sin createdAt o fallar si la configuración de índices cambia.
+  listenAdminData("forumPosts", collection(db, "forumPosts"), snap => {
+    state.forumPosts = snap.docs
+      .map(d => ({ ...d.data(), id: d.id }))
+      .sort((a, b) => timeValue(b.createdAt) - timeValue(a.createdAt));
+  });
 
-  // Escuchar reportes
-  unsubscribers.push(onSnapshot(collection(db, "reports"), snap => {
-    state.reports = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    render();
-  }));
+  listenAdminData("reports", collection(db, "reports"), snap => {
+    state.reports = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+  });
 
-  // Escuchar bitácora de actividad
-  unsubscribers.push(onSnapshot(query(collection(db, "activity"), orderBy("createdAt", "desc"), limit(60)), snap => {
-    state.activity = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    render();
-  }));
+  listenAdminData("activity", collection(db, "activity"), snap => {
+    state.activity = snap.docs
+      .map(d => ({ ...d.data(), id: d.id }))
+      .sort((a, b) => timeValue(b.createdAt) - timeValue(a.createdAt))
+      .slice(0, 60);
+  });
 
   render();
 }
