@@ -82,7 +82,7 @@ async function render() {
 
   const evidences = await getMyEvidences(user.id);
 
-  // Determinar reto seleccionado por URL o por defecto el primero
+  // Determinar la misión elegida por URL o por defecto el primero
   const urlParams = new URLSearchParams(window.location.search);
   const requestedId = urlParams.get("id");
   let challenge = CHALLENGES.find(c => c.id === requestedId) || CHALLENGES[0];
@@ -95,7 +95,7 @@ async function render() {
     stateHTML = `
       <div class="card mb-lg" style="background-color: var(--status-pending-bg); border-color: var(--status-pending-border); padding: var(--space-md);">
         <strong style="color: var(--status-pending-text); display: block; margin-bottom: 4px;">🟡 Evidencia en revisión</strong>
-        <small style="color: var(--status-pending-text);">Tu evidencia fue enviada correctamente. El reto se marcará como completado cuando el equipo de moderación la apruebe.</small>
+        <small style="color: var(--status-pending-text);">Tu evidencia fue enviada correctamente. La misión se marcará como cumplida cuando el equipo de moderación la apruebe.</small>
       </div>
     `;
   } else if (status === "approved") {
@@ -118,19 +118,19 @@ async function render() {
   const isApproved = status === "approved";
   const isLocked = isPending || isApproved;
   const submitLabel = isApproved
-    ? "Reto completado ✓"
+    ? "Misión cumplida ✓"
     : (status === "rejected" ? "Enviar nueva evidencia" : "Enviar evidencia (foto o video)");
 
   const challengeOptionsHTML = CHALLENGES.map(c => `
     <option value="${c.id}" ${c.id === challenge.id ? "selected" : ""}>
-      ${c.icon} Reto ${c.number}: ${escapeHTML(c.title)}
+      ${c.icon} Misión ${c.number}: ${escapeHTML(c.title)}
     </option>
   `).join("");
 
   root.innerHTML = `
     <div class="card mb-xl">
       <div class="form-group mb-lg">
-        <label class="form-label" for="challengeSelect">Seleccionar reto para documentar:</label>
+        <label class="form-label" for="challengeSelect">Seleccionar misión para documentar:</label>
         <select id="challengeSelect" class="form-select">
           ${challengeOptionsHTML}
         </select>
@@ -174,13 +174,13 @@ async function render() {
           <input id="evidencePrivacyConsent" type="checkbox" required aria-describedby="evidencePrivacySummary" ${isLocked ? "disabled" : ""}>
           <span>
             <strong id="evidencePrivacyTitle">Acuerdo de privacidad para fotografías y videos (obligatorio)</strong>
-            <span id="evidencePrivacySummary">Autorizo expresamente que mi evidencia se utilice exclusivamente con fines informativos, educativos y para verificar la realización de este reto dentro de BWC.</span>
+            <span id="evidencePrivacySummary">Autorizo expresamente que mi evidencia se utilice exclusivamente con fines informativos, educativos y para verificar la realización de esta misión dentro de BWC.</span>
           </span>
         </label>
         <details class="privacy-consent-details">
           <summary>Leer el acuerdo completo</summary>
           <div class="privacy-consent-copy">
-            <p>Al marcar esta casilla, autorizas expresamente el uso de la fotografía o el video que envíes exclusivamente con fines informativos, educativos y de verificación de retos. El equipo de moderación podrá revisar el archivo y asociarlo con tu cuenta y el reto correspondiente para resolver su aprobación o rechazo. La evidencia no se utilizará para publicidad, venta ni para otros fines ajenos a los indicados.</p>
+            <p>Al marcar esta casilla, autorizas expresamente el uso de la fotografía o el video que envíes exclusivamente con fines informativos, educativos y de verificación de misiones. El equipo de moderación podrá revisar el archivo y asociarlo con tu cuenta y la misión correspondiente para resolver su aprobación o rechazo. La evidencia no se utilizará para publicidad, venta ni para otros fines ajenos a los indicados.</p>
             <p>Comparte material propio o para el que tengas autorización. Evita incluir rostros de otras personas, especialmente menores de edad, matrículas, direcciones, documentos u otros datos personales sin permiso.</p>
             <p><strong>Importante sobre el almacenamiento:</strong> las evidencias se guardan en el almacenamiento del proyecto mediante un enlace público para que el panel de moderación pueda mostrarlas. Por ello, cualquier persona que obtenga la URL del archivo podría acceder a él. No subas contenido que necesite confidencialidad estricta ni material sensible.</p>
             <p>Contacto del proyecto para consultas sobre una evidencia: <a href="mailto:proyecto.ecracr@gmail.com">proyecto.ecracr@gmail.com</a>.</p>
@@ -190,7 +190,7 @@ async function render() {
 
       <div style="margin-top: var(--space-lg); display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; justify-content: space-between;">
         <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0; max-width: 420px;">
-          <strong>Para completar este reto es obligatorio enviar una foto o un video</strong> que muestre tu acción. Un moderador la revisa y, al aprobarla, el reto queda completado.
+          <strong>Para cumplir esta misión es obligatorio enviar una foto o un video</strong> que muestre tu acción. Un moderador la revisa y, al aprobarla, la misión queda cumplida.
         </p>
 
         <button id="submitEvidenceBtn" class="btn btn-primary" ${isLocked ? "disabled" : ""}>
@@ -200,7 +200,7 @@ async function render() {
     </div>
   `;
 
-  // Selector de reto
+  // Selector de misión
   document.getElementById("challengeSelect")?.addEventListener("change", e => {
     const newId = e.target.value;
     window.history.replaceState(null, "", `challenge.html?id=${newId}`);
@@ -263,8 +263,8 @@ async function render() {
     if (!privacyConsent?.checked) {
       return showToast("Debes leer y aceptar expresamente el acuerdo de privacidad antes de enviar la evidencia.", "error");
     }
-    // Regla del reto: sin foto o video no se puede enviar ni completar.
-    if (!selectedFile || !selectedKind) return showToast("Para completar el reto debes enviar una foto o un video.", "error");
+    // Regla de la misión: sin foto o video no se puede enviar ni completar.
+    if (!selectedFile || !selectedKind) return showToast("Para cumplir la misión debes enviar una foto o un video.", "error");
 
     submit.disabled = true;
     submit.textContent = selectedKind === "video" ? "Preparando video…" : "Procesando imagen…";
@@ -330,7 +330,7 @@ async function render() {
         privacyAgreementVersion: "2026-10-27",
         privacyConsentAccepted: true,
         privacyConsentAcceptedAt: new Date().toISOString(),
-        privacyConsentPurpose: "informativo, educativo y verificación de retos",
+        privacyConsentPurpose: "informativo, educativo y verificación de misiones",
         submittedAt: new Date().toISOString(),
         submittedAtServer: serverTimestamp(),
         status: "pending",
@@ -350,7 +350,7 @@ async function render() {
         createdAt: new Date().toISOString()
       });
 
-      // Actualizar estado del reto a en progreso (se completa cuando el moderador aprueba)
+      // Actualizar estado de la misión a en progreso (se completa cuando el moderador aprueba)
       await setChallengeProgress(user.id, challenge.id, "in_progress", "Evidencia enviada para revisión");
 
       fill.style.width = "100%";

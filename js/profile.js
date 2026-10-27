@@ -98,7 +98,7 @@ function openEditProfileModal() {
       <div class="form-group">
         <label class="form-label" for="editNameInput">Nombre público visible *</label>
         <input class="form-input" id="editNameInput" type="text" value="${escapeHTML(currentUser.name || "")}" required minlength="2" maxlength="60">
-        <span class="form-helper">Este es el nombre con el que aparecerás en retos, iniciativas y comentarios.</span>
+        <span class="form-helper">Este es el nombre con el que aparecerás en misiones, iniciativas y comentarios.</span>
       </div>
 
       <div class="form-group">
@@ -189,7 +189,7 @@ function updateHeroCard() {
   }
 }
 
-// Cargar estado de retos del usuario
+// Cargar estado de misiones del usuario
 async function loadUserChallenges() {
   try {
     const q = query(collection(db, "user_challenges"), where("userId", "==", currentUser.id));
@@ -200,7 +200,7 @@ async function loadUserChallenges() {
       userChallengesMap[data.challengeId] = data.status;
     });
   } catch (err) {
-    console.error("Error al cargar retos del usuario:", err);
+    console.error("Error al cargar misiones del usuario:", err);
   }
 }
 
@@ -249,7 +249,7 @@ async function loadUserEvidences() {
   }
 }
 
-// Renderizar Panel 1: Mis Retos
+// Renderizar Panel 1: Mis Misiones
 function renderChallengesPanel() {
   const grid = document.getElementById("userChallengesGrid");
   const percentText = document.getElementById("challengesPercentText");
@@ -288,7 +288,7 @@ function renderChallengesPanel() {
         </div>
 
         <div>
-          <span class="badge badge-outline" style="font-size: 0.7rem; margin-bottom: 4px;">Reto #${ch.number} · ${escapeHTML(ch.categoryLabel)}</span>
+          <span class="badge badge-outline" style="font-size: 0.7rem; margin-bottom: 4px;">Misión #${ch.number} · ${escapeHTML(ch.categoryLabel)}</span>
           <h3 class="challenge-title" style="font-size: 1.15rem;">${escapeHTML(ch.title)}</h3>
           <p class="challenge-summary" style="font-size: 0.875rem;">${escapeHTML(ch.summary)}</p>
         </div>
@@ -301,9 +301,9 @@ function renderChallengesPanel() {
 
           <div style="display: flex; gap: 6px; margin-top: 4px;">
             ${currentStatus === "completed" ? `
-              <span class="status-badge status-approved" style="flex: 1; justify-content: center;">🟢 Reto completado</span>
+              <span class="status-badge status-approved" style="flex: 1; justify-content: center;">🟢 Misión cumplida</span>
             ` : `
-              <a class="btn btn-primary btn-sm" href="challenge.html?id=${ch.id}" title="Para completar el reto debes enviar una foto o un video" style="flex: 1; text-align: center;">
+              <a class="btn btn-primary btn-sm" href="challenge.html?id=${ch.id}" title="Para cumplir la misión debes enviar una foto o un video" style="flex: 1; text-align: center;">
                 📸 Enviar foto o video
               </a>
             `}
@@ -450,7 +450,7 @@ function renderEvidencesPanel() {
 
   container.innerHTML = userEvidences.map(ev => {
     const ch = CHALLENGES.find(c => c.id === ev.challengeId || c.number === Number(ev.challengeNumber)) || {
-      title: `Desafío #${ev.challengeNumber || 1}`,
+      title: `Misión #${ev.challengeNumber || 1}`,
       icon: "🌱"
     };
 
@@ -492,7 +492,7 @@ function renderEvidencesPanel() {
               </a>
             ` : `
               <a class="btn btn-ghost btn-sm" href="challenge.html?id=${ev.challengeId || 'challenge-' + ev.challengeNumber}">
-                Ver reto asociado
+                Ver misión asociada
               </a>
             `}
           </div>

@@ -20,19 +20,19 @@ export const ADMIN_EMAIL = "mongemoraemiliano60@gmail.com";
 export const CONTACT_PHONE = "87506973";
 export const CONTACT_EMAIL = "proyecto.ecracr@gmail.com";
 
-// Catálogo completo de retos de sostenibilidad ambiental accesibles, prácticos y seguros
+// Catálogo completo de misiones verdes accesibles, prácticas y seguras
 export const CHALLENGES = [
   {
     id: "challenge-1",
     number: 1,
-    title: "Manejo consciente y separación de residuos",
+    title: "Separa tu basura: orgánicos, reciclables y el resto",
     shortTitle: "Residuos y reciclaje",
     category: "waste",
-    categoryLabel: "Reciclaje y residuos",
+    categoryLabel: "Reciclaje y basura",
     difficulty: "Fácil",
     duration: "20-30 min",
     icon: "♻️",
-    summary: "Audita y clasifica adecuadamente los residuos en tu hogar o comunidad para reducir lo que llega al vertedero.",
+    summary: "Separa la basura de tu casa en tres bolsas y reduce lo que termina en el basurero.",
     instruction: "Revisa los residuos generados hoy en tu hogar o espacio de trabajo. Separa al menos tres categorías: orgánicos (para compost), reciclables limpios y secos (plásticos, papel, cartón o vidrio) y no reciclables. Llévalos o déjalos listos para el centro de acopio o ruta de reciclaje local.",
     concreteActions: [
       "Limpia y seca envases de plástico, latas o vidrio antes de disponerlos.",
@@ -44,14 +44,14 @@ export const CHALLENGES = [
   {
     id: "challenge-2",
     number: 2,
-    title: "Protección de nacientes y uso consciente del agua",
+    title: "Cuida el agua: revisa fugas y protege tu naciente",
     shortTitle: "Conservación de agua",
     category: "water",
     categoryLabel: "Agua y nacientes",
     difficulty: "Media",
     duration: "30-45 min",
     icon: "💧",
-    summary: "Inspecciona tu consumo hídrico, repara o reporta fugas y cuida las fuentes naturales de tu entorno.",
+    summary: "Busca goteos en tu casa, ahorra agua y cuida la quebrada o naciente que tengas cerca.",
     instruction: "Realiza una inspección en tu casa o comunidad para detectar goteos en grifos, inodoros o mangueras. Implementa medidas inmediatas de ahorro: duchas de máximo 4 minutos, cerrar la llave al enjabonar platos y, si vives cerca de una quebrada o naciente, asegúrate de que no haya basura ni vertidos cerca.",
     concreteActions: [
       "Revisa empaques de llaves y tuberías para eliminar goteos continuos.",
@@ -63,14 +63,14 @@ export const CHALLENGES = [
   {
     id: "challenge-3",
     number: 3,
-    title: "Refugio para flora y polinizadores locales",
+    title: "Un rinconcito para abejas y mariposas",
     shortTitle: "Flora y fauna",
     category: "wildlife",
-    categoryLabel: "Protección de biodiversidad",
+    categoryLabel: "Plantas y animales",
     difficulty: "Fácil",
     duration: "30 min",
     icon: "🦋",
-    summary: "Fomenta la presencia de abejas, mariposas y aves sembrando plantas con flores o creando espacios seguros.",
+    summary: "Siembra plantas con flores y atrae abejas, mariposas y pajaritos a tu patio.",
     instruction: "Crea o cuida un pequeño espacio verde con plantas con flores atractivas para polinizadores (como ruda, lantana, girasoles o aromáticas). Si tienes jardín, evita podar en exceso la vegetación silvestre y no apliques pesticidas ni venenos que dañen a insectos benéficos.",
     concreteActions: [
       "Coloca un bebedero seguro para polinizadores (plato poco profundo con piedras limpias y agua fresca).",
@@ -82,14 +82,14 @@ export const CHALLENGES = [
   {
     id: "challenge-4",
     number: 4,
-    title: "Auditoría de energía y apagón de vampiros eléctricos",
+    title: "Caza vampiros eléctricos: desconecta lo que no usas",
     shortTitle: "Ahorro de energía",
     category: "energy",
-    categoryLabel: "Energía y consumo",
+    categoryLabel: "Luz y energía",
     difficulty: "Fácil",
     duration: "20 min",
     icon: "⚡",
-    summary: "Reduce el consumo pasivo de electricidad y disminuye tu huella de carbono doméstica.",
+    summary: "Desconecta cargadores y aparatos en espera y baja tu recibo de luz.",
     instruction: "Recorre tu casa y desconecta los cargadores, electrodomésticos y dispositivos que consumen energía 'fantasma' en modo de espera. Aprovecha al máximo la luz natural abriendo cortinas y planifica sustituir focos incandescentes por tecnología LED.",
     concreteActions: [
       "Desconecta cargadores de celular y computadoras cuando no estén en uso.",
@@ -101,14 +101,14 @@ export const CHALLENGES = [
   {
     id: "challenge-5",
     number: 5,
-    title: "Recuperación y limpieza de un espacio público",
+    title: "Deja limpio un rinconcito de tu barrio",
     shortTitle: "Limpieza comunitaria",
     category: "community",
-    categoryLabel: "Espacios públicos",
+    categoryLabel: "Mi barrio",
     difficulty: "Media",
     duration: "45-60 min",
     icon: "🧤",
-    summary: "Dedica un tiempo a sanear una acera, parque, parada de autobús o orilla de camino en tu localidad.",
+    summary: "Recoge la basura de una acera, parque o parada de bus y déjalo como nuevo.",
     instruction: "Equípate con guantes reutilizables y bolsas para residuos. Escoge un tramo de acera, área verde o parque de tu comunidad y recoge plásticos, colillas de cigarro y latas. Si es posible, invita a un vecino o familiar a sumarse.",
     concreteActions: [
       "Lleva guantes de protección y recipiente seguro para objetos punzocortantes.",
@@ -120,14 +120,14 @@ export const CHALLENGES = [
   {
     id: "challenge-6",
     number: 6,
-    title: "Consumo responsable y cero plástico de un solo uso",
+    title: "Un día sin plásticos de un solo uso",
     shortTitle: "Consumo responsable",
     category: "consumption",
-    categoryLabel: "Consumo responsable",
+    categoryLabel: "Compras con cabeza",
     difficulty: "Fácil",
     duration: "Todo el día",
     icon: "🛍️",
-    summary: "Realiza tus compras diarias sin aceptar bolsas plásticas, pajillas ni botellas descartables.",
+    summary: "Haz tus compras del día sin bolsas, pajillas ni botellas desechables.",
     instruction: "Durante al menos una semana completa, lleva siempre contigo tu bolsa de tela, una botella reutilizable de agua y un recipiente para alimentos cuando salgas. Elige productos locales, de temporada y a granel para evitar envases innecesarios.",
     concreteActions: [
       "Di activamente 'sin bolsa plástica, por favor' en el comercio local.",
@@ -139,14 +139,14 @@ export const CHALLENGES = [
   {
     id: "challenge-7",
     number: 7,
-    title: "Iniciación al compostaje casero",
+    title: "Empieza tu abono casero (compost)",
     shortTitle: "Compostaje y suelo",
     category: "waste",
-    categoryLabel: "Suelo y materia orgánica",
+    categoryLabel: "Compost y tierra",
     difficulty: "Media",
     duration: "30-40 min",
     icon: "🌱",
-    summary: "Transforma cáscaras de frutas y restos de verduras en abono natural rico en nutrientes.",
+    summary: "Convierte cáscaras de fruta y restos de verdura en abono para tus plantas.",
     instruction: "Aparta un balde con tapa o espacio en tu patio para iniciar compostaje. Coloca una base de hojas secas o aserrín (material marrón) y agrega cáscaras de vegetales, restos de café y frutas (material verde). Mantén la mezcla húmeda pero aireada.",
     concreteActions: [
       "No agregues carnes, lácteos ni aceites para evitar malos olores o fauna no deseada.",
@@ -158,19 +158,19 @@ export const CHALLENGES = [
   {
     id: "challenge-8",
     number: 8,
-    title: "Educación y diálogo ambiental en tu círculo",
+    title: "Cuéntales a tus amigos y familia",
     shortTitle: "Educación ambiental",
     category: "education",
-    categoryLabel: "Educación y concientización",
+    categoryLabel: "Hablemos del ambiente",
     difficulty: "Fácil",
     duration: "30 min",
     icon: "🗣️",
-    summary: "Comparte conocimientos sobre cambio climático y sostenibilidad con tu familia, amigos o centro de estudio.",
+    summary: "Conversa con tu familia, amigos o compas del cole sobre cómo cuidar el ambiente.",
     instruction: "Conversa con al menos dos personas cercanas sobre una práctica ecológica sencilla que puedan adoptar juntos (como separar residuos o ahorrar agua). También puedes compartir una publicación informativa en los foros de ECRA o en tus redes sociales personales.",
     concreteActions: [
       "Explica de forma positiva por qué te importa el cuidado del planeta sin juzgar a otros.",
       "Comparte una receta de aprovechamiento de alimentos o un consejo de ahorro energético.",
-      "Invita a un amigo o colega a registrarse en ECRA para realizar un reto en conjunto."
+      "Invita a un amigo o colega a registrarse en ECRA para realizar una misión en conjunto."
     ],
     whyItMatters: "El cambio cultural empieza con conversaciones honestas y cotidianas. La educación ambiental compartida multiplica el impacto colectivo."
   },
@@ -180,7 +180,7 @@ export const CHALLENGES = [
     title: "La broza al compost: aprovecha restos de la broza de tu café",
     shortTitle: "Broza al compost",
     category: "waste",
-    categoryLabel: "Suelo y materia orgánica",
+    categoryLabel: "Compost y tierra",
     difficulty: "Fácil",
     duration: "20-30 min",
     icon: "☕",
@@ -199,7 +199,7 @@ export const CHALLENGES = [
     title: "Mini huerta en casa: siembra tus aromáticas y hortalizas",
     shortTitle: "Huerta casera",
     category: "consumption",
-    categoryLabel: "Huerta y alimentación",
+    categoryLabel: "Huerta y comida",
     difficulty: "Fácil",
     duration: "40 min",
     icon: "🥬",
@@ -237,7 +237,7 @@ export const CHALLENGES = [
     title: "Segunda vida: reutiliza frascos, botellas y envases",
     shortTitle: "Reutilizar envases",
     category: "waste",
-    categoryLabel: "Reciclaje y residuos",
+    categoryLabel: "Reciclaje y basura",
     difficulty: "Fácil",
     duration: "30 min",
     icon: "🫙",
@@ -294,7 +294,7 @@ export const CHALLENGES = [
     title: "Tendedero solar: seca tu ropa al sol",
     shortTitle: "Secado al sol",
     category: "energy",
-    categoryLabel: "Energía y consumo",
+    categoryLabel: "Luz y energía",
     difficulty: "Fácil",
     duration: "Todo el día",
     icon: "☀️",
@@ -313,7 +313,7 @@ export const CHALLENGES = [
     title: "Cocina eficiente: menos gas, menos electricidad",
     shortTitle: "Cocina eficiente",
     category: "energy",
-    categoryLabel: "Energía y consumo",
+    categoryLabel: "Luz y energía",
     difficulty: "Fácil",
     duration: "Todo el día",
     icon: "🍳",
@@ -332,7 +332,7 @@ export const CHALLENGES = [
     title: "Un día sin carro: camina, pedalea o comparte el viaje",
     shortTitle: "Movilidad sostenible",
     category: "energy",
-    categoryLabel: "Movilidad sostenible",
+    categoryLabel: "Moverse mejor",
     difficulty: "Media",
     duration: "Todo el día",
     icon: "🚲",
@@ -351,7 +351,7 @@ export const CHALLENGES = [
     title: "Tarde sin pantallas: conecta con la naturaleza",
     shortTitle: "Desconexión digital",
     category: "education",
-    categoryLabel: "Tecnología y ambiente",
+    categoryLabel: "Pantallas y naturaleza",
     difficulty: "Fácil",
     duration: "1-2 horas",
     icon: "📵",
@@ -370,7 +370,7 @@ export const CHALLENGES = [
     title: "Residuos electrónicos: dales el destino correcto",
     shortTitle: "Residuos electrónicos",
     category: "waste",
-    categoryLabel: "Reciclaje y residuos",
+    categoryLabel: "Reciclaje y basura",
     difficulty: "Media",
     duration: "30-40 min",
     icon: "🔋",
@@ -389,7 +389,7 @@ export const CHALLENGES = [
     title: "Ropa con segunda oportunidad: repara, intercambia o dona",
     shortTitle: "Ropa circular",
     category: "consumption",
-    categoryLabel: "Consumo responsable",
+    categoryLabel: "Compras con cabeza",
     difficulty: "Fácil",
     duration: "45 min",
     icon: "👕",
@@ -408,7 +408,7 @@ export const CHALLENGES = [
     title: "Cero desperdicio: cocina con lo que ya tienes",
     shortTitle: "Cero desperdicio de alimentos",
     category: "consumption",
-    categoryLabel: "Huerta y alimentación",
+    categoryLabel: "Huerta y comida",
     difficulty: "Fácil",
     duration: "40 min",
     icon: "🥘",
@@ -427,7 +427,7 @@ export const CHALLENGES = [
     title: "Siembra un árbol nativo",
     shortTitle: "Árbol nativo",
     category: "wildlife",
-    categoryLabel: "Protección de biodiversidad",
+    categoryLabel: "Plantas y animales",
     difficulty: "Media",
     duration: "1 hora",
     icon: "🌳",
@@ -446,7 +446,7 @@ export const CHALLENGES = [
     title: "Conteo de aves en tu patio o barrio",
     shortTitle: "Conteo de aves",
     category: "wildlife",
-    categoryLabel: "Protección de biodiversidad",
+    categoryLabel: "Plantas y animales",
     difficulty: "Fácil",
     duration: "30 min",
     icon: "🐦",
@@ -465,7 +465,7 @@ export const CHALLENGES = [
     title: "Ecoladrillo: encierra plástico limpio en una botella",
     shortTitle: "Ecoladrillo",
     category: "waste",
-    categoryLabel: "Reciclaje y residuos",
+    categoryLabel: "Reciclaje y basura",
     difficulty: "Media",
     duration: "Varios días",
     icon: "🧱",
@@ -484,7 +484,7 @@ export const CHALLENGES = [
     title: "Caminata de limpieza en una quebrada, río o playa",
     shortTitle: "Limpieza de quebrada",
     category: "community",
-    categoryLabel: "Espacios públicos",
+    categoryLabel: "Mi barrio",
     difficulty: "Media",
     duration: "1-2 horas",
     icon: "🌊",
@@ -522,15 +522,15 @@ export const CHALLENGES = [
     title: "Lleva ECRA a tu escuela, colegio o grupo",
     shortTitle: "ECRA en tu institución",
     category: "education",
-    categoryLabel: "Educación y concientización",
+    categoryLabel: "Hablemos del ambiente",
     difficulty: "Media",
     duration: "30-45 min",
     icon: "🏫",
-    summary: "Presenta un reto de ECRA a tu grupo y propongan una acción conjunta.",
-    instruction: "Conversa con un docente, directivo o líder de tu grupo y propón dedicar un espacio corto para presentar un reto ambiental. Elijan juntos una acción para hacer en grupo (por ejemplo, un punto de reciclaje o una limpieza) y definan quién se encarga de qué.",
+    summary: "Presenta una misión de ECRA a tu grupo y propongan una acción conjunta.",
+    instruction: "Conversa con un docente, directivo o líder de tu grupo y propón dedicar un espacio corto para presentar una misión ambiental. Elijan juntos una acción para hacer en grupo (por ejemplo, un punto de reciclaje o una limpieza) y definan quién se encarga de qué.",
     concreteActions: [
       "Prepara una explicación breve de máximo 10 minutos sobre qué es ECRA y cómo participar.",
-      "Propón un reto concreto que el grupo pueda completar en una semana.",
+      "Propón una misión concreta que el grupo pueda completar en una semana.",
       "Acuerden una forma de compartir los resultados con otras personas de la institución."
     ],
     whyItMatters: "Las instituciones educativas y los grupos de interés común multiplican el alcance de las acciones y llegan a quienes no tienen acceso directo a internet."
@@ -538,10 +538,10 @@ export const CHALLENGES = [
   {
     id: "challenge-28",
     number: 28,
-    title: "Reto sin internet: un mural ambiental para tu comunidad",
+    title: "Misión sin internet: un mural ambiental para tu comunidad",
     shortTitle: "Mural sin conexión",
     category: "education",
-    categoryLabel: "Educación y concientización",
+    categoryLabel: "Hablemos del ambiente",
     difficulty: "Fácil",
     duration: "1 hora",
     icon: "📌",
@@ -550,7 +550,7 @@ export const CHALLENGES = [
     concreteActions: [
       "Usa materiales reutilizados: cartón, hojas usadas por un lado o pintura que te sobre.",
       "Escribe un mensaje corto, con letra grande y un dibujo que se entienda de lejos.",
-      "Incluye una invitación a participar en ECRA o a unirse a un reto grupal."
+      "Incluye una invitación a participar en ECRA o a unirse a una misión grupal."
     ],
     whyItMatters: "No todos los hogares tienen internet; llevar la información al espacio físico hace que el cuidado ambiental llegue a más personas."
   }
@@ -666,8 +666,9 @@ export function normalize(value = "") {
 }
 
 export function isConfiguredAdmin(userOrProfile) {
-  const email = normalize(userOrProfile?.email || "");
-  return email === normalize(ADMIN_EMAIL);
+  // Acepta un objeto con .email (usuario o perfil) o directamente el correo como texto.
+  const raw = typeof userOrProfile === "string" ? userOrProfile : (userOrProfile?.email || "");
+  return normalize(raw) === normalize(ADMIN_EMAIL);
 }
 
 // Asegura que exista el perfil en Cloud Firestore y mantiene el rol admin sincronizado
@@ -711,6 +712,16 @@ export async function getCurrentProfile() {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) return ensureUserProfile(user);
   const data = snap.data();
+  // Si el correo es el de la cuenta administradora, el rol siempre es "admin", aunque el
+  // documento viejo en Firestore diga "participant". Antes esto sacaba al admin del panel.
+  if (isConfiguredAdmin(user) && data.role !== "admin") {
+    try {
+      await updateDoc(doc(db, "users", user.uid), { role: "admin", updatedAt: serverTimestamp() });
+    } catch (error) {
+      console.warn("No se pudo guardar el rol de administrador:", error);
+    }
+    return { id: snap.id, ...data, role: "admin" };
+  }
   return { id: snap.id, ...data };
 }
 
@@ -730,11 +741,19 @@ export async function requireAdmin() {
     window.location.href = "login.html";
     return null;
   }
-  const profile = await getCurrentProfile();
-  if (!profile || profile.role !== "admin") {
+  let profile = null;
+  try {
+    profile = await getCurrentProfile();
+  } catch (error) {
+    console.error("No se pudo leer el perfil de administración:", error);
+  }
+  const isAdmin = isConfiguredAdmin(user) || profile?.role === "admin";
+  if (!isAdmin) {
     window.location.href = "profile.html";
     return null;
   }
+  // Perfil mínimo por si Firestore tardó o falló al leer el documento del admin.
+  profile = { name: user.displayName || user.email?.split("@")[0] || "Admin", email: user.email || "", ...(profile || {}), role: "admin" };
   return { user, profile };
 }
 
@@ -896,7 +915,7 @@ export function syncNavigationHeader(user, profile) {
 
   let html = `
     <a class="nav-link ${currentPath === "index.html" || currentPath === "" ? "active" : ""}" href="index.html">Inicio</a>
-    <a class="nav-link ${currentPath === "challenges.html" || currentPath === "challenge.html" ? "active" : ""}" href="challenges.html">Retos Ambientales</a>
+    <a class="nav-link ${currentPath === "challenges.html" || currentPath === "challenge.html" ? "active" : ""}" href="challenges.html">Misiones Verdes</a>
     <a class="nav-link ${currentPath === "forums.html" ? "active" : ""}" href="forums.html">Foros Comunitarios</a>
     <a class="nav-link ${currentPath === "ranking.html" ? "active" : ""}" href="ranking.html">Clasificación</a>
   `;
@@ -904,8 +923,8 @@ export function syncNavigationHeader(user, profile) {
   if (user) {
     // Un fallo temporal al leer el perfil no debe volver a mostrar accesos de visitante.
     const displayName = profile?.name || user.displayName || user.email?.split("@")[0] || "Mi perfil";
-    if (profile?.role === "admin") {
-      html += `<a class="nav-link ${currentPath === "admin.html" ? "active" : ""}" href="admin.html">Moderación</a>`;
+    if (profile?.role === "admin" || isConfiguredAdmin(user)) {
+      html += `<a class="nav-link ${currentPath === "admin.html" ? "active" : ""}" href="admin.html">Panel admin</a>`;
     }
     html += `
       <a class="nav-link user-pill ${currentPath === "profile.html" ? "active" : ""}" href="profile.html">
@@ -957,7 +976,7 @@ export function initMobileNav() {
   });
 }
 
-// Funciones para retos persistidos en Firestore
+// Funciones para las misiones guardadas en Firestore
 export async function getUserChallengeStatus(userId) {
   if (!userId) return {};
   try {
@@ -969,7 +988,7 @@ export async function getUserChallengeStatus(userId) {
     });
     return map;
   } catch (error) {
-    console.error("Error al obtener estado de retos:", error);
+    console.error("Error al obtener estado de misiones:", error);
     return {};
   }
 }
@@ -1055,7 +1074,10 @@ onAuthStateChanged(auth, async user => {
       window.ECRA_PROFILE = await ensureUserProfile(user);
     } catch (error) {
       console.error("No se pudo sincronizar el perfil:", error);
-      window.ECRA_PROFILE = null;
+      // Aunque Firestore falle, la cuenta admin debe seguir viendo su acceso al panel.
+      window.ECRA_PROFILE = isConfiguredAdmin(user)
+        ? { id: user.uid, name: user.displayName || user.email?.split("@")[0] || "Admin", email: user.email || "", role: "admin" }
+        : null;
     }
   } else {
     window.ECRA_PROFILE = null;
@@ -1117,7 +1139,7 @@ function initScrollReveal() {
   document.documentElement.classList.add("rv-ready");
   register(document.body);
 
-  // Contenido que se inyecta después (retos, publicaciones, vistas de admin…)
+  // Contenido que se inyecta después (misiones, publicaciones, vistas de admin…)
   new MutationObserver((mutations) => {
     mutations.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) register(n); }));
   }).observe(document.body, { childList: true, subtree: true });

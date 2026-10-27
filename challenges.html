@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Explora los retos ambientales de ECRA. Acciones accesibles de reciclaje, protección de nacientes, ahorro de energía y concientización.">
-  <title>Retos Ambientales — ECRA</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23123322'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23358b5e' stroke-width='2'/%3E%3Cpath d='M20 9c-4.5 3-7 7.5-7 11.5 0 4 3 7.5 7 7.5s7-3.5 7-7.5C27 16.5 24.5 12 20 9Z' fill='%2349ab77'/%3E%3Cpath d='M20 13c-2.5 2-4 5-4 7.5' stroke='%23123322' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <meta name="description" content="Explora las misiones verdes de ECRA. Acciones accesibles de reciclaje, protección de nacientes, ahorro de energía y concientización.">
+  <title>Misiones Verdes — ECRA</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
   <meta name="theme-color" content="#123322">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,19 +18,13 @@
   <header class="site-header">
     <div class="container header-content">
       <a class="brand" href="index.html" aria-label="Inicio ECRA">
-        <span class="brand-mark">
-          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="10" fill="#123322"/>
-            <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
-            <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
-          </svg>
-        </span>
+        <span class="brand-mark"><img src="img/perezoso-logo-sm.png" alt="" width="46" height="46" decoding="async"></span>
         <span>ECRA</span>
       </a>
 
       <nav class="nav-links">
         <a class="nav-link" href="index.html">Inicio</a>
-        <a class="nav-link active" href="challenges.html">Retos Ambientales</a>
+        <a class="nav-link active" href="challenges.html">Misiones Verdes</a>
         <a class="nav-link" href="forums.html">Foros Comunitarios</a>
         <a class="nav-link" href="ranking.html">Clasificación</a>
         <a class="nav-link" href="login.html" data-auth-guest>Iniciar sesión</a>
@@ -44,27 +38,28 @@
   </header>
 
   <main class="section container">
-    <div class="text-center mb-xl" style="max-width: 720px; margin-left: auto; margin-right: auto;">
+    <div class="text-center mb-xl" style="max-width: 720px; margin-left: auto; margin-right: auto; position: relative;">
+      <img class="sticker sticker--right sticker--hide-sm" style="top:-8px;right:-110px;--s:110px;--r:8deg" src="img/perezoso-sticker.png" alt="" aria-hidden="true" width="110" height="110" loading="lazy" draggable="false">
       <span class="eyebrow">Catálogo Abierto de Sostenibilidad</span>
-      <h1>Desafíos para transformar tu entorno</h1>
+      <h1>Misiones para cambiar tu barrio</h1>
       <p class="lead">
-        Cualquier persona puede explorar y poner en práctica estos retos sin necesidad de registrarse. Para guardar tu avance personal, acumular logros o enviar evidencias (fotos o videos), puedes iniciar sesión.
+        Cualquiera puede probar estas misiones sin registrarse. Si quieres guardar tu avance, sumar logros o mandar fotos y videos de lo que hiciste, inicia sesión.
       </p>
     </div>
 
     <!-- Barra de Filtros y Búsqueda -->
     <div class="filter-bar">
-      <input id="challengeSearch" class="filter-input" type="text" placeholder="🔍 Buscar por palabra clave, acción o residuo..." aria-label="Buscar retos">
+      <input id="challengeSearch" class="filter-input" type="text" placeholder="🔍 Buscar por palabra clave, acción o residuo..." aria-label="Buscar misiones">
       
       <select id="categoryFilter" class="filter-select" aria-label="Filtrar por categoría">
         <option value="all">Todas las categorías</option>
-        <option value="waste">♻️ Reciclaje y residuos</option>
+        <option value="waste">♻️ Reciclaje y basura</option>
         <option value="water">💧 Agua y nacientes</option>
-        <option value="wildlife">🦋 Flora y fauna</option>
-        <option value="energy">⚡ Ahorro de energía</option>
-        <option value="community">🧤 Espacios públicos</option>
-        <option value="consumption">🛍️ Consumo responsable</option>
-        <option value="education">📚 Educación ambiental</option>
+        <option value="wildlife">🦋 Plantas y animales</option>
+        <option value="energy">⚡ Luz y energía</option>
+        <option value="community">🧤 Mi barrio</option>
+        <option value="consumption">🛍️ Compras con cabeza</option>
+        <option value="education">📚 Hablemos del ambiente</option>
       </select>
 
       <select id="difficultyFilter" class="filter-select" aria-label="Filtrar por dificultad">
@@ -78,19 +73,19 @@
     <div id="authStatusBanner" class="card mb-lg hidden" style="padding: 12px 18px; display: none; align-items: center; justify-content: space-between; background-color: var(--forest-50); border-color: var(--forest-200);">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.25rem;">👋</span>
-        <span style="font-size: 0.9rem; color: var(--tint-text); font-weight: 600;">Sesión activa: tu progreso en los retos se sincronizará automáticamente con tu perfil.</span>
+        <span style="font-size: 0.9rem; color: var(--tint-text); font-weight: 600;">Sesión activa: tu progreso en las misiones se sincronizará automáticamente con tu perfil.</span>
       </div>
       <a href="profile.html" class="btn btn-secondary btn-sm" style="border-color: var(--forest-300);">Ver mi panel de progreso</a>
     </div>
 
-    <!-- Grid de Retos -->
+    <!-- Grid de Misiones -->
     <div id="challengesGrid" class="challenges-grid">
       <!-- Se puebla dinámicamente desde js/challenges-public.js -->
     </div>
 
     <div id="noResults" class="empty-state hidden" style="display: none; margin-top: var(--space-xl);">
-      <div class="empty-state-icon">🔍</div>
-      <h3>No encontramos retos con esos filtros</h3>
+      <img class="sticker sticker--inline" style="--s:110px;--r:-4deg" src="img/perezoso-sticker.png" alt="" aria-hidden="true" width="110" height="110" loading="lazy" draggable="false">
+      <h3>No encontramos misiones con esos filtros</h3>
       <p class="text-muted">Prueba buscando con otros términos o seleccionando «Todas las categorías».</p>
       <button id="resetFiltersBtn" class="btn btn-secondary btn-sm" style="margin-top: var(--space-sm);">Restablecer filtros</button>
     </div>
@@ -121,13 +116,7 @@
       <div class="footer-top-grid">
         <div class="footer-brand-col">
           <div class="brand">
-            <span class="brand-mark">
-              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#123322"/>
-                <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
-                <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
-              </svg>
-            </span>
+            <span class="brand-mark"><img src="img/perezoso-logo-sm.png" alt="" width="46" height="46" decoding="async"></span>
             <span>ECRA</span>
           </div>
           <p style="font-size: 0.9rem; margin-top: var(--space-xs);">
@@ -139,7 +128,7 @@
           <h4 class="footer-heading">Navegación</h4>
           <ul class="footer-links">
             <li><a href="index.html">Inicio</a></li>
-            <li><a href="challenges.html">Retos Ambientales</a></li>
+            <li><a href="challenges.html">Misiones Verdes</a></li>
             <li><a href="forums.html">Foros Comunitarios</a></li>
             <li><a href="ranking.html">Clasificación</a></li>
             <li><a href="profile.html">Mi Perfil</a></li>

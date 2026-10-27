@@ -8,16 +8,16 @@ import {
 
 const CATEGORY_CHIPS = [
   { id: "all", label: "General", icon: "🏆" },
-  { id: "waste", label: "Reciclaje y residuos", icon: "♻️" },
+  { id: "waste", label: "Reciclaje y basura", icon: "♻️" },
   { id: "water", label: "Agua y nacientes", icon: "💧" },
-  { id: "wildlife", label: "Flora y fauna", icon: "🦋" },
-  { id: "energy", label: "Ahorro de energía", icon: "⚡" },
-  { id: "community", label: "Espacios públicos", icon: "🧤" },
-  { id: "consumption", label: "Consumo responsable", icon: "🛍️" },
-  { id: "education", label: "Educación ambiental", icon: "📚" }
+  { id: "wildlife", label: "Plantas y animales", icon: "🦋" },
+  { id: "energy", label: "Luz y energía", icon: "⚡" },
+  { id: "community", label: "Mi barrio", icon: "🧤" },
+  { id: "consumption", label: "Compras con cabeza", icon: "🛍️" },
+  { id: "education", label: "Hablemos del ambiente", icon: "📚" }
 ];
 
-// Niveles según retos completados (se muestran en la tarjeta lateral)
+// Niveles según misiones cumplidas (se muestran en la tarjeta lateral)
 const LEVELS = [
   { min: 15, label: "Bosque", icon: "🌲" },
   { min: 8, label: "Árbol", icon: "🌳" },
@@ -110,7 +110,7 @@ function rebuildParticipants() {
     "completed", "approved", "completado", "completada", "finalizado", "finalizada"
   ]);
 
-  // Los registros duplicados no inflan el puntaje: cada reto se cuenta una sola vez por persona.
+  // Los registros duplicados no inflan el puntaje: cada misión se cuenta una sola vez por persona.
   state.challengeDocs.forEach(document => {
     const data = document.data || {};
     const status = String(data.status || "").trim().toLowerCase();
@@ -218,17 +218,17 @@ function renderStats(board) {
   const top = board.popularity[0];
   $("rankStats").innerHTML = `
     <div class="card rank-stat">
-      <span class="rank-stat-label">Participantes con retos</span>
+      <span class="rank-stat-label">Participantes con misiones</span>
       <span class="rank-stat-value">${board.rows.length}</span>
-      <span class="rank-stat-note">${board.rows.length === 0 ? "Aún nadie en esta categoría" : "Con al menos un reto aprobado"}</span>
+      <span class="rank-stat-note">${board.rows.length === 0 ? "Aún nadie en esta categoría" : "Con al menos una misión aprobada"}</span>
     </div>
     <div class="card rank-stat">
-      <span class="rank-stat-label">Retos completados</span>
+      <span class="rank-stat-label">Misiones cumplidas</span>
       <span class="rank-stat-value">${board.totalDone}</span>
       <span class="rank-stat-note">Sumando a toda la comunidad</span>
     </div>
     <div class="card rank-stat">
-      <span class="rank-stat-label">Reto más realizado</span>
+      <span class="rank-stat-label">Misión más hecha</span>
       ${top ? `
         <span class="rank-stat-value rank-stat-text"><span aria-hidden="true">${top.challenge.icon}</span> ${escapeHTML(top.challenge.shortTitle)}</span>
         <span class="rank-stat-note">${top.count} ${plural(top.count, "persona lo completó", "personas lo completaron")}</span>
@@ -264,7 +264,7 @@ function renderPodium(rows) {
             <strong class="podium-name">${escapeHTML(r.name)}${r.uid === state.myUid ? " (tú)" : ""}</strong>
             ${levelChip(r.count)}
           </div>
-          <div class="podium-score"><b>${r.count}</b><span>${plural(r.count, "reto", "retos")}</span></div>
+          <div class="podium-score"><b>${r.count}</b><span>${plural(r.count, "misión", "misiones")}</span></div>
         </li>`;
       }).join("")}
     </ol>
@@ -287,11 +287,11 @@ function renderList(rows, total) {
                 <strong>${escapeHTML(r.name)}${r.uid === state.myUid ? " (tú)" : ""}</strong>
                 ${levelChip(r.count)}
               </div>
-              <div class="rank-bar" role="img" aria-label="${r.count} de ${total} retos">
+              <div class="rank-bar" role="img" aria-label="${r.count} de ${total} misiones">
                 <span style="width: ${Math.max(4, Math.round((r.count / total) * 100))}%"></span>
               </div>
             </div>
-            <span class="rank-count"><b>${r.count}</b> ${plural(r.count, "reto", "retos")}</span>
+            <span class="rank-count"><b>${r.count}</b> ${plural(r.count, "misión", "misiones")}</span>
           </li>
         `).join("")}
       </ol>
@@ -306,7 +306,7 @@ function renderMe(board) {
       <div class="card rank-me">
         <div>
           <strong>¿Dónde quedarías tú?</strong>
-          <p>Inicia sesión para ver tu posición y empezar a sumar retos.</p>
+          <p>Inicia sesión para ver tu posición y empezar a sumar misiones.</p>
         </div>
         <a class="btn btn-primary btn-sm" href="login.html?returnUrl=${encodeURIComponent("ranking.html")}" data-auth-guest>Iniciar sesión</a>
       </div>`;
@@ -317,9 +317,9 @@ function renderMe(board) {
       <div class="card rank-me is-me">
         <div>
           <strong>Tu posición: #${mine.rank}</strong>
-          <p>${mine.count} de ${board.total} ${plural(board.total, "reto completado", "retos completados")}.</p>
+          <p>${mine.count} de ${board.total} ${plural(board.total, "misión cumplida", "misiones cumplidas")}.</p>
         </div>
-        <a class="btn btn-secondary btn-sm" href="challenges.html">Seguir con retos →</a>
+        <a class="btn btn-secondary btn-sm" href="challenges.html">Seguir con misiones →</a>
       </div>`;
   }
   const isParticipant = state.participants.some(p => p.uid === state.myUid);
@@ -328,19 +328,19 @@ function renderMe(board) {
     <div class="card rank-me">
       <div>
         <strong>Todavía no estás en la clasificación</strong>
-        <p>Completa un reto con evidencia aprobada para aparecer aquí.</p>
+        <p>Completa una misión con evidencia aprobada para aparecer aquí.</p>
       </div>
-      <a class="btn btn-primary btn-sm" href="challenges.html">Elegir un reto →</a>
+      <a class="btn btn-primary btn-sm" href="challenges.html">Elegir una misión →</a>
     </div>`;
 }
 
 function renderEmpty() {
   return `
     <div class="empty-state">
-      <div class="empty-state-icon" aria-hidden="true">🌱</div>
-      <h3>Aún no hay retos completados aquí</h3>
-      <p class="text-muted">Los retos cuentan cuando un moderador aprueba tu evidencia. Puedes ser la primera persona en esta lista.</p>
-      <a class="btn btn-primary btn-sm" href="challenges.html" style="margin-top: var(--space-sm);">Ver retos disponibles</a>
+      <img class="sticker sticker--inline" style="--s:120px;--r:-4deg" src="img/perezoso-sticker.png" alt="" aria-hidden="true" width="120" height="120" loading="lazy" draggable="false">
+      <h3>Aún no hay misiones cumplidas aquí</h3>
+      <p class="text-muted">Las misiones cuentan cuando un moderador aprueba tu evidencia. Puedes ser la primera persona en esta lista.</p>
+      <a class="btn btn-primary btn-sm" href="challenges.html" style="margin-top: var(--space-sm);">Ver misiones disponibles</a>
     </div>`;
 }
 
@@ -349,7 +349,7 @@ function renderAside(board) {
   const max = topChallenges[0]?.count || 1;
   $("rankAside").innerHTML = `
     <section class="card" aria-labelledby="popTitle">
-      <h2 id="popTitle" class="aside-title">Retos más completados</h2>
+      <h2 id="popTitle" class="aside-title">Misiones más cumplidas</h2>
       ${topChallenges.length ? `
         <ul class="pop-list">
           ${topChallenges.map(({ challenge, count }) => `
@@ -360,14 +360,14 @@ function renderAside(board) {
                 <div class="rank-bar"><span style="width: ${Math.round((count / max) * 100)}%"></span></div>
               </div>
             </li>`).join("")}
-        </ul>` : `<p class="text-muted" style="font-size: 0.9rem;">Cuando haya retos aprobados, aquí verás cuáles son los favoritos.</p>`}
+        </ul>` : `<p class="text-muted" style="font-size: 0.9rem;">Cuando haya misiones aprobadas, aquí verás cuáles son las favoritas.</p>`}
     </section>
 
     <section class="card" aria-labelledby="levelsTitle">
       <h2 id="levelsTitle" class="aside-title">Niveles</h2>
       <ul class="level-list">
         ${[...LEVELS].reverse().map(l => `
-          <li><span aria-hidden="true">${l.icon}</span><strong>${l.label}</strong><span class="text-muted">${l.min}+ ${plural(l.min, "reto", "retos")}</span></li>
+          <li><span aria-hidden="true">${l.icon}</span><strong>${l.label}</strong><span class="text-muted">${l.min}+ ${plural(l.min, "misión", "misiones")}</span></li>
         `).join("")}
       </ul>
     </section>

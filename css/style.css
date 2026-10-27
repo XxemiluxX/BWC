@@ -2418,3 +2418,244 @@ html[data-authenticated="true"] [data-auth-guest] { display: none !important; }
   #noPosts > .card { padding: var(--space-xl) var(--space-md); }
   #noPosts .btn[data-action="open-create"] { width: 100%; }
 }
+
+
+/* =========================================================
+   20. BOTONES "LIQUID GLASS" (verde → naranja) + PEREZOSO
+   Estos estilos van al final a propósito: reemplazan a los
+   botones anteriores sin tocar el HTML de cada página.
+   ========================================================= */
+
+:root {
+  --lg-green: 53, 139, 94;
+  --lg-lime: 132, 190, 80;
+  --lg-amber: 235, 168, 52;
+  --lg-orange: 224, 108, 36;
+}
+
+.btn {
+  --lg-bg: linear-gradient(115deg,
+      rgba(var(--lg-green), 0.92) 0%,
+      rgba(var(--lg-lime), 0.88) 38%,
+      rgba(var(--lg-amber), 0.9) 68%,
+      rgba(var(--lg-orange), 0.94) 100%);
+  --lg-glow-a: rgba(41, 112, 76, 0.5);
+  --lg-glow-b: rgba(224, 108, 36, 0.32);
+  background-size: 170% 100%;
+  background-position: 12% 50%;
+  -webkit-backdrop-filter: blur(14px) saturate(190%);
+  backdrop-filter: blur(14px) saturate(190%);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+  transition: transform var(--duration-normal) var(--ease-spring),
+              box-shadow var(--duration-normal) var(--ease-ui),
+              background-position 650ms var(--ease-out),
+              border-color var(--duration-fast) var(--ease-ui),
+              color var(--duration-fast) var(--ease-ui);
+}
+
+/* Reflejo de vidrio en la mitad de arriba */
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 1px 1px 46% 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.06));
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* Primario: verde que se vuelve naranja al pasar el cursor */
+.btn-primary,
+html[data-theme="dark"] .btn-primary {
+  color: #fff;
+  background-image: var(--lg-bg);
+  background-size: 170% 100%;
+  background-position: 12% 50%;
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -10px 16px -8px rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 12px 28px -10px var(--lg-glow-a),
+    0 5px 12px -6px var(--lg-glow-b);
+}
+
+/* Acento: empieza naranja y termina verde (el reverso) */
+.btn-accent {
+  --lg-bg: linear-gradient(115deg,
+      rgba(var(--lg-orange), 0.94) 0%,
+      rgba(var(--lg-amber), 0.9) 36%,
+      rgba(var(--lg-lime), 0.88) 70%,
+      rgba(var(--lg-green), 0.92) 100%);
+  --lg-glow-a: rgba(224, 108, 36, 0.5);
+  --lg-glow-b: rgba(53, 139, 94, 0.3);
+  color: #fff;
+  background-image: var(--lg-bg);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.65),
+    inset 0 -10px 16px -8px rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 12px 28px -10px var(--lg-glow-a),
+    0 5px 12px -6px var(--lg-glow-b);
+}
+
+/* Secundario: cristal casi transparente que se tiñe de verde → naranja */
+.btn-secondary {
+  color: var(--text-primary);
+  text-shadow: none;
+  background-image: linear-gradient(115deg,
+      rgba(var(--lg-green), 0.16) 0%,
+      rgba(255, 255, 255, 0.10) 50%,
+      rgba(var(--lg-orange), 0.18) 100%);
+  background-color: var(--glass-bg);
+  background-size: 200% 100%;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -8px 14px -8px rgba(var(--lg-green), 0.25),
+    0 8px 22px -12px rgba(24, 66, 44, 0.4);
+}
+html[data-theme="dark"] .btn-secondary {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.28),
+    inset 0 -8px 14px -8px rgba(var(--lg-green), 0.3),
+    0 8px 22px -12px rgba(0, 0, 0, 0.6);
+}
+.btn-secondary::after { opacity: 0.45; }
+
+/* Variación automática: en grupos de botones, cada uno arranca en otro punto del degradado */
+.hero-actions .btn:nth-child(2),
+.btn-group .btn:nth-child(2) { background-position: 60% 50%; }
+.btn-group .btn:nth-child(3) { background-position: 100% 50%; }
+
+.btn-danger {
+  background-image: linear-gradient(135deg, rgba(220, 38, 38, 0.92), rgba(239, 90, 60, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, 0.55), 0 10px 24px -10px rgba(220, 38, 38, 0.55);
+}
+
+.btn-ghost {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-image: none;
+  text-shadow: none;
+}
+.btn-ghost::after { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover:not(:disabled),
+  .btn-accent:hover:not(:disabled) {
+    background-position: 100% 50%;
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1.5px 1px rgba(255, 255, 255, 0.75),
+      inset 0 -10px 16px -8px rgba(255, 255, 255, 0.3),
+      0 16px 34px -10px var(--lg-glow-b),
+      0 8px 16px -8px var(--lg-glow-a);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-position: 100% 50%;
+    transform: translateY(-2px);
+    border-color: rgba(var(--lg-orange), 0.55);
+  }
+  .btn-ghost:hover:not(:disabled) { transform: translateY(-1px); }
+  .btn:hover:not(:disabled)::before { transform: translateX(120%); }
+}
+
+.btn:focus-visible {
+  outline: 3px solid rgba(var(--lg-amber), 0.85);
+  outline-offset: 3px;
+}
+
+/* Otros controles con el mismo toque de vidrio */
+.theme-toggle {
+  background: linear-gradient(135deg, rgba(var(--lg-green), 0.22), rgba(var(--lg-orange), 0.22)), var(--glass-bg);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, 0.6), 0 6px 16px -8px rgba(24, 66, 44, 0.45);
+}
+.admin-nav-item.active, .admin-nav-btn.active {
+  background: linear-gradient(115deg, rgba(var(--lg-green), 0.95), rgba(var(--lg-lime), 0.9) 55%, rgba(var(--lg-orange), 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, 0.6), 0 12px 24px -10px rgba(41, 112, 76, 0.6);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .btn::before { transition: none !important; }
+}
+
+/* ---------- Logo: el perezoso ---------- */
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+html[data-theme="dark"] .brand-mark { background: none; box-shadow: none; }
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 6px rgba(24, 66, 44, 0.28));
+  transition: transform var(--duration-normal) var(--ease-spring);
+}
+.brand:hover .brand-mark { transform: none; }
+.brand:hover .brand-mark img { transform: rotate(-8deg) scale(1.08); }
+html[data-theme="dark"] .brand-mark img {
+  filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 10px rgba(113, 198, 150, 0.45));
+}
+
+/* ---------- Stickers del perezoso ---------- */
+.sticker {
+  --s: 120px;
+  --r: -8deg;
+  position: absolute;
+  width: var(--s);
+  height: auto;
+  z-index: 3;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: rotate(var(--r));
+  filter: drop-shadow(0 8px 10px rgba(24, 66, 44, 0.25));
+  animation: sticker-bob 6s ease-in-out infinite;
+}
+.sticker--inline {
+  position: relative;
+  display: block;
+  margin: 0 auto var(--space-3, 12px);
+}
+.sticker--right { right: -14px; }
+.sticker--left { left: -14px; }
+.sticker--top { top: -34px; }
+.sticker--bottom { bottom: -30px; }
+.sticker--slow { animation-duration: 8s; animation-delay: -2s; }
+
+@keyframes sticker-bob {
+  0%, 100% { transform: translateY(0) rotate(var(--r)); }
+  50% { transform: translateY(-7px) rotate(calc(var(--r) + 3deg)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticker { animation: none; }
+}
+@media (max-width: 768px) {
+  .sticker { --s: 84px; }
+  .sticker--hide-sm { display: none; }
+}
+@media print { .sticker { display: none; } }
+
+/* Contenedores que sostienen stickers */
+.hero-visual, .banner-highlight, .ecra-origin, .profile-hero-card, .auth-brand-pane { position: relative; }
+.hero-visual { overflow: visible; }
+.banner-highlight .sticker { z-index: 1; }
+.empty-state .sticker--inline { animation-duration: 5s; }
+.sticker--footer { position: relative; display: inline-block; width: 64px; margin-top: var(--space-2); transform: rotate(-6deg); animation: none; }
+
+.hero-visual .sticker { top: -58px; bottom: auto; left: -46px; }

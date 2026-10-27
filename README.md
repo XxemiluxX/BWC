@@ -88,3 +88,11 @@ Supabase ya está vinculado al proyecto `ubefhwtkbpveoxodraba`. La app usa la Pu
 3. Ejecuta la app por HTTPS o mediante un servidor local; no abras los archivos HTML directamente con `file://`.
 
 La Publishable key es apta para código de navegador según la documentación actual de Supabase; nunca sustituyas esta clave por una secret/service-role key.
+
+
+## Últimos cambios
+
+- Logo y favicon: el perezoso (`img/perezoso-logo-sm.png`, `img/favicon.png`). Stickers en `img/perezoso-sticker.png` (clase CSS `.sticker`).
+- Botones con efecto liquid glass verde → naranja (sección 20 de `css/style.css`).
+- Lenguaje más cotidiano: "retos" pasó a "misiones" en toda la interfaz (la R de ECRA se conserva en el inicio) y se reescribieron títulos y categorías.
+- Acceso al panel de administración: `requireAdmin`, `getCurrentProfile` y el menú ahora reconocen la cuenta administradora por su correo, aunque el documento en Firestore diga `participant`.

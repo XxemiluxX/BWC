@@ -80,7 +80,7 @@ export function openChallengeDetailModal(challengeId) {
             📷 Enviar foto o video para completar
           </a>
         ` : `
-          <span class="status-badge status-approved">🟢 Reto completado</span>
+          <span class="status-badge status-approved">🟢 Misión cumplida</span>
         `}
 
         ${!isInProgress && !isCompleted ? `
@@ -90,12 +90,12 @@ export function openChallengeDetailModal(challengeId) {
         ` : ""}
 
       </div>
-      ${!isCompleted ? `<p class="text-muted" style="font-size: 0.8rem; margin: 8px 0 0;">Para completar el reto debes enviar una foto o un video como evidencia. Se marca como completado cuando un moderador la aprueba.</p>` : ""}
+      ${!isCompleted ? `<p class="text-muted" style="font-size: 0.8rem; margin: 8px 0 0;">Para cumplir la misión debes enviar una foto o un video como evidencia. Se marca como cumplida cuando un moderador la aprueba.</p>` : ""}
     `;
   } else {
     actionsHTML = `
       <div style="background-color: var(--bg-surface-secondary); border-radius: var(--radius-md); padding: var(--space-md); margin-top: var(--space-lg); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-sm);">
-        <span style="font-size: 0.875rem; color: var(--text-secondary);">¿Quieres registrar tu progreso y acumular logros en este reto?</span>
+        <span style="font-size: 0.875rem; color: var(--text-secondary);">¿Quieres registrar tu progreso y acumular logros en esta misión?</span>
         <div style="display: flex; gap: 8px;" data-auth-guest>
           <a href="login.html" data-auth-guest class="btn btn-secondary btn-sm">Iniciar sesión</a>
           <a href="register.html" data-auth-guest class="btn btn-primary btn-sm">Crear cuenta</a>
@@ -117,7 +117,7 @@ export function openChallengeDetailModal(challengeId) {
 
         <div style="display: flex; flex-direction: column; gap: var(--space-md);">
           <div>
-            <h4 style="margin-bottom: 6px;">📋 Instrucciones del reto</h4>
+            <h4 style="margin-bottom: 6px;">📋 Instrucciones de la misión</h4>
             <p>${escapeHTML(c.instruction)}</p>
           </div>
 
@@ -141,12 +141,12 @@ export function openChallengeDetailModal(challengeId) {
   modal.root.querySelector("#startChallengeBtn")?.addEventListener("click", async () => {
     try {
       await setChallengeProgress(currentUser.id, c.id, "in_progress");
-      showToast(`Reto iniciado: "${c.title}". ¡Mucho éxito!`, "info");
+      showToast(`Misión iniciada: "${c.title}". ¡Mucho éxito!`, "info");
       modal.close();
       await refreshState();
     } catch (err) {
       console.error(err);
-      showToast("No se pudo iniciar el reto.", "error");
+      showToast("No se pudo iniciar la misión.", "error");
     }
   });
 }
