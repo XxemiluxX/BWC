@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Panel de participante de ECRA. Consulta tu progreso en misiones verdes, publicaciones en foros, colaboraciones y evidencias.">
+  <meta name="description" content="Panel de participante de ECRA. Consulta tu progreso en retos ecológicos, publicaciones en foros, colaboraciones y evidencias.">
   <title>Mi Perfil y Progreso — ECRA</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
   <meta name="theme-color" content="#123322">
@@ -24,7 +24,7 @@
 
       <nav class="nav-links">
         <a class="nav-link" href="index.html">Inicio</a>
-        <a class="nav-link" href="challenges.html">Misiones Verdes</a>
+        <a class="nav-link" href="challenges.html">Retos Ecológicos</a>
         <a class="nav-link" href="forums.html">Foros Comunitarios</a>
         <a class="nav-link" href="ranking.html">Clasificación</a>
         <a class="nav-link active" href="profile.html">Mi Perfil</a>
@@ -67,7 +67,7 @@
     <div class="metrics-grid mb-xl" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl);">
       <div class="metric-card" style="background-color: var(--bg-surface); padding: var(--space-lg); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); text-align: center;">
         <span class="metric-number" id="metricChallenges" style="font-size: 2rem; font-weight: 800; color: var(--accent-text); display: block;">0 / 8</span>
-        <span class="metric-label" style="font-size: 0.85rem; color: var(--text-muted);">Misiones cumplidas</span>
+        <span class="metric-label" style="font-size: 0.85rem; color: var(--text-muted);">Retos cumplidos</span>
       </div>
 
       <div class="metric-card" style="background-color: var(--bg-surface); padding: var(--space-lg); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle); text-align: center;">
@@ -89,7 +89,7 @@
     <!-- Navegación por Pestañas Accesible -->
     <div class="tabs-nav" role="tablist" aria-label="Secciones del perfil">
       <button class="tab-btn active" id="tabBtn-challenges" role="tab" aria-selected="true" aria-controls="panel-challenges" data-target="challenges" type="button">
-        🌱 Mis Misiones Verdes
+        🌱 Mis Retos
       </button>
       <button class="tab-btn" id="tabBtn-posts" role="tab" aria-selected="false" aria-controls="panel-posts" data-target="posts" type="button">
         📢 Mis Publicaciones en Foros
@@ -102,15 +102,15 @@
       </button>
     </div>
 
-    <!-- Panel 1: Mis Misiones Verdes -->
+    <!-- Panel 1: Mis Retos Ecológicos -->
     <div class="tab-panel active" id="panel-challenges" role="tabpanel" aria-labelledby="tabBtn-challenges">
       <div class="card mb-lg" style="padding: var(--space-lg);">
         <div class="flex items-center justify-between mb-sm" style="flex-wrap: wrap; gap: 8px;">
           <div>
             <span class="eyebrow">Seguimiento Personal</span>
-            <h3 style="margin-bottom: 2px;">Progreso en el Catálogo de Misiones</h3>
+            <h3 style="margin-bottom: 2px;">Progreso en el Catálogo de Retos</h3>
             <p class="text-muted" style="margin-bottom: 0; font-size: 0.9rem;">
-              Marca tu avance en cada una de las misiones verdes y envía una foto o un video como evidencia: la misión se cumple cuando un moderador la aprueba.
+              Marca tu avance en cada uno de los retos ecológicos y envía una foto o un video como evidencia: el reto se cumple cuando un moderador lo aprueba.
             </p>
           </div>
           <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-text);" id="challengesPercentText">0%</div>
@@ -120,9 +120,9 @@
         </div>
       </div>
 
-      <!-- Rejilla de misiones con estado individual -->
+      <!-- Rejilla de retos con estado individual -->
       <div id="userChallengesGrid" class="challenges-grid">
-        <p class="text-muted">Cargando misiones...</p>
+        <p class="text-muted">Cargando retos...</p>
       </div>
     </div>
 
@@ -193,7 +193,7 @@
           <h4 class="footer-heading">Navegación</h4>
           <ul class="footer-links">
             <li><a href="index.html">Inicio</a></li>
-            <li><a href="challenges.html">Misiones Verdes</a></li>
+            <li><a href="challenges.html">Retos Ecológicos</a></li>
             <li><a href="forums.html">Foros Comunitarios</a></li>
             <li><a href="ranking.html">Clasificación</a></li>
             <li><a href="profile.html">Mi Perfil</a></li>
