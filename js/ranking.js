@@ -1,14 +1,10 @@
 import "./app.js";
-import { CHALLENGES, escapeHTML, initials, waitForAuth } from "./app.js";
+import { CHALLENGES, escapeHTML, initials, waitForAuth, ADMIN_EMAIL } from "./app.js";
 import { db } from "./firebase-client.js";
 import {
   collection,
-  getDocs,
-  query,
-  where
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-
-const MAX_LIST = 20;
 
 const CATEGORY_CHIPS = [
   { id: "all", label: "General", icon: "🏆" },
@@ -33,7 +29,13 @@ const state = {
   category: "all",
   participants: [],
   myUid: null,
-  loaded: false
+  loaded: false,
+  userDocs: [],
+  challengeDocs: [],
+  usersReady: false,
+  challengesReady: false,
+  unsubscribers: [],
+  loadVersion: 0
 };
 
 const $ = (id) => document.getElementById(id);
@@ -57,28 +59,114 @@ function plural(n, one, many) {
 
 /* ------------------------------ Datos ------------------------------ */
 
-async function loadData() {
-  const [doneSnap, usersSnap] = await Promise.all([
-    getDocs(query(collection(db, "user_challenges"), where("status", "==", "completed"))),
-    getDocs(collection(db, "users"))
+function stopDataListeners() {
+  state.unsubscribers.forEach(unsubscribe => {
+    try { unsubscribe(); } catch { /* Listener ya cerrado */ }
+  });
+  state.unsubscribers = [];
+}
+
+function resolveChallengeId(data) {
+  const rawId = String(data?.challengeId ?? data?.challenge_id ?? "").trim();
+  const catalogIds = new Set(CHALLENGES.map(challenge => challenge.id));
+  if (catalogIds.has(rawId)) return rawId;
+
+  const numberValue = data?.challengeNumber ?? data?.challenge_number ?? data?.number
+    ?? rawId.match(/(?:challenge-)?(\d+)/i)?.[1];
+  const number = Number(numberValue);
+  return Number.isFinite(number)
+    ? (CHALLENGES.find(challenge => challenge.number === number)?.id || null)
+    : null;
+}
+
+function rebuildParticipants() {
+  const peopleById = new Map();
+  const peopleByUid = new Map();
+  const adminEmail = String(ADMIN_EMAIL || "").trim().toLowerCase();
+
+  state.userDocs.forEach(document => {
+    const data = document.data || {};
+    const email = String(data.email || "").trim().toLowerCase();
+    if (String(data.role || "").toLowerCase() === "admin" || (adminEmail && email === adminEmail)) return;
+
+    const uid = String(data.firebaseUid || data.uid || document.docId || "").trim();
+    if (!uid) return;
+
+    let person = peopleByUid.get(uid);
+    if (!person) {
+      person = { uid, name: data.name || data.email || "", done: new Set() };
+      peopleByUid.set(uid, person);
+    } else if (!person.name && (data.name || data.email)) {
+      person.name = data.name || data.email;
+    }
+
+    // Acepta tanto el ID del documento como el UID guardado en el perfil.
+    peopleById.set(String(document.docId), person);
+    peopleById.set(uid, person);
+    if (data.id) peopleById.set(String(data.id), person);
+  });
+
+  const completedStatuses = new Set([
+    "completed", "approved", "completado", "completada", "finalizado", "finalizada"
   ]);
 
-  const catalogIds = new Set(CHALLENGES.map(c => c.id));
-  const users = new Map();
-  usersSnap.docs.forEach(d => {
-    const data = d.data();
-    if (data.role === "admin") return;
-    users.set(d.id, { uid: d.id, name: data.name || data.email || "", done: new Set() });
+  // Los registros duplicados no inflan el puntaje: cada reto se cuenta una sola vez por persona.
+  state.challengeDocs.forEach(document => {
+    const data = document.data || {};
+    const status = String(data.status || "").trim().toLowerCase();
+    if (!completedStatuses.has(status) && data.completed !== true) return;
+
+    const userId = String(data.userId || data.uid || data.firebaseUid || data.ownerId || "").trim();
+    const person = peopleById.get(userId);
+    if (!person) return;
+
+    const challengeId = resolveChallengeId(data);
+    if (challengeId) person.done.add(challengeId);
   });
 
-  // Un reto cuenta una sola vez por persona, aunque haya más de un registro
-  doneSnap.docs.forEach(d => {
-    const { userId, challengeId } = d.data();
-    const person = users.get(userId);
-    if (person && catalogIds.has(challengeId)) person.done.add(challengeId);
-  });
+  state.participants = [...peopleByUid.values()];
+}
 
-  state.participants = [...users.values()];
+function acceptSnapshot(version) {
+  if (version !== state.loadVersion || !state.usersReady || !state.challengesReady) return;
+  rebuildParticipants();
+  state.loaded = true;
+  render();
+}
+
+function handleLoadError(error, version) {
+  if (version !== state.loadVersion) return;
+  console.error("Error al cargar datos de la clasificación:", error);
+  stopDataListeners();
+  state.loaded = false;
+  renderError();
+}
+
+async function loadData() {
+  const version = state.loadVersion;
+  const usersUnsubscribe = onSnapshot(
+    collection(db, "users"),
+    snapshot => {
+      if (version !== state.loadVersion) return;
+      state.userDocs = snapshot.docs.map(document => ({ docId: document.id, data: document.data() }));
+      state.usersReady = true;
+      acceptSnapshot(version);
+    },
+    error => handleLoadError(error, version)
+  );
+
+  const challengesUnsubscribe = onSnapshot(
+    collection(db, "user_challenges"),
+    snapshot => {
+      if (version !== state.loadVersion) return;
+      state.challengeDocs = snapshot.docs.map(document => ({ docId: document.id, data: document.data() }));
+      state.challengesReady = true;
+      acceptSnapshot(version);
+    },
+    error => handleLoadError(error, version)
+  );
+
+  state.unsubscribers = [usersUnsubscribe, challengesUnsubscribe];
 }
 
 function buildBoard(category) {
@@ -184,7 +272,7 @@ function renderPodium(rows) {
 }
 
 function renderList(rows, total) {
-  const rest = rows.slice(3, MAX_LIST);
+  const rest = rows.slice(3);
   if (!rest.length) return "";
   return `
     <section class="card rank-board" aria-labelledby="rankListTitle">
@@ -220,7 +308,7 @@ function renderMe(board) {
           <strong>¿Dónde quedarías tú?</strong>
           <p>Inicia sesión para ver tu posición y empezar a sumar retos.</p>
         </div>
-        <a class="btn btn-primary btn-sm" href="login.html?returnUrl=${encodeURIComponent("ranking.html")}">Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="login.html?returnUrl=${encodeURIComponent("ranking.html")}" data-auth-guest>Iniciar sesión</a>
       </div>`;
   }
   const mine = board.rows.find(r => r.uid === state.myUid);
@@ -318,16 +406,23 @@ function renderError() {
 }
 
 async function init() {
+  const version = ++state.loadVersion;
+  stopDataListeners();
+  state.loaded = false;
+  state.usersReady = false;
+  state.challengesReady = false;
+  state.userDocs = [];
+  state.challengeDocs = [];
   renderFilters();
   renderLoading();
+
   try {
-    const [user] = await Promise.all([waitForAuth(), loadData()]);
+    const user = await waitForAuth();
+    if (version !== state.loadVersion) return;
     state.myUid = user?.uid || null;
-    state.loaded = true;
-    render();
+    await loadData();
   } catch (err) {
-    console.error("Error al cargar la clasificación:", err);
-    renderError();
+    handleLoadError(err, version);
   }
 }
 

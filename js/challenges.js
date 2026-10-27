@@ -169,6 +169,25 @@ async function render() {
         </div>
       </div>
 
+      <section class="privacy-consent-panel" aria-labelledby="evidencePrivacyTitle">
+        <label class="privacy-consent-label" for="evidencePrivacyConsent">
+          <input id="evidencePrivacyConsent" type="checkbox" required aria-describedby="evidencePrivacySummary" ${isLocked ? "disabled" : ""}>
+          <span>
+            <strong id="evidencePrivacyTitle">Acuerdo de privacidad para fotografías y videos (obligatorio)</strong>
+            <span id="evidencePrivacySummary">Autorizo expresamente que mi evidencia se utilice exclusivamente con fines informativos, educativos y para verificar la realización de este reto dentro de BWC.</span>
+          </span>
+        </label>
+        <details class="privacy-consent-details">
+          <summary>Leer el acuerdo completo</summary>
+          <div class="privacy-consent-copy">
+            <p>Al marcar esta casilla, autorizas expresamente el uso de la fotografía o el video que envíes exclusivamente con fines informativos, educativos y de verificación de retos. El equipo de moderación podrá revisar el archivo y asociarlo con tu cuenta y el reto correspondiente para resolver su aprobación o rechazo. La evidencia no se utilizará para publicidad, venta ni para otros fines ajenos a los indicados.</p>
+            <p>Comparte material propio o para el que tengas autorización. Evita incluir rostros de otras personas, especialmente menores de edad, matrículas, direcciones, documentos u otros datos personales sin permiso.</p>
+            <p><strong>Importante sobre el almacenamiento:</strong> las evidencias se guardan en el almacenamiento del proyecto mediante un enlace público para que el panel de moderación pueda mostrarlas. Por ello, cualquier persona que obtenga la URL del archivo podría acceder a él. No subas contenido que necesite confidencialidad estricta ni material sensible.</p>
+            <p>Contacto del proyecto para consultas sobre una evidencia: <a href="mailto:proyecto.ecracr@gmail.com">proyecto.ecracr@gmail.com</a>.</p>
+          </div>
+        </details>
+      </section>
+
       <div style="margin-top: var(--space-lg); display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; justify-content: space-between;">
         <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0; max-width: 420px;">
           <strong>Para completar este reto es obligatorio enviar una foto o un video</strong> que muestre tu acción. Un moderador la revisa y, al aprobarla, el reto queda completado.
@@ -193,6 +212,7 @@ async function render() {
   const previewVideo = document.getElementById("previewVideo");
   const fileName = document.getElementById("fileName");
   const submit = document.getElementById("submitEvidenceBtn");
+  const privacyConsent = document.getElementById("evidencePrivacyConsent");
   let selectedFile = null;
   let selectedKind = null;
   let previewUrl = null;
@@ -239,6 +259,10 @@ async function render() {
 
   submit?.addEventListener("click", async () => {
     if (isLocked) return;
+    // La aceptación explícita debe ocurrir antes de iniciar cualquier procesamiento o carga.
+    if (!privacyConsent?.checked) {
+      return showToast("Debes leer y aceptar expresamente el acuerdo de privacidad antes de enviar la evidencia.", "error");
+    }
     // Regla del reto: sin foto o video no se puede enviar ni completar.
     if (!selectedFile || !selectedKind) return showToast("Para completar el reto debes enviar una foto o un video.", "error");
 
@@ -303,6 +327,10 @@ async function render() {
         storageProvider: "supabase",
         originalFileName: selectedFile.name,
         fileSize: uploadBody.size,
+        privacyAgreementVersion: "2026-10-27",
+        privacyConsentAccepted: true,
+        privacyConsentAcceptedAt: new Date().toISOString(),
+        privacyConsentPurpose: "informativo, educativo y verificación de retos",
         submittedAt: new Date().toISOString(),
         submittedAtServer: serverTimestamp(),
         status: "pending",

@@ -3,6 +3,8 @@ import { auth, db } from "./firebase-client.js";
 import {
   collection,
   doc,
+  getDocs,
+  where,
   runTransaction,
   updateDoc,
   deleteDoc,
@@ -655,6 +657,28 @@ function openEvidenceReviewModal(evidenceId) {
   });
 }
 
+async function syncUserCompletedCount(userId) {
+  if (!userId) return;
+  const snap = await getDocs(query(collection(db, "user_challenges"), where("userId", "==", userId)));
+  const completedIds = new Set();
+
+  snap.docs.forEach(document => {
+    const data = document.data();
+    const status = String(data.status || "").trim().toLowerCase();
+    if (!["completed", "approved", "completado", "completada", "finalizado", "finalizada"].includes(status)) return;
+
+    const rawId = String(data.challengeId ?? "").trim();
+    const number = Number(data.challengeNumber ?? rawId.match(/(?:challenge-)?(\d+)/i)?.[1]);
+    const challengeId = CHALLENGES.find(challenge => challenge.id === rawId || challenge.number === number)?.id;
+    if (challengeId) completedIds.add(challengeId);
+  });
+
+  await updateDoc(doc(db, "users", userId), {
+    completed: completedIds.size,
+    updatedAt: serverTimestamp()
+  });
+}
+
 async function approveEvidence(id, moderatorComment) {
   const admin = await requireAdmin();
   if (!admin) return;
@@ -670,19 +694,27 @@ async function approveEvidence(id, moderatorComment) {
       moderatorComment
     });
 
-    // Registrar reto como completado en user_challenges
-    if (ev?.userId && ev?.challengeId) {
-      await updateDoc(doc(db, "user_challenges", `${ev.userId}_${ev.challengeId}`), {
+    // Registrar reto como completado en user_challenges; también admite evidencias antiguas
+    // que guardaban el número del reto pero no su ID.
+    const approvedChallengeId = ev?.challengeId || CHALLENGES.find(challenge =>
+      challenge.number === Number(ev?.challengeNumber)
+    )?.id;
+    if (ev?.userId && approvedChallengeId) {
+      await updateDoc(doc(db, "user_challenges", `${ev.userId}_${approvedChallengeId}`), {
         status: "completed",
         updatedAt: nowISO()
       }).catch(async () => {
         // Si no existía, crearlo
         await addDoc(collection(db, "user_challenges"), {
           userId: ev.userId,
-          challengeId: ev.challengeId,
+          challengeId: approvedChallengeId,
           status: "completed",
           updatedAt: nowISO()
         });
+      });
+      // Mantener sincronizado el contador agregado del perfil y las estadísticas de inicio.
+      await syncUserCompletedCount(ev.userId).catch(error => {
+        console.warn("No se pudo sincronizar el contador de retos completados:", error);
       });
     }
 
