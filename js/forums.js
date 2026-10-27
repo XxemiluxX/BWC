@@ -309,7 +309,7 @@ async function openCreatePostModal() {
         <div class="form-group">
           <label class="form-label" for="newPostLocation">Comunidad / Ubicación general</label>
           <input class="form-input" id="newPostLocation" type="text" placeholder="Ej: Palmichal de Acosta, Barrio Escalante, o Nacional">
-          <span class="form-helper">Indica tu barrio, cantón o cantones beneficiados.</span>
+          <span class="form-helper">Indica tu comunidad, cantón o cantones beneficiados.</span>
         </div>
 
         <div class="form-group">

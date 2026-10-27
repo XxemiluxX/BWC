@@ -643,7 +643,7 @@ function settingsView() {
       <div class="card" style="padding: var(--space-lg);">
         <h3 style="font-size: 1.15rem; margin-bottom: 8px;">🌿 Catálogo de Misiones</h3>
         <p class="text-muted" style="font-size: 0.875rem;">
-          ${CHALLENGES.length} misiones verdes accesibles para todo público, sin barreras económicas ni riesgos.
+          ${CHALLENGES.length} retos ecológicos accesibles para todo público, sin barreras económicas ni riesgos.
         </p>
         <div style="background-color: var(--bg-surface-secondary); padding: 8px 12px; border-radius: var(--radius-xs); font-family: monospace; font-size: 0.8rem;">
           Total de misiones: ${CHALLENGES.length}<br>

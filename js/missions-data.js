@@ -6,7 +6,7 @@
 //
 // Cómo funciona el sistema:
 //   1. Cada misión mide una "métrica" (días de sesión, racha, veces compartido,
-//      misiones verdes completadas, publicaciones, etc.).
+//      retos ecológicos completados, publicaciones, etc.).
 //   2. Cuando la métrica llega a la meta, la persona pulsa "Reclamar" y la misión
 //      se guarda en users/{uid}.claimedMissions.
 //   3. Las recompensas (marco, título, fondo) se desbloquean según las misiones
@@ -42,8 +42,9 @@ export const MISSION_CATEGORIES = [
   { id: "start",     label: "Primeros pasos", icon: "🌱" },
   { id: "streak",    label: "Constancia",     icon: "🔥" },
   { id: "share",     label: "Compartir",      icon: "📣" },
-  { id: "action",    label: "Acción verde",   icon: "🌎" },
-  { id: "community", label: "Comunidad",      icon: "🤝" }
+  { id: "action",    label: "Retos ecológicos", icon: "🌎" },
+  { id: "community", label: "Comunidad",      icon: "🤝" },
+  { id: "collection",label: "Colección",      icon: "🎒" }
 ];
 
 // ----------------------------- Recompensas: marcos -----------------------------
@@ -55,6 +56,8 @@ export const FRAMES = {
   rio:        { label: "Río vivo",         icon: "🌊", tier: "rare",      blurb: "Agua cristalina que nunca deja de fluir." },
   mariposa:   { label: "Morpho azul",      icon: "🦋", tier: "rare",      blurb: "Los destellos azules de la mariposa más famosa de Costa Rica." },
   sol:        { label: "Sol tropical",     icon: "☀️", tier: "rare",      blurb: "Rayos de sol que giran sin parar." },
+  nube:       { label: "Bosque nuboso",    icon: "☁️", tier: "rare",      blurb: "Neblina suave que abraza tu foto." },
+  luciernaga: { label: "Luciérnagas",      icon: "✨", tier: "epic",      blurb: "Puntos de luz que parpadean en la noche." },
   perezoso:   { label: "Ritmo pura vida",  icon: "🦥", tier: "epic",      blurb: "Respira hondo… sin prisa, pero sin pausa." },
   volcan:     { label: "Volcán Arenal",    icon: "🌋", tier: "epic",      blurb: "Lava que late en el borde de tu perfil." },
   aurora:     { label: "Aurora del bosque",icon: "🌌", tier: "epic",      blurb: "Un resplandor verde, turquesa y violeta." },
@@ -78,10 +81,24 @@ export const TITLES = {
   cazador:      { label: "Cazador/a de evidencias", icon: "📸", tier: "rare" },
   maestro:      { label: "Maestro/a del compost",   icon: "♻️", tier: "epic" },
   leyenda:      { label: "Leyenda de ECRA",         icon: "🏆", tier: "legendary" },
-  voz:          { label: "Voz del barrio",          icon: "📢", tier: "common" },
+  voz:          { label: "Voz de la comunidad",          icon: "📢", tier: "common" },
   vecino:       { label: "Buen vecino/a",           icon: "🏘️", tier: "rare" },
   unidos:       { label: "Manos unidas",            icon: "🤝", tier: "rare" },
-  polinizador:  { label: "Polinizador/a",           icon: "🐝", tier: "rare" }
+  polinizador:  { label: "Polinizador/a",           icon: "🐝", tier: "rare" },
+  veterano:     { label: "Veterano/a del bosque",   icon: "🧓", tier: "epic" },
+  aguador:      { label: "Guardián/a del agua",     icon: "💧", tier: "rare" },
+  reciclador:   { label: "Reciclador/a estrella",   icon: "♻️", tier: "rare" },
+  solar:        { label: "Energía solar",           icon: "☀️", tier: "rare" },
+  fauna:        { label: "Amigo/a de la fauna",     icon: "🦜", tier: "rare" },
+  corazon:      { label: "Corazón de la comunidad", icon: "💚", tier: "rare" },
+  consciente:   { label: "Consumo consciente",      icon: "🛍️", tier: "rare" },
+  educador:     { label: "Educador/a verde",        icon: "🎓", tier: "rare" },
+  todoterreno:  { label: "Todoterreno ecológico",   icon: "🧗", tier: "epic" },
+  conversador:  { label: "Conversador/a del foro",  icon: "💬", tier: "common" },
+  lider:        { label: "Líder de iniciativas",    icon: "🚩", tier: "epic" },
+  equipo:       { label: "Jugador/a de equipo",     icon: "🫶", tier: "rare" },
+  coleccionista:{ label: "Coleccionista",           icon: "🎒", tier: "common" },
+  centenario:   { label: "Árbol centenario",        icon: "🌳", tier: "epic" }
 };
 
 // ----------------------------- Recompensas: fondos de perfil -----------------------------
@@ -91,6 +108,8 @@ export const BACKDROPS = {
   noche:     { label: "Noche de luciérnagas",  icon: "✨", tier: "common" },
   naciente:  { label: "Naciente cristalina",   icon: "💧", tier: "rare" },
   atardecer: { label: "Atardecer en el Pacífico", icon: "🌅", tier: "epic" },
+  arrecife:  { label: "Arrecife de coral",     icon: "🐠", tier: "rare" },
+  cafetal:   { label: "Cafetal al amanecer",   icon: "☕", tier: "epic" },
   arenal:    { label: "Amanecer en el Arenal", icon: "🌋", tier: "legendary" }
 };
 
@@ -104,13 +123,15 @@ export const TIER_LABELS = {
 // ----------------------------- Niveles -----------------------------
 
 export const LEVELS = [
-  { xp: 0,    label: "Semilla",  icon: "🫘" },
-  { xp: 60,   label: "Brote",    icon: "🌱" },
-  { xp: 150,  label: "Plántula", icon: "🌿" },
-  { xp: 280,  label: "Arbusto",  icon: "🪴" },
-  { xp: 450,  label: "Árbol",    icon: "🌳" },
-  { xp: 650,  label: "Bosque",   icon: "🌲" },
-  { xp: 900,  label: "Selva",    icon: "🦜" }
+  { xp: 0,    label: "Semilla",    icon: "🫘" },
+  { xp: 60,   label: "Brote",      icon: "🌱" },
+  { xp: 150,  label: "Plántula",   icon: "🌿" },
+  { xp: 300,  label: "Arbusto",    icon: "🪴" },
+  { xp: 500,  label: "Árbol",      icon: "🌳" },
+  { xp: 800,  label: "Bosque",     icon: "🌲" },
+  { xp: 1200, label: "Selva",      icon: "🦜" },
+  { xp: 1800, label: "Cordillera", icon: "⛰️" },
+  { xp: 2600, label: "Guardián/a del planeta", icon: "🌎" }
 ];
 
 export function levelForXp(xp = 0) {
@@ -136,7 +157,7 @@ export const MISSIONS = [
   {
     id: "m-explorer", category: "start", icon: "🧭", metric: "visitedPages", goal: 4,
     title: "Explorador/a",
-    desc: "Visita Misiones Verdes, Foros, Clasificación y tu Perfil estando con sesión iniciada.",
+    desc: "Visita Retos Ecológicos, Foros, Clasificación y tu Perfil estando con sesión iniciada.",
     reward: { xp: 20, title: "explorador", backdrop: "nuboso" }
   },
   {
@@ -204,54 +225,54 @@ export const MISSIONS = [
     reward: { xp: 80, title: "embajador", backdrop: "atardecer" }
   },
 
-  // ---- Acción verde (misiones verdes aprobadas)
+  // ---- Acción verde (retos ecológicos aprobados)
   {
     id: "m-act-1", category: "action", icon: "🫘", metric: "challengesCompleted", goal: 1,
-    title: "Tu primera misión verde",
-    desc: "Completa una misión verde (se cuenta cuando un moderador aprueba tu evidencia).",
+    title: "Tu primer reto ecológico",
+    desc: "Completa un reto ecológico (se cuenta cuando un moderador aprueba tu evidencia).",
     reward: { xp: 40, title: "semilla", frame: "sol" }
   },
   {
     id: "m-act-evidence", category: "action", icon: "📸", metric: "evidences", goal: 1,
     title: "Foto o video como prueba",
-    desc: "Envía tu primera evidencia desde la página de una misión verde.",
+    desc: "Envía tu primera evidencia desde la página de un reto ecológico.",
     reward: { xp: 25, title: "cazador" }
   },
   {
     id: "m-act-3", category: "action", icon: "🧤", metric: "challengesCompleted", goal: 3,
     title: "Manos a la tierra",
-    desc: "Completa 3 misiones verdes.",
+    desc: "Completa 3 retos ecológicos.",
     reward: { xp: 60, title: "manos" }
   },
   {
     id: "m-act-5", category: "action", icon: "🦥", metric: "challengesCompleted", goal: 5,
     title: "Ritmo pura vida",
-    desc: "Completa 5 misiones verdes sin perder la calma.",
+    desc: "Completa 5 retos ecológicos sin perder la calma.",
     reward: { xp: 80, frame: "perezoso" }
   },
   {
     id: "m-act-10", category: "action", icon: "🌋", metric: "challengesCompleted", goal: 10,
     title: "Fuego en el Arenal",
-    desc: "Completa 10 misiones verdes.",
+    desc: "Completa 10 retos ecológicos.",
     reward: { xp: 120, title: "maestro", frame: "volcan" }
   },
   {
     id: "m-act-20", category: "action", icon: "🪶", metric: "challengesCompleted", goal: 20,
     title: "Vuelo de quetzal",
-    desc: "Completa 20 misiones verdes. Muy pocas personas llegan aquí.",
+    desc: "Completa 20 retos ecológicos. Muy pocas personas llegan aquí.",
     reward: { xp: 200, frame: "quetzal" }
   },
   {
     id: "m-act-28", category: "action", icon: "🏆", metric: "challengesCompleted", goal: 28,
     title: "Leyenda de ECRA",
-    desc: "Completa las 28 misiones verdes del catálogo.",
+    desc: "Completa los 28 retos ecológicos del catálogo.",
     reward: { xp: 300, title: "leyenda", frame: "legendario", backdrop: "arenal" }
   },
 
   // ---- Comunidad
   {
     id: "m-com-post", category: "community", icon: "📢", metric: "posts", goal: 1,
-    title: "Voz del barrio",
+    title: "Voz de la comunidad",
     desc: "Publica tu primera iniciativa en los Foros Comunitarios.",
     reward: { xp: 30, title: "voz" }
   },
@@ -272,6 +293,141 @@ export const MISSIONS = [
     title: "Polinizador/a de ideas",
     desc: "Publica 3 iniciativas en los foros.",
     reward: { xp: 60, title: "polinizador" }
+  },
+  // ---- Constancia (más difíciles)
+  {
+    id: "m-logins-50", category: "streak", icon: "🧓", metric: "totalLogins", goal: 50,
+    title: "Raíces profundas",
+    desc: "Suma 50 días distintos con sesión iniciada.",
+    reward: { xp: 100, title: "veterano" }
+  },
+  {
+    id: "m-streak-60", category: "streak", icon: "✨", metric: "bestStreak", goal: 60,
+    title: "Luciérnaga incansable",
+    desc: "Dos meses seguidos de racha. Casi nadie lo logra.",
+    reward: { xp: 200, frame: "luciernaga" }
+  },
+
+  // ---- Compartir
+  {
+    id: "m-share-14", category: "share", icon: "☁️", metric: "shareDays", goal: 14,
+    title: "Semillas al viento",
+    desc: "Comparte ECRA en 14 días distintos.",
+    reward: { xp: 120, frame: "nube" }
+  },
+
+  // ---- Retos ecológicos por tema (según la categoría del reto)
+  {
+    id: "m-cat-water", category: "action", icon: "💧", metric: "cat_water", goal: 3,
+    title: "Guardián/a del agua",
+    desc: "Completa 3 retos de la categoría Agua y nacientes.",
+    reward: { xp: 60, title: "aguador", backdrop: "arrecife" }
+  },
+  {
+    id: "m-cat-waste", category: "action", icon: "♻️", metric: "cat_waste", goal: 3,
+    title: "Reciclador/a estrella",
+    desc: "Completa 3 retos de Reciclaje, basura o compost.",
+    reward: { xp: 60, title: "reciclador" }
+  },
+  {
+    id: "m-cat-energy", category: "action", icon: "☀️", metric: "cat_energy", goal: 3,
+    title: "Cazador/a de vampiros eléctricos",
+    desc: "Completa 3 retos de Luz y energía o movilidad.",
+    reward: { xp: 60, title: "solar" }
+  },
+  {
+    id: "m-cat-wildlife", category: "action", icon: "🦜", metric: "cat_wildlife", goal: 2,
+    title: "Amigo/a de la fauna",
+    desc: "Completa 2 retos de Plantas y animales.",
+    reward: { xp: 50, title: "fauna" }
+  },
+  {
+    id: "m-cat-community", category: "action", icon: "🧤", metric: "cat_community", goal: 2,
+    title: "Corazón de la comunidad",
+    desc: "Completa 2 retos de la categoría Mi comunidad.",
+    reward: { xp: 50, title: "corazon" }
+  },
+  {
+    id: "m-cat-consumption", category: "action", icon: "🛍️", metric: "cat_consumption", goal: 2,
+    title: "Compras con cabeza",
+    desc: "Completa 2 retos de Compras con cabeza o huerta y comida.",
+    reward: { xp: 50, title: "consciente" }
+  },
+  {
+    id: "m-cat-education", category: "action", icon: "🎓", metric: "cat_education", goal: 2,
+    title: "Educador/a verde",
+    desc: "Completa 2 retos de Hablemos del ambiente.",
+    reward: { xp: 50, title: "educador" }
+  },
+  {
+    id: "m-cat-all", category: "action", icon: "🧗", metric: "categoriesDone", goal: 5,
+    title: "Todoterreno ecológico",
+    desc: "Completa retos de 5 categorías distintas.",
+    reward: { xp: 150, title: "todoterreno" }
+  },
+  {
+    id: "m-act-started", category: "action", icon: "🚀", metric: "challengesStarted", goal: 5,
+    title: "Con ganas de más",
+    desc: "Empieza 5 retos ecológicos distintos (marca tu avance en tu perfil).",
+    reward: { xp: 30 }
+  },
+  {
+    id: "m-act-evid-5", category: "action", icon: "🖼️", metric: "evidences", goal: 5,
+    title: "Álbum de evidencias",
+    desc: "Envía 5 evidencias (fotos o videos) de tus retos.",
+    reward: { xp: 60 }
+  },
+  {
+    id: "m-act-15", category: "action", icon: "☕", metric: "challengesCompleted", goal: 15,
+    title: "Amanecer en el cafetal",
+    desc: "Completa 15 retos ecológicos.",
+    reward: { xp: 150, backdrop: "cafetal" }
+  },
+
+  // ---- Comunidad (más difíciles)
+  {
+    id: "m-com-comments-10", category: "community", icon: "💬", metric: "comments", goal: 10,
+    title: "Conversador/a del foro",
+    desc: "Deja 10 comentarios en los foros comunitarios.",
+    reward: { xp: 60, title: "conversador" }
+  },
+  {
+    id: "m-com-post-5", category: "community", icon: "🚩", metric: "posts", goal: 5,
+    title: "Líder de iniciativas",
+    desc: "Publica 5 iniciativas en los foros.",
+    reward: { xp: 100, title: "lider" }
+  },
+  {
+    id: "m-com-collab-3", category: "community", icon: "🫶", metric: "collabs", goal: 3,
+    title: "Jugador/a de equipo",
+    desc: "Colabora como voluntario/a en 3 iniciativas.",
+    reward: { xp: 80, title: "equipo" }
+  },
+
+  // ---- Colección (misiones sobre tu propio progreso)
+  {
+    id: "m-col-claim-10", category: "collection", icon: "🎒", metric: "claimedCount", goal: 10,
+    title: "Coleccionista",
+    desc: "Reclama 10 misiones.",
+    reward: { xp: 60, title: "coleccionista" }
+  },
+  {
+    id: "m-col-frames-5", category: "collection", icon: "🖼️", metric: "framesUnlocked", goal: 5,
+    title: "Vitrina de marcos",
+    desc: "Desbloquea 5 marcos de perfil distintos.",
+    reward: { xp: 70 }
+  },
+  {
+    id: "m-col-claim-25", category: "collection", icon: "🏅", metric: "claimedCount", goal: 25,
+    title: "Gran colección",
+    desc: "Reclama 25 misiones.",
+    reward: { xp: 120 }
+  },
+  {
+    id: "m-col-level", category: "collection", icon: "🌳", metric: "xp", goal: 500,
+    title: "Árbol centenario",
+    desc: "Alcanza 500 XP en total y llega al nivel Árbol.",
+    reward: { xp: 100, title: "centenario" }
   }
 ];
 
@@ -322,7 +478,10 @@ export function cosmeticsFromUser(userData) {
 // Métricas del usuario. `extra` trae lo que sale de otras colecciones.
 export function metricsFromUser(userData = {}, extra = {}) {
   const eq = userData.equipped || {};
-  return {
+  const claimed = claimedSet(userData);
+  const unlocked = unlockedRewards(claimed);
+  const cats = extra.cats || {};
+  const metrics = {
     totalLogins: Number(userData.totalLogins) || 0,
     bestStreak: Math.max(Number(userData.bestStreak) || 0, Number(userData.loginStreak) || 0),
     visitedPages: EXPLORE_PAGES.filter(p => (userData.visitedPages || []).includes(p)).length,
@@ -330,11 +489,20 @@ export function metricsFromUser(userData = {}, extra = {}) {
     shareDays: Array.isArray(userData.shareDates) ? new Set(userData.shareDates).size : 0,
     equippedCount: [eq.frame, eq.title, eq.backdrop].filter(Boolean).length,
     challengesCompleted: extra.challengesCompleted ?? (Number(userData.completed) || 0),
+    challengesStarted: extra.challengesStarted ?? 0,
     evidences: extra.evidences ?? 0,
     posts: extra.posts ?? 0,
     comments: extra.comments ?? 0,
-    collabs: extra.collabs ?? 0
+    collabs: extra.collabs ?? 0,
+    claimedCount: claimed.size,
+    framesUnlocked: unlocked.frame.size,
+    xp: xpFromClaimed(claimed),
+    categoriesDone: Object.values(cats).filter(n => n > 0).length
   };
+  // Retos completados por categoría: cat_water, cat_waste, cat_energy…
+  Object.entries(cats).forEach(([key, n]) => { metrics[`cat_${key}`] = n; });
+  // La categoría "Luz y energía" también cubre movilidad; "consumption" cubre huerta y comida.
+  return metrics;
 }
 
 export function missionState(mission, metrics, claimed) {

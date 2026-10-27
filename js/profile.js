@@ -177,7 +177,7 @@ function updateHeroCard() {
   if (frameEl) frameEl.className = `avatar-frame af-xl${cos.frame && FRAMES[cos.frame] ? ` frame-${cos.frame}` : ""}`;
   const heroCard = document.querySelector(".profile-hero-card");
   if (heroCard) {
-    heroCard.classList.remove("has-bd", "bd-nuboso", "bd-noche", "bd-naciente", "bd-atardecer", "bd-arenal");
+    [...heroCard.classList].filter(c => c === "has-bd" || c.startsWith("bd-")).forEach(c => heroCard.classList.remove(c));
     if (cos.backdrop) heroCard.classList.add("has-bd", `bd-${cos.backdrop}`);
   }
   const titleRow = document.getElementById("profileTitleRow");
@@ -352,7 +352,7 @@ function renderPostsPanel() {
         <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">📢</div>
         <h3>Aún no has publicado en los foros</h3>
         <p class="text-muted" style="margin-bottom: var(--space-md);">
-          ¿Tienes una idea ecológica para tu barrio o conoces un problema ambiental que amerite atención? Compártelo con la comunidad.
+          ¿Tienes una idea ecológica para tu comunidad o conoces un problema ambiental que amerite atención? Compártelo con la comunidad.
         </p>
         <a class="btn btn-primary" href="forums.html">+ Crear primera publicación</a>
       </div>

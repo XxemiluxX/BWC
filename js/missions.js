@@ -1,5 +1,5 @@
 // ECRA — Página pública de Misiones y Logros
-import { profileReady, recordShare, syncNavigationHeader, escapeHTML, showToast, openModal } from "./app.js";
+import { CHALLENGES, profileReady, recordShare, syncNavigationHeader, escapeHTML, showToast, openModal } from "./app.js";
 import { auth, db } from "./firebase-client.js";
 import {
   collection, getDocs, query, where, doc, updateDoc, arrayUnion, serverTimestamp
@@ -31,16 +31,40 @@ async function countWhere(col, field, uid, extraFilter) {
   }
 }
 
+// Retos del usuario: completados (total y por categoría) y empezados
+async function loadChallengeMetrics(uid) {
+  try {
+    const snap = await getDocs(query(collection(db, "user_challenges"), where("userId", "==", uid)));
+    const categoryOf = Object.fromEntries(CHALLENGES.map(c => [c.id, c.category]));
+    const cats = {};
+    const done = new Set();
+    const started = new Set();
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (!categoryOf[data.challengeId]) return;
+      if (["in_progress", "completed"].includes(data.status)) started.add(data.challengeId);
+      if (data.status === "completed" && !done.has(data.challengeId)) {
+        done.add(data.challengeId);
+        const cat = categoryOf[data.challengeId];
+        cats[cat] = (cats[cat] || 0) + 1;
+      }
+    });
+    return { challengesCompleted: done.size, challengesStarted: started.size, cats };
+  } catch (error) {
+    console.warn("No se pudo leer el progreso de retos:", error);
+    return {};
+  }
+}
+
 async function loadExtraMetrics(uid) {
-  const [completed, evidences, posts, comments, collabs] = await Promise.all([
-    countWhere("user_challenges", "userId", uid, d => d.status === "completed"),
+  const [challenges, evidences, posts, comments, collabs] = await Promise.all([
+    loadChallengeMetrics(uid),
     countWhere("evidences", "userId", uid),
     countWhere("forumPosts", "authorId", uid, d => !d.deleted),
     countWhere("forumComments", "authorId", uid, d => !d.deleted),
     countWhere("forumParticipations", "userId", uid)
   ]);
-  const extra = {};
-  if (completed !== null) extra.challengesCompleted = completed;
+  const extra = { ...challenges };
   if (evidences !== null) extra.evidences = evidences;
   if (posts !== null) extra.posts = posts;
   if (comments !== null) extra.comments = comments;
@@ -131,7 +155,7 @@ function renderPlayer() {
 function shareUrl() {
   return new URL("index.html", window.location.href).href;
 }
-const SHARE_TEXT = "Únete a ECRA: misiones verdes, foros comunitarios y logros para cuidar nuestro planeta 🌎🦥";
+const SHARE_TEXT = "Únete a ECRA: retos ecológicos, foros comunitarios y logros para cuidar nuestro planeta 🌎🦥";
 
 function renderShare() {
   const dates = new Set(state.profile?.shareDates || []);
@@ -300,7 +324,7 @@ function tile({ kind, id, def, visual, unlocked, equipped }) {
       ${state.user && !unlocked ? `<span class="reward-lock" aria-label="Bloqueado">🔒</span>` : ""}
       ${equipped ? `<span class="reward-lock" aria-label="Equipado">✅</span>` : ""}
       ${visual}
-      <span class="reward-name">${escapeHTML(def.label)}</span>
+      ${kind === "title" ? "" : `<span class="reward-name">${escapeHTML(def.label)}</span>`}
       <span class="reward-tier tier-${tier}">${TIER_LABELS[tier]}</span>
       <p class="reward-hint">${unlocked && state.user ? (def.blurb ? escapeHTML(def.blurb) : "") : tileHint(kind, id)}</p>
       ${action}

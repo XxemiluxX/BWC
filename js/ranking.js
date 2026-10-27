@@ -13,7 +13,7 @@ const CATEGORY_CHIPS = [
   { id: "water", label: "Agua y nacientes", icon: "💧" },
   { id: "wildlife", label: "Plantas y animales", icon: "🦋" },
   { id: "energy", label: "Luz y energía", icon: "⚡" },
-  { id: "community", label: "Mi barrio", icon: "🧤" },
+  { id: "community", label: "Mi comunidad", icon: "🧤" },
   { id: "consumption", label: "Compras con cabeza", icon: "🛍️" },
   { id: "education", label: "Hablemos del ambiente", icon: "📚" }
 ];

@@ -100,9 +100,9 @@ La Publishable key es apta para código de navegador según la documentación ac
 
 ## Misiones y logros (`missions.html`)
 
-Sección pública con 23 misiones: iniciar sesión (días y rachas), compartir la página, completar misiones verdes y participar en los foros. Al reclamar una misión se ganan XP (niveles Semilla → Selva) y recompensas:
+Sección pública con 44 misiones: iniciar sesión (días y rachas), compartir la página, completar retos ecológicos y participar en los foros. Al reclamar una misión se ganan XP (9 niveles, de Semilla a Guardián/a del planeta) y recompensas:
 
-- **Marcos de perfil** (10 diseños animados en CSS, `.frame-*`), **títulos** bajo el nombre (17) y **fondos** del perfil (5).
+- **Marcos de perfil** (12 diseños animados en CSS, `.frame-*`), **títulos** bajo el nombre (31) y **fondos** del perfil (7).
 - Catálogo y recompensas: `js/missions-data.js`. Página: `js/missions.js`. Estilos: sección 21 de `css/style.css`.
 - Se muestran en el perfil, la clasificación, los foros y el menú superior.
 - Datos nuevos en `users/{uid}`: `totalLogins`, `loginStreak`, `bestStreak`, `lastLoginDate`, `visitedPages`, `themeToggled`, `shareDates`, `claimedMissions`, `equipped`. No requieren cambios en `firestore.rules` (cada persona ya puede actualizar su propio documento).

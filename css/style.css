@@ -3080,3 +3080,64 @@ html[data-theme="dark"] .reward-chip.xp { color: #fcd34d; }
   text-overflow: ellipsis;
   margin: 2px 0;
 }
+
+
+/* ---------- Stickers: que nunca tapen texto (PC y celular) ---------- */
+
+/* Encabezados de página: el perezoso va centrado ARRIBA del título, no encima */
+.sticker--intro {
+  position: relative;
+  display: block;
+  margin: 0 auto var(--space-2);
+  width: var(--s);
+}
+@media (max-width: 768px) {
+  .sticker--intro { --s: 72px; }
+}
+
+/* Tarjeta de perfil: deja libre el rincón del sticker para que no cubra los botones */
+@media (min-width: 769px) {
+  .profile-hero-card { padding-right: calc(var(--space-8) + 130px); }
+}
+
+/* Banner de llamado a la acción: el texto se acorta para no pasar por debajo del sticker */
+@media (min-width: 769px) {
+  .banner-highlight .sticker { right: 12px; bottom: -22px; }
+  .banner-highlight .sticker + div { max-width: min(680px, calc(100% - 210px)) !important; }
+}
+
+/* Portada: cuando la foto baja debajo del texto, el sticker se sube a su esquina */
+@media (max-width: 1024px) {
+  .hero-visual .sticker { top: -34px; left: auto; right: 8px; --s: 92px; }
+}
+
+
+/* ---------- Marcos y fondos añadidos ---------- */
+@keyframes af-twinkle { 0%, 100% { opacity: 0.55; filter: brightness(0.9); } 50% { opacity: 1; filter: brightness(1.5); } }
+@keyframes af-drift { to { transform: rotate(-1turn); } }
+
+.frame-nube {
+  --ring-bg: conic-gradient(#e0f2fe, #93c5fd, #f8fafc, #a7f3d0, #e0f2fe);
+  --badge: "☁️";
+  box-shadow: 0 0 16px -2px rgba(186, 230, 253, 0.85);
+}
+.frame-nube::before { animation: af-drift 14s linear infinite; }
+
+.frame-luciernaga {
+  --ring-bg: repeating-conic-gradient(#fde047 0 6deg, transparent 6deg 24deg),
+             conic-gradient(rgba(190, 242, 100, 0.55), rgba(250, 204, 21, 0.55), rgba(190, 242, 100, 0.55));
+  --badge: "✨";
+  box-shadow: 0 0 18px -1px rgba(250, 224, 71, 0.6);
+}
+.frame-luciernaga::before { animation: af-spin 22s linear infinite, af-twinkle 2.2s ease-in-out infinite; }
+.frame-luciernaga::after { animation: af-twinkle 1.8s ease-in-out infinite; }
+
+.bd-arrecife {
+  --bd: radial-gradient(40% 60% at 15% 100%, rgba(251, 113, 133, 0.55), transparent 70%),
+        radial-gradient(35% 50% at 60% 105%, rgba(251, 191, 36, 0.45), transparent 70%),
+        linear-gradient(160deg, #031b34 0%, #0369a1 55%, #22d3ee 100%);
+}
+.bd-cafetal {
+  --bd: radial-gradient(70% 55% at 85% 0%, rgba(253, 224, 71, 0.5), transparent 70%),
+        linear-gradient(160deg, #2a1608 0%, #6b3f1d 45%, #3f7d4d 100%);
+}

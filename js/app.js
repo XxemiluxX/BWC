@@ -22,7 +22,7 @@ export const ADMIN_EMAIL = "mongemoraemiliano60@gmail.com";
 export const CONTACT_PHONE = "87506973";
 export const CONTACT_EMAIL = "proyecto.ecracr@gmail.com";
 
-// Catálogo completo de misiones verdes accesibles, prácticas y seguras
+// Catálogo completo de retos ecológicos accesibles, prácticos y seguros
 export const CHALLENGES = [
   {
     id: "challenge-1",
@@ -103,10 +103,10 @@ export const CHALLENGES = [
   {
     id: "challenge-5",
     number: 5,
-    title: "Deja limpio un rinconcito de tu barrio",
+    title: "Deja limpio un rinconcito de tu comunidad",
     shortTitle: "Limpieza comunitaria",
     category: "community",
-    categoryLabel: "Mi barrio",
+    categoryLabel: "Mi comunidad",
     difficulty: "Media",
     duration: "45-60 min",
     icon: "🧤",
@@ -445,7 +445,7 @@ export const CHALLENGES = [
   {
     id: "challenge-23",
     number: 23,
-    title: "Conteo de aves en tu patio o barrio",
+    title: "Conteo de aves en tu patio o comunidad",
     shortTitle: "Conteo de aves",
     category: "wildlife",
     categoryLabel: "Plantas y animales",
@@ -486,7 +486,7 @@ export const CHALLENGES = [
     title: "Caminata de limpieza en una quebrada, río o playa",
     shortTitle: "Limpieza de quebrada",
     category: "community",
-    categoryLabel: "Mi barrio",
+    categoryLabel: "Mi comunidad",
     difficulty: "Media",
     duration: "1-2 horas",
     icon: "🌊",
@@ -564,10 +564,10 @@ export const FORUM_CATEGORIES = {
   problem: { label: "Problemas ambientales de mi comunidad", icon: "⚠️", description: "Denuncias constructivas, vertederos clandestinos y puntos críticos." },
   project: { label: "Proyectos sostenibles", icon: "🛠️", description: "Iniciativas en marcha que requieren voluntarios o apoyo vecinal." },
   wildlife: { label: "Protección de flora y fauna", icon: "🦋", description: "Cuidado de especies nativas, rescate y siembra comunitaria." },
-  waste: { label: "Reciclaje y contaminación", icon: "♻️", description: "Centros de acopio, compostaje barrial y reducción de plásticos." },
+  waste: { label: "Reciclaje y contaminación", icon: "♻️", description: "Centros de acopio, compostaje comunitario y reducción de plásticos." },
   water: { label: "Agua y conservación de nacientes", icon: "💧", description: "Cuidado de ríos, cuencas, quebradas y acueductos comunales." },
   education: { label: "Educación ambiental", icon: "📚", description: "Talleres, charlas, guías didácticas y recursos escolares." },
-  idea: { label: "Ideas y propuestas ciudadanas", icon: "💡", description: "Propuestas innovadoras para mejorar barrios y ciudades." },
+  idea: { label: "Ideas y propuestas ciudadanas", icon: "💡", description: "Propuestas innovadoras para mejorar comunidades y ciudades." },
   general: { label: "General", icon: "🌐", description: "Cualquier otro tema ambiental y comunitario." }
 };
 
@@ -918,7 +918,7 @@ export function syncNavigationHeader(user, profile) {
 
   let html = `
     <a class="nav-link ${currentPath === "index.html" || currentPath === "" ? "active" : ""}" href="index.html">Inicio</a>
-    <a class="nav-link ${currentPath === "challenges.html" || currentPath === "challenge.html" ? "active" : ""}" href="challenges.html">Misiones Verdes</a>
+    <a class="nav-link ${currentPath === "challenges.html" || currentPath === "challenge.html" ? "active" : ""}" href="challenges.html">Retos Ecológicos</a>
     <a class="nav-link ${currentPath === "missions.html" ? "active" : ""}" href="missions.html">Misiones</a>
     <a class="nav-link ${currentPath === "forums.html" ? "active" : ""}" href="forums.html">Foros Comunitarios</a>
     <a class="nav-link ${currentPath === "ranking.html" ? "active" : ""}" href="ranking.html">Clasificación</a>
