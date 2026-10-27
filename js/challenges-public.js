@@ -96,9 +96,9 @@ export function openChallengeDetailModal(challengeId) {
     actionsHTML = `
       <div style="background-color: var(--bg-surface-secondary); border-radius: var(--radius-md); padding: var(--space-md); margin-top: var(--space-lg); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-sm);">
         <span style="font-size: 0.875rem; color: var(--text-secondary);">¿Quieres registrar tu progreso y acumular logros en este reto?</span>
-        <div style="display: flex; gap: 8px;">
-          <a href="login.html" class="btn btn-secondary btn-sm">Iniciar sesión</a>
-          <a href="register.html" class="btn btn-primary btn-sm">Crear cuenta</a>
+        <div style="display: flex; gap: 8px;" data-auth-guest>
+          <a href="login.html" data-auth-guest class="btn btn-secondary btn-sm">Iniciar sesión</a>
+          <a href="register.html" data-auth-guest class="btn btn-primary btn-sm">Crear cuenta</a>
         </div>
       </div>
     `;

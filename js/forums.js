@@ -495,7 +495,7 @@ async function openPostDetail(postId) {
         ` : `
           <div style="background-color: var(--bg-surface-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: var(--space-md); text-align: center;">
             <p style="margin-bottom: var(--space-xs); font-size: 0.9rem;">Para participar en la conversación debes iniciar sesión.</p>
-            <a class="btn btn-secondary btn-sm" href="login.html">Iniciar sesión</a>
+            <a class="btn btn-secondary btn-sm" href="login.html" data-auth-guest>Iniciar sesión</a>
           </div>
         `}
       </div>

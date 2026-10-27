@@ -26,6 +26,10 @@ function initCarousel(root) {
 
   function paint(i) {
     current = i;
+    slides.forEach((slide, k) => {
+      slide.classList.toggle("is-active", k === i);
+      slide.setAttribute("aria-hidden", k === i ? "false" : "true");
+    });
     dots.forEach((d, k) => {
       d.classList.toggle("active", k === i);
       if (k === i) d.setAttribute("aria-current", "true"); else d.removeAttribute("aria-current");
@@ -34,7 +38,7 @@ function initCarousel(root) {
 
   function goTo(i) {
     const target = (i + slides.length) % slides.length; // da la vuelta al llegar al final
-    track.scrollTo({ left: target * track.clientWidth, behavior: reduceMotion() ? "auto" : "smooth" });
+    track.scrollTo({ left: slides[target].offsetLeft, behavior: reduceMotion() ? "auto" : "smooth" });
     paint(target);
   }
 
@@ -44,8 +48,8 @@ function initCarousel(root) {
     ticking = true;
     requestAnimationFrame(() => {
       ticking = false;
-      const i = Math.round(track.scrollLeft / track.clientWidth);
-      if (i !== current && i >= 0 && i < slides.length) paint(i);
+      const i = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / track.clientWidth)));
+      if (i !== current) paint(i);
     });
   }, { passive: true });
 
@@ -59,7 +63,7 @@ function initCarousel(root) {
     if (e.key === "ArrowRight") { e.preventDefault(); goTo(current + 1); }
     if (e.key === "ArrowLeft") { e.preventDefault(); goTo(current - 1); }
   });
-  window.addEventListener("resize", () => { track.scrollLeft = current * track.clientWidth; });
+  window.addEventListener("resize", () => { track.scrollLeft = slides[current]?.offsetLeft || 0; });
 
   paint(0);
 }

@@ -901,21 +901,23 @@ export function syncNavigationHeader(user, profile) {
     <a class="nav-link ${currentPath === "ranking.html" ? "active" : ""}" href="ranking.html">Clasificación</a>
   `;
 
-  if (user && profile) {
-    if (profile.role === "admin") {
+  if (user) {
+    // Un fallo temporal al leer el perfil no debe volver a mostrar accesos de visitante.
+    const displayName = profile?.name || user.displayName || user.email?.split("@")[0] || "Mi perfil";
+    if (profile?.role === "admin") {
       html += `<a class="nav-link ${currentPath === "admin.html" ? "active" : ""}" href="admin.html">Moderación</a>`;
     }
     html += `
       <a class="nav-link user-pill ${currentPath === "profile.html" ? "active" : ""}" href="profile.html">
-        <span class="user-pill-avatar">${initials(profile.name)}</span>
-        <span>${escapeHTML(profile.name?.split(" ")[0] || "Mi perfil")}</span>
+        <span class="user-pill-avatar">${initials(displayName)}</span>
+        <span>${escapeHTML(displayName.split(" ")[0] || "Mi perfil")}</span>
       </a>
       <button id="logoutBtn" class="btn btn-ghost btn-sm" type="button" data-logout>Cerrar sesión</button>
     `;
   } else {
     html += `
-      <a class="nav-link ${currentPath === "login.html" ? "active" : ""}" href="login.html">Iniciar sesión</a>
-      <a class="btn btn-primary btn-sm" href="register.html">Participar</a>
+      <a class="nav-link ${currentPath === "login.html" ? "active" : ""}" href="login.html" data-auth-guest>Iniciar sesión</a>
+      <a class="btn btn-primary btn-sm" href="register.html" data-auth-guest>Participar</a>
     `;
   }
 
@@ -1043,6 +1045,10 @@ export async function getRealCommunityMetrics() {
 
 // Escuchar cambios de Auth globalmente
 onAuthStateChanged(auth, async user => {
+  // Determina el estado cuanto antes para ocultar enlaces de acceso en todas las páginas.
+  // La navegación completa se reconstruye después de resolver el perfil de Firestore.
+  document.documentElement.dataset.authenticated = user ? "true" : "false";
+  document.documentElement.dataset.authReady = "true";
   window.ECRA_AUTH_USER = user || null;
   if (user) {
     try {

@@ -3,6 +3,9 @@ import { auth, db } from "./firebase-client.js";
 import {
   collection,
   doc,
+  getDoc,
+  getDocs,
+  where,
   runTransaction,
   updateDoc,
   deleteDoc,
@@ -642,10 +645,19 @@ function openEvidenceReviewModal(evidenceId) {
     if (evt.target.classList.contains("modal-overlay")) close();
   });
 
-  modalRoot.querySelector("#btnApproveEvidence")?.addEventListener("click", async () => {
+  modalRoot.querySelector("#btnApproveEvidence")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = "Aprobando…";
     const comment = modalRoot.querySelector("#modCommentInput").value.trim() || "¡Excelente evidencia! Reto aprobado satisfactoriamente.";
-    await approveEvidence(e.id, comment);
-    close();
+    const approved = await approveEvidence(e.id, comment);
+    if (approved) {
+      close();
+    } else if (button.isConnected) {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
   });
 
   modalRoot.querySelector("#btnRejectEvidence")?.addEventListener("click", async () => {
@@ -655,51 +667,129 @@ function openEvidenceReviewModal(evidenceId) {
   });
 }
 
+async function syncUserCompletedCount(userId) {
+  if (!userId) return;
+  const snap = await getDocs(query(collection(db, "user_challenges"), where("userId", "==", userId)));
+  const completedIds = new Set();
+
+  snap.docs.forEach(document => {
+    const data = document.data();
+    const status = String(data.status || "").trim().toLowerCase();
+    if (!["completed", "approved", "completado", "completada", "finalizado", "finalizada"].includes(status)) return;
+
+    const rawId = String(data.challengeId ?? "").trim();
+    const number = Number(data.challengeNumber ?? rawId.match(/(?:challenge-)?(\d+)/i)?.[1]);
+    const challengeId = CHALLENGES.find(challenge => challenge.id === rawId || challenge.number === number)?.id;
+    if (challengeId) completedIds.add(challengeId);
+  });
+
+  await updateDoc(doc(db, "users", userId), {
+    completed: completedIds.size,
+    updatedAt: serverTimestamp()
+  });
+}
+
+async function findChallengeProgressRef(userId, challenge) {
+  const snap = await getDocs(query(collection(db, "user_challenges"), where("userId", "==", userId)));
+  const matchingDoc = snap.docs.find(item => {
+    const data = item.data() || {};
+    const rawId = String(data.challengeId ?? data.challenge_id ?? "").trim();
+    const number = Number(data.challengeNumber ?? data.challenge_number ?? rawId.match(/(?:challenge-)?(\d+)/i)?.[1]);
+    return rawId === challenge.id || number === challenge.number || item.id === `${userId}_${challenge.id}`;
+  });
+  return matchingDoc?.ref || doc(db, "user_challenges", `${userId}_${challenge.id}`);
+}
+
+function getEvidenceChallenge(ev) {
+  const rawId = String(ev?.challengeId ?? ev?.challenge_id ?? "").trim();
+  const numberFromId = rawId.match(/(?:challenge-)?(\d+)/i)?.[1];
+  const rawNumber = ev?.challengeNumber ?? ev?.challenge_number ?? numberFromId;
+  const number = Number(rawNumber);
+  return CHALLENGES.find(challenge => challenge.id === rawId || (Number.isFinite(number) && challenge.number === number)) || null;
+}
+
+function approvalErrorMessage(error) {
+  const code = String(error?.code || "").toLowerCase();
+  if (code.includes("permission-denied")) return "Firebase denegó el permiso para modificar esta evidencia o su progreso. Revisa las reglas publicadas y la cuenta administradora.";
+  if (code.includes("not-found")) return "No se encontró el registro de la evidencia o del reto. Actualiza el panel y vuelve a intentarlo.";
+  if (code.includes("unavailable") || code.includes("network-request-failed")) return "No se pudo conectar con Firebase. Revisa la conexión e inténtalo de nuevo.";
+  if (error?.message && !code) return error.message;
+  return `Ocurrió un error al aprobar la evidencia${code ? ` (${code})` : ""}. La ventana seguirá abierta para que puedas intentarlo de nuevo.`;
+}
+
 async function approveEvidence(id, moderatorComment) {
   const admin = await requireAdmin();
-  if (!admin) return;
+  if (!admin) return false;
 
   try {
+    // Lee el documento directamente: no depende del estado del panel, que puede estar desactualizado.
     const evRef = doc(db, "evidences", id);
-    const ev = state.evidences.find(x => x.id === id);
+    const evidenceSnap = await getDoc(evRef);
+    if (!evidenceSnap.exists()) {
+      throw new Error("La evidencia ya no existe en Firestore. Actualiza el panel y vuelve a abrirla.");
+    }
+    const ev = evidenceSnap.data() || {};
+    const userId = String(ev.userId ?? ev.uid ?? ev.firebaseUid ?? ev.ownerId ?? "").trim();
+    const challenge = getEvidenceChallenge(ev);
 
-    await updateDoc(evRef, {
-      status: "approved",
-      reviewedAt: nowISO(),
-      reviewedBy: admin.user.uid,
-      moderatorComment
+    if (!userId) throw new Error("Esta evidencia no tiene un identificador de participante; no se modificó su estado.");
+    if (!challenge) throw new Error("No se pudo identificar el reto asociado a esta evidencia. Revisa sus campos challengeId y challengeNumber.");
+
+    // Busca también registros antiguos cuyo ID o formato no coincide con el formato actual.
+    const progressRef = await findChallengeProgressRef(userId, challenge);
+    const reviewedAt = nowISO();
+
+    // La aprobación y el marcado del reto se guardan en una sola transacción para evitar
+    // evidencias que aparezcan aprobadas mientras el reto sigue pendiente (o viceversa).
+    await runTransaction(db, async transaction => {
+      const latestEvidenceSnap = await transaction.get(evRef);
+      const progressSnap = await transaction.get(progressRef);
+      if (!latestEvidenceSnap.exists()) throw new Error("La evidencia ya no existe en Firestore.");
+
+      transaction.update(evRef, {
+        status: "approved",
+        reviewedAt,
+        reviewedBy: admin.user.uid,
+        moderatorComment
+      });
+
+      const progressData = {
+        userId,
+        challengeId: challenge.id,
+        challengeNumber: challenge.number,
+        status: "completed",
+        completedAt: reviewedAt,
+        updatedAt: reviewedAt
+      };
+      if (progressSnap.exists()) transaction.update(progressRef, progressData);
+      else transaction.set(progressRef, progressData);
     });
 
-    // Registrar reto como completado en user_challenges
-    if (ev?.userId && ev?.challengeId) {
-      await updateDoc(doc(db, "user_challenges", `${ev.userId}_${ev.challengeId}`), {
-        status: "completed",
-        updatedAt: nowISO()
-      }).catch(async () => {
-        // Si no existía, crearlo
-        await addDoc(collection(db, "user_challenges"), {
-          userId: ev.userId,
-          challengeId: ev.challengeId,
-          status: "completed",
-          updatedAt: nowISO()
-        });
-      });
+    // El contador del perfil es un dato agregado; no debe convertir una aprobación exitosa
+    // en un error visible si ese contador no se puede recalcular.
+    try {
+      await syncUserCompletedCount(userId);
+    } catch (error) {
+      console.warn("La evidencia se aprobó, pero no se pudo sincronizar el contador del perfil:", error);
     }
 
     await logActivity({
       type: "approved",
       actorUid: admin.user.uid,
       actorName: admin.profile?.name || admin.user.email,
-      userId: ev?.userId || "",
-      userName: ev?.userName || "Participante",
-      challengeNumber: ev?.challengeNumber || 1,
+      userId,
+      userName: ev.userName || "Participante",
+      challengeNumber: challenge.number,
       moderatorComment
     });
 
-    showToast("Evidencia aprobada exitosamente.");
+    // La lista se actualiza por onSnapshot; el mensaje solo indica que la transacción se completó.
+    showToast("Evidencia aprobada exitosamente.", "success");
+    return true;
   } catch (err) {
     console.error("Error al aprobar evidencia:", err);
-    showToast("No se pudo aprobar la evidencia.");
+    showToast(approvalErrorMessage(err), "error");
+    return false;
   }
 }
 
@@ -927,8 +1017,14 @@ async function startAdmin() {
 
   // Escuchar evidencias
   unsubscribers.push(onSnapshot(collection(db, "evidences"), snap => {
-    state.evidences = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // El ID real de Firestore debe prevalecer sobre un posible campo `id` de registros antiguos.
+    // Algunos documentos históricos guardaban su propio `id`, lo que provocaba que updateDoc
+    // apuntara a un documento inexistente y mostrara "No se pudo aprobar la evidencia".
+    state.evidences = snap.docs.map(d => ({ ...d.data(), id: d.id }));
     render();
+  }, error => {
+    console.error("No se pudieron cargar las evidencias:", error);
+    showToast("No se pudieron actualizar las evidencias. Revisa los permisos de Firebase.", "error");
   }));
 
   // Escuchar publicaciones de foros
