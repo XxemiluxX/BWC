@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Panel de administración y moderación comunitaria de ECRA.">
+  <title>Panel de Moderación — ECRA</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%23123322'/%3E%3Ccircle cx='20' cy='20' r='11' fill='none' stroke='%23358b5e' stroke-width='2'/%3E%3Cpath d='M20 9c-4.5 3-7 7.5-7 11.5 0 4 3 7.5 7 7.5s7-3.5 7-7.5C27 16.5 24.5 12 20 9Z' fill='%2349ab77'/%3E%3Cpath d='M20 13c-2.5 2-4 5-4 7.5' stroke='%23123322' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#123322">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>(function(){try{var t=localStorage.getItem('ecra_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+</head>
+<body class="admin-page">
+  <div class="admin-layout">
+    <!-- Barra Lateral de Administración -->
+    <aside class="admin-sidebar">
+      <div>
+        <a class="brand" href="admin.html" aria-label="Panel ECRA">
+          <span class="brand-mark">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="10" fill="#123322"/>
+              <circle cx="20" cy="20" r="11" stroke="#358b5e" stroke-width="2"/>
+              <path d="M20 9C15.5 12 13 16.5 13 20.5C13 24.5 16 28 20 28C24 28 27 24.5 27 20.5C27 16.5 24.5 12 20 9Z" fill="#49ab77"/>
+            </svg>
+          </span>
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 1rem; font-weight: 800; line-height: 1.1;">ECRA Admin</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em;">MODERACIÓN</span>
+          </div>
+        </a>
+
+        <div class="admin-nav-group" style="margin-top: var(--space-xl);">
+          <button class="admin-nav-item active" data-view="dashboard" type="button">
+            <span>📊 Dashboard</span>
+          </button>
+          <button class="admin-nav-item" data-view="evidence" type="button">
+            <span>📷 Evidencias</span>
+            <span id="pendingNavCount" class="status-badge status-pending" style="font-size: 0.7rem; padding: 1px 7px;">0</span>
+          </button>
+          <button class="admin-nav-item" data-view="forums" type="button">
+            <span>💬 Foros e Iniciativas</span>
+            <span id="postsNavCount" class="badge badge-outline" style="font-size: 0.7rem; padding: 1px 7px;">0</span>
+          </button>
+          <button class="admin-nav-item" data-view="reports" type="button">
+            <span>🚩 Reportes Ciudadanos</span>
+            <span id="reportsNavCount" class="status-badge status-rejected" style="font-size: 0.7rem; padding: 1px 7px;">0</span>
+          </button>
+          <button class="admin-nav-item" data-view="users" type="button">
+            <span>👥 Directorio Usuarios</span>
+          </button>
+          <button class="admin-nav-item" data-view="activity" type="button">
+            <span>📜 Bitácora de Actividad</span>
+          </button>
+          <button class="admin-nav-item" data-view="settings" type="button">
+            <span>⚙️ Configuración</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid var(--border-subtle); padding-top: var(--space-md);">
+        <a class="btn btn-ghost btn-sm" href="index.html" style="width: 100%; justify-content: flex-start; margin-bottom: 6px;">
+          🌐 Ver plataforma pública
+        </a>
+        <button id="adminLogoutBtn" class="btn btn-secondary btn-sm" style="width: 100%;" type="button">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- Contenido Principal Administrativo -->
+    <main class="admin-content" style="padding: var(--space-xl); overflow-y: auto;">
+      <div class="flex items-center justify-between mb-xl" style="flex-wrap: wrap; gap: var(--space-md); border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-md);">
+        <div>
+          <span class="eyebrow" style="color: var(--accent-text);">Administración y Moderación</span>
+          <h1 style="font-size: 1.75rem; margin-bottom: 2px;">ECRA</h1>
+          <p class="text-muted" style="margin-bottom: 0; font-size: 0.85rem;">
+            Control de validación de evidencias fotográficas, moderación de foros y trazabilidad.
+          </p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: var(--space-md);">
+          <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">🌙</button>
+          
+          <div class="card" style="padding: 6px 14px; display: flex; align-items: center; gap: 10px; margin: 0; border-radius: var(--radius-pill);">
+            <div class="post-avatar" id="adminAvatar" style="width: 32px; height: 32px; font-size: 0.8rem;" aria-hidden="true">M</div>
+            <div>
+              <strong id="adminUserName" style="display: block; font-size: 0.85rem; line-height: 1.1;">Moderador</strong>
+              <small id="adminUserEmail" class="text-muted" style="font-size: 0.725rem;">admin@bwc.org</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenedor Dinámico de Vistas -->
+      <div id="adminViewRoot" aria-live="polite">
+        <p class="text-muted">Cargando datos administrativos en vivo...</p>
+      </div>
+    </main>
+  </div>
+
+  <div id="adminModalRoot"></div>
+  <div id="toastRoot" class="toast-root"></div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

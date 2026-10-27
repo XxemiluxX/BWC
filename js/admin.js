@@ -3,7 +3,10 @@ import { auth, db } from "./firebase-client.js";
 import {
   collection,
   doc,
+<<<<<<< HEAD
   getDoc,
+=======
+>>>>>>> b94b9b68726dc77b6c11c4f03bfec58f24af8c7f
   getDocs,
   where,
   runTransaction,
@@ -689,6 +692,7 @@ async function syncUserCompletedCount(userId) {
   });
 }
 
+<<<<<<< HEAD
 async function findChallengeProgressRef(userId, challenge) {
   const snap = await getDocs(query(collection(db, "user_challenges"), where("userId", "==", userId)));
   const matchingDoc = snap.docs.find(item => {
@@ -717,6 +721,8 @@ function approvalErrorMessage(error) {
   return `Ocurrió un error al aprobar la evidencia${code ? ` (${code})` : ""}. La ventana seguirá abierta para que puedas intentarlo de nuevo.`;
 }
 
+=======
+>>>>>>> b94b9b68726dc77b6c11c4f03bfec58f24af8c7f
 async function approveEvidence(id, moderatorComment) {
   const admin = await requireAdmin();
   if (!admin) return false;
@@ -765,12 +771,37 @@ async function approveEvidence(id, moderatorComment) {
       else transaction.set(progressRef, progressData);
     });
 
+<<<<<<< HEAD
     // El contador del perfil es un dato agregado; no debe convertir una aprobación exitosa
     // en un error visible si ese contador no se puede recalcular.
     try {
       await syncUserCompletedCount(userId);
     } catch (error) {
       console.warn("La evidencia se aprobó, pero no se pudo sincronizar el contador del perfil:", error);
+=======
+    // Registrar reto como completado en user_challenges; también admite evidencias antiguas
+    // que guardaban el número del reto pero no su ID.
+    const approvedChallengeId = ev?.challengeId || CHALLENGES.find(challenge =>
+      challenge.number === Number(ev?.challengeNumber)
+    )?.id;
+    if (ev?.userId && approvedChallengeId) {
+      await updateDoc(doc(db, "user_challenges", `${ev.userId}_${approvedChallengeId}`), {
+        status: "completed",
+        updatedAt: nowISO()
+      }).catch(async () => {
+        // Si no existía, crearlo
+        await addDoc(collection(db, "user_challenges"), {
+          userId: ev.userId,
+          challengeId: approvedChallengeId,
+          status: "completed",
+          updatedAt: nowISO()
+        });
+      });
+      // Mantener sincronizado el contador agregado del perfil y las estadísticas de inicio.
+      await syncUserCompletedCount(ev.userId).catch(error => {
+        console.warn("No se pudo sincronizar el contador de retos completados:", error);
+      });
+>>>>>>> b94b9b68726dc77b6c11c4f03bfec58f24af8c7f
     }
 
     await logActivity({
