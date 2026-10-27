@@ -11,6 +11,7 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { cosmeticsFromUser, titleChipHTML, FRAMES } from "./missions-data.js";
 
 const {
   CHALLENGES,
@@ -169,6 +170,22 @@ function updateHeroCard() {
   if (nameEl) nameEl.textContent = currentUser.name || "Participante";
   if (emailEl) emailEl.textContent = currentUser.email || "";
   if (avatarEl) avatarEl.textContent = initials(currentUser.name || "U");
+
+  // Recompensas equipadas desde la sección Misiones: marco, título y fondo
+  const cos = cosmeticsFromUser(currentUser);
+  const frameEl = document.getElementById("profileFrame");
+  if (frameEl) frameEl.className = `avatar-frame af-xl${cos.frame && FRAMES[cos.frame] ? ` frame-${cos.frame}` : ""}`;
+  const heroCard = document.querySelector(".profile-hero-card");
+  if (heroCard) {
+    heroCard.classList.remove("has-bd", "bd-nuboso", "bd-noche", "bd-naciente", "bd-atardecer", "bd-arenal");
+    if (cos.backdrop) heroCard.classList.add("has-bd", `bd-${cos.backdrop}`);
+  }
+  const titleRow = document.getElementById("profileTitleRow");
+  if (titleRow) {
+    titleRow.innerHTML = `
+      ${cos.title ? titleChipHTML(cos.title, "title-chip--hero") : ""}
+      <a class="hero-level" href="missions.html"><span aria-hidden="true">${cos.level.icon}</span>${cos.level.label} · ${cos.xp} XP</a>`;
+  }
 
   if (roleBadgeEl) {
     if (isAdmin) {

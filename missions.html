@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Misiones y logros de ECRA: inicia sesión, comparte la página y completa retos para ganar marcos de perfil, títulos y fondos exclusivos.">
+  <title>Misiones y Logros — ECRA</title>
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <meta name="theme-color" content="#123322">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>(function(){try{var t=localStorage.getItem('ecra_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+</head>
+<body>
+  <!-- Encabezado Sticky -->
+  <header class="site-header">
+    <div class="container header-content">
+      <a class="brand" href="index.html" aria-label="Inicio ECRA">
+        <span class="brand-mark"><img src="img/perezoso-logo-sm.png" alt="" width="46" height="46" decoding="async"></span>
+        <span>ECRA</span>
+      </a>
+
+      <nav class="nav-links">
+        <a class="nav-link" href="index.html">Inicio</a>
+        <a class="nav-link" href="challenges.html">Misiones Verdes</a>
+        <a class="nav-link active" href="missions.html">Misiones</a>
+        <a class="nav-link" href="forums.html">Foros Comunitarios</a>
+        <a class="nav-link" href="ranking.html">Clasificación</a>
+        <a class="nav-link" href="login.html" data-auth-guest>Iniciar sesión</a>
+        <a class="btn btn-primary btn-sm" href="register.html" data-auth-guest>Participar</a>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button class="theme-toggle" data-theme-toggle type="button" aria-label="Cambiar tema">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="section container">
+    <div class="page-intro text-center mb-xl" style="position: relative;">
+      <img class="sticker sticker--hide-sm" style="top:-6px;left:-6px;--s:110px;--r:-8deg" src="img/perezoso-sticker.png" alt="" aria-hidden="true" width="110" height="110" loading="lazy" draggable="false">
+      <span class="eyebrow">Misiones y logros</span>
+      <h1>Gana recompensas por cuidar el planeta</h1>
+      <p class="lead">
+        Inicia sesión, comparte ECRA y completa misiones para desbloquear marcos animados para tu foto, títulos bajo tu nombre y fondos para tu perfil. Todo el mundo puede ver el catálogo; las recompensas se activan al iniciar sesión.
+      </p>
+    </div>
+
+    <div id="guestBanner"></div>
+
+    <div class="missions-top">
+      <section id="playerCard" class="player-card" aria-live="polite">
+        <p>Cargando tu progreso…</p>
+      </section>
+      <section id="shareCard" class="card share-card" aria-labelledby="shareTitle"></section>
+    </div>
+
+    <div class="missions-summary">
+      <h2 id="missionsTitle">Misiones</h2>
+      <span id="missionsCount" class="text-muted" aria-live="polite"></span>
+    </div>
+    <div id="missionFilters" class="filter-chips-row" role="group" aria-label="Filtrar misiones por tipo" style="display:flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-5);"></div>
+    <div id="missionGrid" class="mission-grid"></div>
+
+    <div class="missions-summary">
+      <h2>Tu colección</h2>
+    </div>
+    <p class="text-muted" style="margin-top:0">Esto es lo que puedes ganar. Lo desbloqueado se equipa con un clic y se ve en tu perfil, en la clasificación y en los foros.</p>
+    <div id="collection"></div>
+  </main>
+
+  <!-- Pie de Página Estandarizado -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid">
+        <div class="footer-brand-col">
+          <div class="brand">
+            <span class="brand-mark"><img src="img/perezoso-logo-sm.png" alt="" width="46" height="46" decoding="async"></span>
+            <span>ECRA</span>
+          </div>
+          <p style="font-size: 0.9rem; margin-top: var(--space-xs);">
+            Plataforma comunitaria e independiente para promover la sostenibilidad, la educación ambiental y las acciones positivas en los barrios.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Navegación</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="challenges.html">Misiones Verdes</a></li>
+            <li><a href="forums.html">Foros Comunitarios</a></li>
+            <li><a href="profile.html">Mi Perfil</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Áreas de Acción</h4>
+          <ul class="footer-links">
+            <li><a href="challenges.html?cat=waste">Reciclaje y Residuos</a></li>
+            <li><a href="challenges.html?cat=water">Protección de Agua</a></li>
+            <li><a href="challenges.html?cat=wildlife">Flora y Biodiversidad</a></li>
+            <li><a href="forums.html">Foros Ciudadanos</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Contacto</h4>
+          <div class="footer-contact-item">
+            <span>📞</span>
+            <span>Teléfono: <strong>87506973</strong></span>
+          </div>
+          <div class="footer-contact-item">
+            <span>✉️</span>
+            <a href="mailto:proyecto.ecracr@gmail.com" style="text-decoration: underline;">proyecto.ecracr@gmail.com</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aviso Legal Obligatorio de Independencia -->
+      <div class="footer-disclaimer-box">
+        <strong>Aviso de independencia del proyecto:</strong> ECRA es un proyecto independiente desarrollado en el marco de una iniciativa personal de sostenibilidad. No está afiliado, patrocinado ni respaldado oficialmente por United World Colleges (UWC).
+      </div>
+
+      <div class="footer-bottom-bar">
+        <span>© 2026 ECRA. Todos los derechos reservados.</span>
+        <span>Acciones locales para un futuro sostenible 🌿</span>
+      </div>
+    </div>
+  </footer>
+
+  <div id="modalRoot"></div>
+  <div id="toastRoot" class="toast-root"></div>
+
+  <script type="module" src="js/missions.js"></script>
+</body>
+</html>

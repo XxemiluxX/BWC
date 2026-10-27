@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Explora los retos ecológicos de ECRA. Acciones accesibles de reciclaje, protección de nacientes, ahorro de energía y concientización.">
-  <title>Retos Ecológicos — ECRA</title>
+  <meta name="description" content="Explora las misiones verdes de ECRA. Acciones accesibles de reciclaje, protección de nacientes, ahorro de energía y concientización.">
+  <title>Misiones Verdes — ECRA</title>
   <link rel="icon" type="image/png" href="img/favicon.png">
   <meta name="theme-color" content="#123322">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +24,8 @@
 
       <nav class="nav-links">
         <a class="nav-link" href="index.html">Inicio</a>
-        <a class="nav-link active" href="challenges.html">Retos Ecológicos</a>
+        <a class="nav-link active" href="challenges.html">Misiones Verdes</a>
+        <a class="nav-link" href="missions.html">Misiones</a>
         <a class="nav-link" href="forums.html">Foros Comunitarios</a>
         <a class="nav-link" href="ranking.html">Clasificación</a>
         <a class="nav-link" href="login.html" data-auth-guest>Iniciar sesión</a>
@@ -41,15 +42,15 @@
     <div class="text-center mb-xl" style="max-width: 720px; margin-left: auto; margin-right: auto; position: relative;">
       <img class="sticker sticker--right sticker--hide-sm" style="top:-8px;right:-110px;--s:110px;--r:8deg" src="img/perezoso-sticker.png" alt="" aria-hidden="true" width="110" height="110" loading="lazy" draggable="false">
       <span class="eyebrow">Catálogo Abierto de Sostenibilidad</span>
-      <h1>Retos ecológicos para cambiar tu barrio</h1>
+      <h1>Misiones para cambiar tu barrio</h1>
       <p class="lead">
-        Cualquiera puede probar estos retos sin registrarse. Si quieres guardar tu avance, sumar logros o mandar fotos y videos de lo que hiciste, inicia sesión.
+        Cualquiera puede probar estas misiones sin registrarse. Si quieres guardar tu avance, sumar logros o mandar fotos y videos de lo que hiciste, inicia sesión.
       </p>
     </div>
 
     <!-- Barra de Filtros y Búsqueda -->
     <div class="filter-bar">
-      <input id="challengeSearch" class="filter-input" type="text" placeholder="🔍 Buscar por palabra clave, acción o residuo..." aria-label="Buscar retos">
+      <input id="challengeSearch" class="filter-input" type="text" placeholder="🔍 Buscar por palabra clave, acción o residuo..." aria-label="Buscar misiones">
       
       <select id="categoryFilter" class="filter-select" aria-label="Filtrar por categoría">
         <option value="all">Todas las categorías</option>
@@ -73,19 +74,19 @@
     <div id="authStatusBanner" class="card mb-lg hidden" style="padding: 12px 18px; display: none; align-items: center; justify-content: space-between; background-color: var(--forest-50); border-color: var(--forest-200);">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.25rem;">👋</span>
-        <span style="font-size: 0.9rem; color: var(--tint-text); font-weight: 600;">Sesión activa: tu progreso en los retos se sincronizará automáticamente con tu perfil.</span>
+        <span style="font-size: 0.9rem; color: var(--tint-text); font-weight: 600;">Sesión activa: tu progreso en las misiones se sincronizará automáticamente con tu perfil.</span>
       </div>
       <a href="profile.html" class="btn btn-secondary btn-sm" style="border-color: var(--forest-300);">Ver mi panel de progreso</a>
     </div>
 
-    <!-- Grid de Retos -->
+    <!-- Grid de Misiones -->
     <div id="challengesGrid" class="challenges-grid">
       <!-- Se puebla dinámicamente desde js/challenges-public.js -->
     </div>
 
     <div id="noResults" class="empty-state hidden" style="display: none; margin-top: var(--space-xl);">
       <img class="sticker sticker--inline" style="--s:110px;--r:-4deg" src="img/perezoso-sticker.png" alt="" aria-hidden="true" width="110" height="110" loading="lazy" draggable="false">
-      <h3>No encontramos retos con esos filtros</h3>
+      <h3>No encontramos misiones con esos filtros</h3>
       <p class="text-muted">Prueba buscando con otros términos o seleccionando «Todas las categorías».</p>
       <button id="resetFiltersBtn" class="btn btn-secondary btn-sm" style="margin-top: var(--space-sm);">Restablecer filtros</button>
     </div>
@@ -128,7 +129,8 @@
           <h4 class="footer-heading">Navegación</h4>
           <ul class="footer-links">
             <li><a href="index.html">Inicio</a></li>
-            <li><a href="challenges.html">Retos Ecológicos</a></li>
+            <li><a href="challenges.html">Misiones Verdes</a></li>
+            <li><a href="missions.html">Misiones y Logros</a></li>
             <li><a href="forums.html">Foros Comunitarios</a></li>
             <li><a href="ranking.html">Clasificación</a></li>
             <li><a href="profile.html">Mi Perfil</a></li>

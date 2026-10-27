@@ -96,3 +96,14 @@ La Publishable key es apta para código de navegador según la documentación ac
 - Botones con efecto liquid glass verde → naranja (sección 20 de `css/style.css`).
 - Lenguaje más cotidiano: "retos" pasó a "misiones" en toda la interfaz (la R de ECRA se conserva en el inicio) y se reescribieron títulos y categorías.
 - Acceso al panel de administración: `requireAdmin`, `getCurrentProfile` y el menú ahora reconocen la cuenta administradora por su correo, aunque el documento en Firestore diga `participant`.
+
+
+## Misiones y logros (`missions.html`)
+
+Sección pública con 23 misiones: iniciar sesión (días y rachas), compartir la página, completar misiones verdes y participar en los foros. Al reclamar una misión se ganan XP (niveles Semilla → Selva) y recompensas:
+
+- **Marcos de perfil** (10 diseños animados en CSS, `.frame-*`), **títulos** bajo el nombre (17) y **fondos** del perfil (5).
+- Catálogo y recompensas: `js/missions-data.js`. Página: `js/missions.js`. Estilos: sección 21 de `css/style.css`.
+- Se muestran en el perfil, la clasificación, los foros y el menú superior.
+- Datos nuevos en `users/{uid}`: `totalLogins`, `loginStreak`, `bestStreak`, `lastLoginDate`, `visitedPages`, `themeToggled`, `shareDates`, `claimedMissions`, `equipped`. No requieren cambios en `firestore.rules` (cada persona ya puede actualizar su propio documento).
+- Nota: el reclamo se valida en el navegador; para impedir trampas habría que moverlo a una Cloud Function.

@@ -1,5 +1,6 @@
 import "./app.js";
 import { CHALLENGES, escapeHTML, initials, waitForAuth, ADMIN_EMAIL } from "./app.js";
+import { cosmeticsFromUser, avatarHTML, titleChipHTML } from "./missions-data.js";
 import { db } from "./firebase-client.js";
 import {
   collection,
@@ -94,7 +95,7 @@ function rebuildParticipants() {
 
     let person = peopleByUid.get(uid);
     if (!person) {
-      person = { uid, name: data.name || data.email || "", done: new Set() };
+      person = { uid, name: data.name || data.email || "", done: new Set(), cos: cosmeticsFromUser(data) };
       peopleByUid.set(uid, person);
     } else if (!person.name && (data.name || data.email)) {
       person.name = data.name || data.email;
@@ -177,6 +178,7 @@ function buildBoard(category) {
     .map(p => ({
       uid: p.uid,
       name: publicName(p.name),
+      cos: p.cos,
       count: [...p.done].filter(id => ids.has(id)).length
     }))
     .filter(r => r.count > 0)
@@ -240,8 +242,12 @@ function renderStats(board) {
   `;
 }
 
-function avatar(name, large = false) {
-  return `<span class="rank-avatar ${large ? "rank-avatar-lg" : ""}" aria-hidden="true">${escapeHTML(initials(name))}</span>`;
+function avatar(name, large = false, cos = null) {
+  return avatarHTML(name, cos || {}, { size: large ? "lg" : "md", coreClass: `rank-avatar ${large ? "rank-avatar-lg" : ""}` });
+}
+
+function titleLine(cos) {
+  return cos?.title ? titleChipHTML(cos.title) : "";
 }
 
 function levelChip(count) {
@@ -259,9 +265,10 @@ function renderPodium(rows) {
         return `
         <li class="card podium-card place-${place} ${r.uid === state.myUid ? "is-me" : ""}">
           <span class="rank-medal medal-${place}" aria-label="Posición ${r.rank}">${r.rank}</span>
-          ${avatar(r.name, true)}
+          ${avatar(r.name, true, r.cos)}
           <div class="podium-who">
             <strong class="podium-name">${escapeHTML(r.name)}${r.uid === state.myUid ? " (tú)" : ""}</strong>
+            ${titleLine(r.cos)}
             ${levelChip(r.count)}
           </div>
           <div class="podium-score"><b>${r.count}</b><span>${plural(r.count, "misión", "misiones")}</span></div>
@@ -281,12 +288,13 @@ function renderList(rows, total) {
         ${rest.map(r => `
           <li class="rank-row ${r.uid === state.myUid ? "is-me" : ""}">
             <span class="rank-pos">${r.rank}</span>
-            ${avatar(r.name)}
+            ${avatar(r.name, false, r.cos)}
             <div class="rank-who">
               <div class="rank-who-top">
                 <strong>${escapeHTML(r.name)}${r.uid === state.myUid ? " (tú)" : ""}</strong>
                 ${levelChip(r.count)}
               </div>
+              ${r.cos?.title ? `<div style="margin:2px 0 4px">${titleLine(r.cos)}</div>` : ""}
               <div class="rank-bar" role="img" aria-label="${r.count} de ${total} misiones">
                 <span style="width: ${Math.max(4, Math.round((r.count / total) * 100))}%"></span>
               </div>

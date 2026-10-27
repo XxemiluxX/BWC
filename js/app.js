@@ -12,8 +12,10 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  arrayUnion
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { todayKey, yesterdayKey, pageKeyFromPath, avatarHTML, cosmeticsFromUser } from "./missions-data.js";
 
 export const THEME_KEY = "ecra_theme_v2";
 export const ADMIN_EMAIL = "mongemoraemiliano60@gmail.com";
@@ -82,7 +84,7 @@ export const CHALLENGES = [
   {
     id: "challenge-4",
     number: 4,
-    title: "Apagones electricos: desconecta lo que no usas",
+    title: "Caza vampiros eléctricos: desconecta lo que no usas",
     shortTitle: "Ahorro de energía",
     category: "energy",
     categoryLabel: "Luz y energía",
@@ -853,6 +855,7 @@ export function initTheme() {
       const next = current === "dark" ? "light" : "dark";
       localStorage.setItem(THEME_KEY, next);
       applyTheme(next);
+      markThemeToggled();
     });
   });
 
@@ -916,6 +919,7 @@ export function syncNavigationHeader(user, profile) {
   let html = `
     <a class="nav-link ${currentPath === "index.html" || currentPath === "" ? "active" : ""}" href="index.html">Inicio</a>
     <a class="nav-link ${currentPath === "challenges.html" || currentPath === "challenge.html" ? "active" : ""}" href="challenges.html">Misiones Verdes</a>
+    <a class="nav-link ${currentPath === "missions.html" ? "active" : ""}" href="missions.html">Misiones</a>
     <a class="nav-link ${currentPath === "forums.html" ? "active" : ""}" href="forums.html">Foros Comunitarios</a>
     <a class="nav-link ${currentPath === "ranking.html" ? "active" : ""}" href="ranking.html">Clasificación</a>
   `;
@@ -928,7 +932,7 @@ export function syncNavigationHeader(user, profile) {
     }
     html += `
       <a class="nav-link user-pill ${currentPath === "profile.html" ? "active" : ""}" href="profile.html">
-        <span class="user-pill-avatar">${initials(displayName)}</span>
+        ${avatarHTML(displayName, cosmeticsFromUser(profile), { size: "sm", coreClass: "user-pill-avatar" })}
         <span>${escapeHTML(displayName.split(" ")[0] || "Mi perfil")}</span>
       </a>
       <button id="logoutBtn" class="btn btn-ghost btn-sm" type="button" data-logout>Cerrar sesión</button>
@@ -1062,6 +1066,69 @@ export async function getRealCommunityMetrics() {
   }
 }
 
+// --------------------------------------------------------------------------
+// MISIONES Y LOGROS: seguimiento de actividad (días con sesión, racha, páginas…)
+// --------------------------------------------------------------------------
+
+// Suma un día de sesión, calcula la racha y anota la página visitada.
+async function trackActivity(user, profile) {
+  if (!user?.uid || !profile) return profile;
+  const patch = {};
+  const local = {};
+  const today = todayKey();
+
+  if (profile.lastLoginDate !== today) {
+    const streak = profile.lastLoginDate === yesterdayKey() ? (Number(profile.loginStreak) || 0) + 1 : 1;
+    local.lastLoginDate = patch.lastLoginDate = today;
+    local.loginStreak = patch.loginStreak = streak;
+    local.bestStreak = patch.bestStreak = Math.max(Number(profile.bestStreak) || 0, streak);
+    local.totalLogins = patch.totalLogins = (Number(profile.totalLogins) || 0) + 1;
+  }
+
+  const page = pageKeyFromPath();
+  const visited = Array.isArray(profile.visitedPages) ? profile.visitedPages : [];
+  if (page && !visited.includes(page)) {
+    patch.visitedPages = arrayUnion(page);
+    local.visitedPages = [...visited, page];
+  }
+
+  if (!Object.keys(patch).length) return profile;
+  patch.updatedAt = serverTimestamp();
+  await updateDoc(doc(db, "users", user.uid), patch);
+  return { ...profile, ...local };
+}
+
+// Marca que la persona cambió de tema (misión "Modo luciérnaga")
+export async function markThemeToggled() {
+  const user = window.ECRA_AUTH_USER;
+  const profile = window.ECRA_PROFILE;
+  if (!user || !profile || profile.themeToggled) return;
+  profile.themeToggled = true;
+  try {
+    await updateDoc(doc(db, "users", user.uid), { themeToggled: true, updatedAt: serverTimestamp() });
+  } catch (error) {
+    profile.themeToggled = false;
+    console.warn("No se pudo registrar el cambio de tema:", error);
+  }
+}
+
+// Registra que compartió ECRA hoy (cuenta una vez por día para evitar abusos)
+export async function recordShare() {
+  const user = window.ECRA_AUTH_USER;
+  const profile = window.ECRA_PROFILE;
+  if (!user || !profile) return { counted: false, days: 0 };
+  const today = todayKey();
+  const dates = Array.isArray(profile.shareDates) ? profile.shareDates : [];
+  if (dates.includes(today)) return { counted: false, days: new Set(dates).size };
+  await updateDoc(doc(db, "users", user.uid), { shareDates: arrayUnion(today), updatedAt: serverTimestamp() });
+  profile.shareDates = [...dates, today];
+  return { counted: true, days: new Set(profile.shareDates).size };
+}
+
+// Se resuelve cuando ya se conoce (o se descartó) el perfil de la sesión actual.
+let resolveProfileReady;
+export const profileReady = new Promise(resolve => { resolveProfileReady = resolve; });
+
 // Escuchar cambios de Auth globalmente
 onAuthStateChanged(auth, async user => {
   // Determina el estado cuanto antes para ocultar enlaces de acceso en todas las páginas.
@@ -1072,6 +1139,11 @@ onAuthStateChanged(auth, async user => {
   if (user) {
     try {
       window.ECRA_PROFILE = await ensureUserProfile(user);
+      try {
+        window.ECRA_PROFILE = await trackActivity(user, window.ECRA_PROFILE);
+      } catch (error) {
+        console.warn("No se pudo registrar la actividad:", error);
+      }
     } catch (error) {
       console.error("No se pudo sincronizar el perfil:", error);
       // Aunque Firestore falle, la cuenta admin debe seguir viendo su acceso al panel.
@@ -1083,6 +1155,7 @@ onAuthStateChanged(auth, async user => {
     window.ECRA_PROFILE = null;
   }
   syncNavigationHeader(window.ECRA_AUTH_USER, window.ECRA_PROFILE);
+  resolveProfileReady(window.ECRA_PROFILE);
 });
 
 // Inicialización de DOM
@@ -1181,5 +1254,8 @@ window.ECRA = {
   openModal,
   getUserChallengeStatus,
   setChallengeProgress,
-  getRealCommunityMetrics
+  getRealCommunityMetrics,
+  recordShare,
+  markThemeToggled,
+  profileReady
 };

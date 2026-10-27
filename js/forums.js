@@ -1,5 +1,6 @@
 import "./app.js";
 import { auth, db } from "./firebase-client.js";
+import { cosmeticsFromUser, avatarHTML, titleChipHTML } from "./missions-data.js";
 import {
   collection,
   getDocs,
@@ -31,6 +32,24 @@ const {
   isConfiguredAdmin,
   nowISO
 } = window.ECRA;
+
+// Recompensas de las misiones (marco y título) por autor, para mostrarlas junto al nombre
+let cosmeticsByUid = {};
+async function loadCosmetics() {
+  try {
+    const snap = await getDocs(collection(db, "users"));
+    const map = {};
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (data.role === "admin") return;
+      const cos = cosmeticsFromUser(data);
+      if (cos.frame || cos.title) map[d.id] = cos;
+    });
+    cosmeticsByUid = map;
+  } catch (error) {
+    console.warn("No se pudieron cargar los marcos y títulos:", error);
+  }
+}
 
 let currentUser = null;
 let allPosts = [];
@@ -115,9 +134,10 @@ function renderPostCard(post) {
   return `
     <article class="post-card reveal" data-post-id="${post.id}" data-category="${post.category}">
       <div class="post-header">
-        <div class="post-avatar" aria-hidden="true">${escapeHTML(authorInitial)}</div>
+        ${avatarHTML(post.authorName || "C", cosmeticsByUid[post.authorId], { size: "post", coreClass: "post-avatar" })}
         <div class="post-meta">
           <div class="post-author">${escapeHTML(post.authorName || "Miembro de la comunidad")}</div>
+          ${cosmeticsByUid[post.authorId]?.title ? titleChipHTML(cosmeticsByUid[post.authorId].title) : ""}
           <div class="post-date">Publicado el ${formatDateShort(post.createdAt)}</div>
         </div>
         <div>
@@ -660,10 +680,10 @@ async function loadCommentsForDetail(postId, rootEl) {
 
       return `
         <div class="comment-card" data-comment-id="${c.id}">
-          <div class="post-avatar" style="width: 34px; height: 34px; font-size: 0.8rem;" aria-hidden="true">${escapeHTML(initial)}</div>
+          ${avatarHTML(c.authorName || "C", cosmeticsByUid[c.authorId], { size: "xs", coreClass: "post-avatar" })}
           <div class="comment-content">
             <div class="comment-header">
-              <span class="comment-author">${escapeHTML(c.authorName || "Anónimo")}</span>
+              <span class="name-stack"><span class="comment-author">${escapeHTML(c.authorName || "Anónimo")}</span>${cosmeticsByUid[c.authorId]?.title ? titleChipHTML(cosmeticsByUid[c.authorId].title) : ""}</span>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="comment-date">${formatDate(c.createdAt)}</span>
                 ${canDelete ? `
@@ -991,6 +1011,7 @@ async function initForumsPage() {
 
   await ensureCurrentUser();
 
+  await loadCosmetics();
   await loadPosts();
 
   // forums.html?new=1 abre directamente el formulario de nueva publicación
