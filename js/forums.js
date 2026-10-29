@@ -162,13 +162,82 @@ async function compressForumImage(file) {
 function safeForumImageUrl(value) {
   if (typeof value !== "string" || !value.trim()) return "";
   try {
-    const url = new URL(value);
+    const url = new URL(value.trim());
     const isSupabasePublicImage = url.hostname.endsWith(".supabase.co")
       && url.pathname.includes(`/storage/v1/object/public/${SUPABASE_BUCKET}/`);
     return url.protocol === "https:" && isSupabasePublicImage ? url.href : "";
   } catch {
     return "";
   }
+}
+
+// Acepta tanto imageUrl como imageURL (formato que ya utiliza el módulo de evidencias)
+// y puede reconstruir la URL pública cuando la publicación solo guardó la ruta del archivo.
+function forumImageUrl(post = {}) {
+  const candidates = [post.imageUrl, post.imageURL, post.coverImageUrl, post.coverURL, post.photoURL];
+  for (const candidate of candidates) {
+    const validUrl = safeForumImageUrl(candidate);
+    if (validUrl) return validUrl;
+  }
+
+  const storagePath = post.imageStoragePath || post.storagePath || post.photoPath;
+  if (typeof storagePath === "string" && storagePath.trim() && supabase) {
+    try {
+      const { data } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(storagePath.trim());
+      return safeForumImageUrl(data?.publicUrl);
+    } catch (error) {
+      console.warn("No se pudo reconstruir la URL de la portada del foro:", error);
+    }
+  }
+  return "";
+}
+
+// getPublicUrl() genera una URL, pero no confirma que el bucket sea público.
+// Validamos la foto antes de guardar la publicación para evitar portadas rotas.
+function verifyForumImageIsPublic(url, timeoutMs = 12000) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    let settled = false;
+    const finish = (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      image.onload = null;
+      image.onerror = null;
+      if (error) reject(error);
+      else resolve(true);
+    };
+    const timer = setTimeout(() => finish(new Error(
+      "No se pudo comprobar que la foto sea pública. Revisa el bucket 'evidence' en Supabase Storage y vuelve a ejecutar el archivo supabase.sql."
+    )), timeoutMs);
+    image.onload = () => finish();
+    image.onerror = () => finish(new Error(
+      "La foto se subió, pero no se puede ver públicamente. En Supabase, abre Storage → evidence y activa 'Public bucket'; después ejecuta supabase.sql y vuelve a publicar la iniciativa."
+    ));
+    image.src = url;
+  });
+}
+
+function bindForumImageFallbacks(root = document) {
+  root.querySelectorAll("img[data-forum-image]").forEach((img) => {
+    if (img.dataset.errorBound === "true") return;
+    img.dataset.errorBound = "true";
+    img.addEventListener("error", () => {
+      const cover = img.closest(".post-cover");
+      const container = cover || img.parentElement;
+      if (!container) {
+        img.hidden = true;
+        return;
+      }
+      img.remove();
+      container.classList.add("post-image-load-error");
+      if (cover) container.style.minHeight = "180px";
+      const note = document.createElement("span");
+      note.className = "post-cover-error";
+      note.textContent = "No se pudo cargar la foto. Revisa que el bucket evidence de Supabase sea público.";
+      container.appendChild(note);
+    }, { once: true });
+  });
 }
 
 function firestoreErrorMessage(err, action = "guardar") {
@@ -199,13 +268,13 @@ function renderPostCard(post) {
   const pType = FORUM_TYPES[post.type] || FORUM_TYPES.idea;
   const commentsCount = Number(post.commentsCount || 0);
   const participantsCount = Number(post.participantsCount || 0);
-  const postImage = safeForumImageUrl(post.imageUrl);
+  const postImage = forumImageUrl(post);
 
   return `
     <article class="post-card reveal" data-post-id="${post.id}" data-category="${post.category}">
       ${postImage ? `
         <div class="post-cover">
-          <img src="${escapeHTML(postImage)}" alt="Portada de ${escapeHTML(post.title || "la iniciativa")}" loading="lazy" decoding="async">
+          <img data-forum-image src="${escapeHTML(postImage)}" alt="Portada de ${escapeHTML(post.title || "la iniciativa")}" loading="eager" decoding="async">
         </div>
       ` : ""}
       <div class="post-header">
@@ -290,6 +359,7 @@ function filterAndRenderPosts() {
   }
 
   bindPostGridEvents();
+  bindForumImageFallbacks(grid);
 }
 
 function bindPostGridEvents() {
@@ -535,8 +605,10 @@ async function openCreatePostModal() {
         }
 
         const { data: publicData } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(imageStoragePath);
-        imageUrl = publicData?.publicUrl || "";
-        if (!imageUrl) throw new Error("La fotografía se subió, pero no se pudo obtener su enlace público.");
+        imageUrl = safeForumImageUrl(publicData?.publicUrl);
+        if (!imageUrl) throw new Error("La fotografía se subió, pero no se pudo obtener una URL pública válida.");
+        submitBtn.textContent = "Comprobando la portada…";
+        await verifyForumImageIsPublic(imageUrl);
       }
 
       submitStage = "guardar la publicación";
@@ -587,7 +659,7 @@ async function openPostDetail(postId) {
 
   const cat = FORUM_CATEGORIES[post.category] || FORUM_CATEGORIES.general;
   const pType = FORUM_TYPES[post.type] || FORUM_TYPES.idea;
-  const postImage = safeForumImageUrl(post.imageUrl);
+  const postImage = forumImageUrl(post);
   const isAuthor = currentUser && currentUser.id === post.authorId;
   const isAdmin = currentUser && (currentUser.isAdmin || isConfiguredAdmin(currentUser.email));
 
@@ -609,7 +681,7 @@ async function openPostDetail(postId) {
       <button class="modal-close-btn" data-close type="button" aria-label="Cerrar">✕</button>
     </div>
 
-    ${postImage ? `<img class="post-detail-image" src="${escapeHTML(postImage)}" alt="Fotografía de la iniciativa: ${escapeHTML(post.title || "publicación comunitaria")}" loading="lazy" decoding="async">` : ""}
+    ${postImage ? `<img data-forum-image class="post-detail-image" src="${escapeHTML(postImage)}" alt="Fotografía de la iniciativa: ${escapeHTML(post.title || "publicación comunitaria")}" loading="eager" decoding="async">` : ""}
 
     <!-- Descripción Principal -->
     <div style="margin-bottom: var(--space-lg); line-height: 1.6; color: var(--text-primary); font-size: 1rem; white-space: pre-line;">
@@ -690,6 +762,7 @@ async function openPostDetail(postId) {
       </div>
     </div>
   `);
+  bindForumImageFallbacks(modal.root);
 
   // Listener para colaborar
   modal.root.querySelector("#btnParticipateInDetail")?.addEventListener("click", () => {
