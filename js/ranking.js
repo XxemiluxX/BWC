@@ -368,7 +368,7 @@ function renderAside(board) {
                 <div class="rank-bar"><span style="width: ${Math.round((count / max) * 100)}%"></span></div>
               </div>
             </li>`).join("")}
-        </ul>` : `<p class="text-muted" style="font-size: 0.9rem;">Cuando haya misiones aprobadas, aquí verás cuáles son las favoritas.</p>`}
+        </ul>` : `<p class="text-muted" style="font-size: 0.9rem;">Cuando haya retos ecológicos aprobados, aquí verás cuáles son los favoritos.</p>`}
     </section>
 
     <section class="card" aria-labelledby="levelsTitle">
