@@ -5,12 +5,14 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isConfiguredAdmin() {
-      return signedIn()
-        && request.auth.token.email != null
-        && request.auth.token.email == 'mongemoraemiliano60@gmail.com';
-    }
-
+   function isConfiguredAdmin() {
+  return signedIn()
+    && request.auth.token.email != null
+    && request.auth.token.email in [
+      'mongemoraemiliano60@gmail.com',
+      'proyecto.ecracr@gmail.com'
+    ];
+}
     function isAdmin() {
       return isConfiguredAdmin();
     }

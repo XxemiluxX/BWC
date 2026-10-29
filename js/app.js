@@ -19,6 +19,11 @@ import { todayKey, yesterdayKey, pageKeyFromPath, avatarHTML, cosmeticsFromUser 
 
 export const THEME_KEY = "ecra_theme_v2";
 export const ADMIN_EMAIL = "mongemoraemiliano60@gmail.com";
+
+const ADMIN_EMAILS = [
+  ADMIN_EMAIL,
+  "proyecto.ecracr@gmail.com"
+];
 export const CONTACT_PHONE = "87506973";
 export const CONTACT_EMAIL = "proyecto.ecracr@gmail.com";
 
@@ -669,7 +674,9 @@ export function normalize(value = "") {
 export function isConfiguredAdmin(userOrProfile) {
   // Acepta un objeto con .email (usuario o perfil) o directamente el correo como texto.
   const raw = typeof userOrProfile === "string" ? userOrProfile : (userOrProfile?.email || "");
-  return normalize(raw) === normalize(ADMIN_EMAIL);
+ return ADMIN_EMAILS.some(
+  email => normalize(email) === normalize(raw)
+);
 }
 
 // Asegura que exista el perfil en Cloud Firestore y mantiene el rol admin sincronizado
