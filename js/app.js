@@ -559,7 +559,7 @@ export const CHALLENGES = [
 ];
 
 export const FORUM_CATEGORIES = {
-  campaign: { label: "Campañas ecológicas", icon: "", description: "Jornadas, firmas, reforestación y actividades colectivas." },
+  campaign: { label: "Campañas ecológicas", icon: "🌱", description: "Jornadas, firmas, reforestación y actividades colectivas." },
   problem: { label: "Problemas ambientales de mi comunidad", icon: "", description: "Denuncias constructivas, vertederos clandestinos y puntos críticos." },
   project: { label: "Proyectos sostenibles", icon: "", description: "Iniciativas en marcha que requieren voluntarios o apoyo vecinal." },
   wildlife: { label: "Protección de flora y fauna", icon: "", description: "Cuidado de especies nativas, rescate y siembra comunitaria." },
@@ -583,7 +583,7 @@ export const FORUM_TYPES = {
   idea: { label: "Idea", icon: "" },
   campaign: { label: "Campaña", icon: "" },
   problem: { label: "Problema", icon: "" },
-  project: { label: "Proyecto", icon: "" }
+  project: { label: "Proyecto", icon: "🌱" }
 };
 
 // Opciones de colaboración voluntaria
@@ -789,6 +789,9 @@ export function showToast(message, type = "info") {
   }, 3400);
 }
 
+// Modal accesible e interactivo con cierre ESC y clic fuera.
+// Si el contenido no trae su propio .modal-overlay, se envuelve aquí: antes los
+// modales de foros/perfil se pintaban sin contenedor al final de la página y no se veían.
 export function openModal(html) {
   let root = document.getElementById("modalRoot") || document.getElementById("adminModalRoot");
   if (!root) {
@@ -1062,6 +1065,8 @@ export async function getRealCommunityMetrics() {
   }
 }
 
+
+// Suma un día de sesión, calcula la racha y anota la página visitada.
 async function trackActivity(user, profile) {
   if (!user?.uid || !profile) return profile;
   const patch = {};
@@ -1156,6 +1161,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireLogout();
   togglePasswordVisibility();
 });
+
 
 const SPOTLIGHT_SELECTOR = ".card, .pillar-card, .challenge-card, .post-card, .metric-card, .progress-card, .admin-stat-card";
 const REVEAL_SELECTOR = ".pillar-card, .challenge-card, .post-card, .metric-item, .metric-card, .card, .banner-highlight, .filter-bar, .profile-hero-card, .empty-state";
