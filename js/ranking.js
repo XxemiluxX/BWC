@@ -8,20 +8,20 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const CATEGORY_CHIPS = [
-  { id: "all", label: "General", icon: "🏆" },
-  { id: "waste", label: "Reciclaje y basura", icon: "♻️" },
-  { id: "water", label: "Agua y nacientes", icon: "💧" },
-  { id: "wildlife", label: "Plantas y animales", icon: "🦋" },
-  { id: "energy", label: "Luz y energía", icon: "⚡" },
-  { id: "community", label: "Mi comunidad", icon: "🧤" },
-  { id: "consumption", label: "Compras con cabeza", icon: "🛍️" },
-  { id: "education", label: "Hablemos del ambiente", icon: "📚" }
+  { id: "all", label: "General", icon: "" },
+  { id: "waste", label: "Reciclaje y basura", icon: "" },
+  { id: "water", label: "Agua y nacientes", icon: "" },
+  { id: "wildlife", label: "Plantas y animales", icon: "" },
+  { id: "energy", label: "Luz y energía", icon: "" },
+  { id: "community", label: "Mi comunidad", icon: "" },
+  { id: "consumption", label: "Compras con cabeza", icon: "" },
+  { id: "education", label: "Hablemos del ambiente", icon: "" }
 ];
 
 // Niveles según misiones cumplidas (se muestran en la tarjeta lateral)
 const LEVELS = [
-  { min: 15, label: "Bosque", icon: "🌲" },
-  { min: 8, label: "Árbol", icon: "🌳" },
+  { min: 15, label: "Bosque", icon: "" },
+  { min: 8, label: "Árbol", icon: "" },
   { min: 3, label: "Brote", icon: "🌿" },
   { min: 1, label: "Semilla", icon: "🌱" }
 ];
@@ -405,7 +405,7 @@ function renderLoading() {
 function renderError() {
   $("rankMain").innerHTML = `
     <div class="empty-state">
-      <div class="empty-state-icon" aria-hidden="true">⚠️</div>
+      <div class="empty-state-icon" aria-hidden="true"></div>
       <h3>No pudimos cargar la clasificación</h3>
       <p class="text-muted">Revisa tu conexión e inténtalo de nuevo.</p>
       <button id="rankRetry" class="btn btn-secondary btn-sm" type="button" style="margin-top: var(--space-sm);">Reintentar</button>

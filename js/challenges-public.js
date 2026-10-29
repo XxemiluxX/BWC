@@ -8,13 +8,14 @@ import {
   setChallengeProgress,
   waitForAuth
 } from "./app.js";
+import { getWeeklyChallengeInfo, getChallengeExperience } from "./challenge-features.js";
 
 let userChallengeMap = {};
 let currentUser = null;
 
 const STATUS_LABELS = {
   completed: { label: "Completado", class: "status-approved", icon: "✓" },
-  in_progress: { label: "En progreso", class: "status-pending", icon: "⏳" },
+  in_progress: { label: "En progreso", class: "status-pending", icon: "" },
   not_started: { label: "Por empezar", class: "status-neutral", icon: "○" }
 };
 
@@ -27,16 +28,20 @@ function getChallengeStatus(challengeId) {
 function renderChallengeCard(c) {
   const status = getChallengeStatus(c.id);
   const statusInfo = status ? STATUS_LABELS[status] : null;
+  const reward = getChallengeExperience(c);
+  const difficultyKey = ({ Principiante: "beginner", Intermedio: "intermediate", Avanzado: "advanced" })[c.difficulty] || "beginner";
 
   return `
-    <article class="challenge-card" data-id="${c.id}" data-category="${c.category}" data-difficulty="${c.difficulty}">
+    <article class="challenge-card ${reward.isWeekly ? "is-weekly-challenge" : ""}" data-id="${c.id}" data-category="${c.category}" data-difficulty="${c.difficulty}">
       <div>
         <div class="challenge-header">
           <div class="challenge-icon-box" aria-hidden="true">${c.icon}</div>
           <div class="challenge-badge-row">
-            <span class="badge badge-difficulty">${c.difficulty}</span>
-            <span class="badge badge-duration">⏱️ ${c.duration}</span>
-            ${statusInfo ? `<span class="status-badge ${statusInfo.class}">${statusInfo.icon} ${statusInfo.label}</span>` : ""}
+            <span class="badge badge-difficulty difficulty-${difficultyKey}">${c.difficulty}</span>
+            <span class="badge badge-duration">${c.duration}</span>
+            <span class="badge challenge-xp-badge">${reward.xp} XP${reward.isWeekly ? " · x2" : ""}</span>
+            ${reward.isWeekly ? `<span class="badge badge-weekly">Reto semanal</span>` : ""}
+            ${statusInfo ? `<span class="status-badge ${statusInfo.class}">${statusInfo.icon ? `${statusInfo.icon} ` : ""}${statusInfo.label}</span>` : ""}
           </div>
         </div>
 
@@ -63,6 +68,7 @@ export function openChallengeDetailModal(challengeId) {
   const status = getChallengeStatus(c.id) || "not_started";
   const isCompleted = status === "completed";
   const isInProgress = status === "in_progress";
+  const reward = getChallengeExperience(c);
 
   const checklistHTML = (c.concreteActions || []).map((action, idx) => `
     <label style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; cursor: pointer; font-size: 0.925rem; line-height: 1.5;">
@@ -77,15 +83,15 @@ export function openChallengeDetailModal(challengeId) {
       <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-lg); border-top: 1px solid var(--border-subtle); padding-top: var(--space-md);">
         ${!isCompleted ? `
           <a id="sendEvidenceBtn" href="challenge.html?id=${c.id}" class="btn btn-primary">
-            📷 Enviar foto o video para completar
+            Enviar foto o video para completar
           </a>
         ` : `
-          <span class="status-badge status-approved">🟢 Misión cumplida</span>
+          <span class="status-badge status-approved">Misión cumplida</span>
         `}
 
         ${!isInProgress && !isCompleted ? `
           <button id="startChallengeBtn" class="btn btn-secondary" type="button">
-            ⏳ Marcar como en progreso
+            Marcar como en progreso
           </button>
         ` : ""}
 
@@ -116,8 +122,12 @@ export function openChallengeDetailModal(challengeId) {
         </div>
 
         <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+          <div class="challenge-modal-reward ${reward.isWeekly ? "is-weekly" : ""}">
+            <span aria-hidden="true"></span>
+            <div><strong>Gana ${reward.xp} XP</strong><p>${reward.isWeekly ? "¡Doble experiencia por el reto ecológico de la semana!" : `Recompensa base: ${reward.baseXp} XP.`} La experiencia se acredita cuando moderación aprueba tu evidencia.</p></div>
+          </div>
           <div>
-            <h4 style="margin-bottom: 6px;">📋 Instrucciones de la misión</h4>
+            <h4 style="margin-bottom: 6px;">Instrucciones de la misión</h4>
             <p>${escapeHTML(c.instruction)}</p>
           </div>
 
@@ -127,7 +137,7 @@ export function openChallengeDetailModal(challengeId) {
           </div>
 
           <div>
-            <h4 style="margin-bottom: 6px;">🌍 ¿Por qué es importante?</h4>
+            <h4 style="margin-bottom: 6px;">¿Por qué es importante?</h4>
             <p class="text-muted" style="margin-bottom: 0;">${escapeHTML(c.whyItMatters)}</p>
           </div>
 
@@ -151,6 +161,51 @@ export function openChallengeDetailModal(challengeId) {
   });
 }
 
+function renderWeeklyChallengeBanner() {
+  const container = document.getElementById("weeklyChallengeBanner");
+  if (!container) return;
+
+  const info = getWeeklyChallengeInfo();
+  const challenge = info.challenge;
+  const reward = getChallengeExperience(challenge, info.weekStart);
+  const dateFormat = new Intl.DateTimeFormat("es-CR", { day: "numeric", month: "short" });
+  const period = `${dateFormat.format(info.weekStart)} – ${dateFormat.format(info.weekEnd)}`;
+  const difficultyKey = ({ Principiante: "beginner", Intermedio: "intermediate", Avanzado: "advanced" })[challenge.difficulty] || "beginner";
+
+  container.innerHTML = `
+    <div class="weekly-challenge-card">
+      <div class="weekly-challenge-main">
+        <div class="weekly-challenge-topline">
+          <span class="weekly-challenge-kicker">RETO ECOLÓGICO DE LA SEMANA</span>
+          <span class="weekly-challenge-dates">${period}</span>
+        </div>
+        <div class="weekly-challenge-title-row">
+          <span class="weekly-challenge-icon" aria-hidden="true">${challenge.icon}</span>
+          <div>
+            <span class="badge badge-difficulty difficulty-${difficultyKey}">${challenge.difficulty}</span>
+            <h2>${escapeHTML(challenge.title)}</h2>
+          </div>
+        </div>
+        <p>${escapeHTML(challenge.summary)}</p>
+        <div class="weekly-challenge-meta">
+          <span>${escapeHTML(challenge.duration)}</span>
+          <span>🌱 ${escapeHTML(challenge.categoryLabel)}</span>
+          <span>${reward.baseXp} XP normal</span>
+          <strong>×2 = ${reward.xp} XP</strong>
+        </div>
+        <p class="weekly-challenge-note">El doble de experiencia se acredita cuando una persona moderadora aprueba tu evidencia. Si la envías esta semana, conserva el bono aunque la revisión ocurra después.</p>
+      </div>
+      <div class="weekly-challenge-action">
+        <strong>¡Participa y comparte tus resultados!</strong>
+        <button class="btn btn-primary" type="button" data-weekly-view="${challenge.id}">Ver misión y participar →</button>
+      </div>
+    </div>`;
+
+  container.querySelector("[data-weekly-view]")?.addEventListener("click", event => {
+    openChallengeDetailModal(event.currentTarget.dataset.weeklyView);
+  });
+}
+
 function filterChallenges() {
   const searchTerm = (document.getElementById("challengeSearch")?.value || "").trim().toLowerCase();
   const categoryFilter = document.getElementById("categoryFilter")?.value || "all";
@@ -160,6 +215,7 @@ function filterChallenges() {
 
   if (!grid) return;
 
+  const weeklyId = getWeeklyChallengeInfo().challenge.id;
   const filtered = CHALLENGES.filter(c => {
     const matchesSearch = !searchTerm ||
       c.title.toLowerCase().includes(searchTerm) ||
@@ -178,7 +234,8 @@ function filterChallenges() {
     noResults?.style.setProperty("display", "block");
   } else {
     noResults?.style.setProperty("display", "none");
-    grid.innerHTML = filtered.map(renderChallengeCard).join("");
+    const ordered = [...filtered].sort((a, b) => Number(b.id === weeklyId) - Number(a.id === weeklyId));
+    grid.innerHTML = ordered.map(renderChallengeCard).join("");
   }
 
   // Vincular clics en las tarjetas
@@ -203,6 +260,8 @@ async function init() {
       catSelect.value = initialCategory;
     }
   }
+
+  renderWeeklyChallengeBanner();
 
   const user = await waitForAuth();
   if (user) {

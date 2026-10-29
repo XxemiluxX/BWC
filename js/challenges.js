@@ -3,6 +3,7 @@ import {
   collection, getDocs, addDoc, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { supabase, SUPABASE_BUCKET, assertSupabaseConfigured } from "./supabase-client.js";
+import { getChallengeExperience } from "./challenge-features.js";
 
 const { db, CHALLENGES, requireParticipant, formatDate, escapeHTML, showToast, uid, setChallengeProgress } = window.ECRA;
 
@@ -86,6 +87,7 @@ async function render() {
   const urlParams = new URLSearchParams(window.location.search);
   const requestedId = urlParams.get("id");
   let challenge = CHALLENGES.find(c => c.id === requestedId) || CHALLENGES[0];
+  const challengeReward = getChallengeExperience(challenge);
 
   const ev = latestEvidenceFrom(evidences, challenge.id);
   const status = ev?.status || "none";
@@ -94,21 +96,21 @@ async function render() {
   if (status === "pending") {
     stateHTML = `
       <div class="card mb-lg" style="background-color: var(--status-pending-bg); border-color: var(--status-pending-border); padding: var(--space-md);">
-        <strong style="color: var(--status-pending-text); display: block; margin-bottom: 4px;">🟡 Evidencia en revisión</strong>
+        <strong style="color: var(--status-pending-text); display: block; margin-bottom: 4px;">Evidencia en revisión</strong>
         <small style="color: var(--status-pending-text);">Tu evidencia fue enviada correctamente. La misión se marcará como cumplida cuando el equipo de moderación la apruebe.</small>
       </div>
     `;
   } else if (status === "approved") {
     stateHTML = `
       <div class="card mb-lg" style="background-color: var(--status-approved-bg); border-color: var(--status-approved-border); padding: var(--space-md);">
-        <strong style="color: var(--status-approved-text); display: block; margin-bottom: 4px;">🟢 ¡Evidencia aprobada!</strong>
+        <strong style="color: var(--status-approved-text); display: block; margin-bottom: 4px;">¡Evidencia aprobada!</strong>
         <small style="color: var(--status-approved-text);">Tu acción fue validada por el moderador. ¡Gracias por tu compromiso ambiental!</small>
       </div>
     `;
   } else if (status === "rejected") {
     stateHTML = `
       <div class="card mb-lg" style="background-color: var(--status-rejected-bg); border-color: var(--status-rejected-border); padding: var(--space-md);">
-        <strong style="color: var(--status-rejected-text); display: block; margin-bottom: 4px;">🔴 Tu evidencia necesita corrección</strong>
+        <strong style="color: var(--status-rejected-text); display: block; margin-bottom: 4px;">Tu evidencia necesita corrección</strong>
         <small style="color: var(--status-rejected-text);">${ev.moderatorComment ? escapeHTML(ev.moderatorComment) : "El moderador solicitó una nueva foto o video más claro."}</small>
       </div>
     `;
@@ -139,7 +141,7 @@ async function render() {
       <div style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: var(--space-md);">
         <div class="challenge-icon-box" style="font-size: 2rem;">${challenge.icon}</div>
         <div>
-          <span class="eyebrow">${escapeHTML(challenge.categoryLabel)} · Dificultad: ${challenge.difficulty}</span>
+          <span class="eyebrow">${escapeHTML(challenge.categoryLabel)} · ${challenge.difficulty} · ${challengeReward.xp} XP${challengeReward.isWeekly ? " · DOBLE XP ESTA SEMANA" : ""}</span>
           <h2 style="font-size: 1.5rem; margin-bottom: 4px;">${escapeHTML(challenge.title)}</h2>
           <p class="text-muted" style="margin-bottom: 0;">${escapeHTML(challenge.instruction)}</p>
         </div>
@@ -151,7 +153,7 @@ async function render() {
         <input id="evidenceInput" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" style="display: none;" ${isLocked ? "disabled" : ""}>
         
         <label for="evidenceInput" style="cursor: ${isLocked ? "default" : "pointer"}; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-          <div style="font-size: 2.5rem;">📷 🎥</div>
+          <div style="font-size: 2.5rem;"></div>
           <strong style="font-size: 1.05rem;">Haz clic para seleccionar una foto o un video</strong>
           <small class="text-muted">Fotos JPG, PNG o WebP (hasta 15 MB) · Videos MP4, WebM o MOV (hasta 50 MB)</small>
         </label>
@@ -244,7 +246,7 @@ async function render() {
         previewVideo.src = previewUrl;
         previewVideo.style.display = "block";
       }
-      fileName.textContent = `${kind === "video" ? "🎥" : "📷"} ${file.name} · ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+      fileName.textContent = `${kind === "video" ? "" : ""} ${file.name} · ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
     } catch (error) {
       selectedFile = null;
       selectedKind = null;
