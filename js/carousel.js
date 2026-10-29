@@ -1,5 +1,3 @@
-// Carrusel de fotografías del inicio: flechas, puntos, teclado y deslizar con el dedo.
-// Usa desplazamiento nativo con "scroll-snap", así que en móvil se desliza de forma natural.
 function initCarousel(root) {
   const track = root.querySelector("[data-carousel-track]");
   const slides = [...root.querySelectorAll(".hero-slide")];

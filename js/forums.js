@@ -148,7 +148,7 @@ function renderPostCard(post) {
       <div class="post-tags-row">
         <span class="tag-category">${cat.icon} ${escapeHTML(cat.label)}</span>
         <span class="tag-type">${pType.icon} ${escapeHTML(pType.label)}</span>
-        ${post.location ? `<span class="tag-location">📍 ${escapeHTML(post.location)}</span>` : ""}
+        ${post.location ? `<span class="tag-location">${escapeHTML(post.location)}</span>` : ""}
       </div>
 
       <h3 class="post-title">${escapeHTML(post.title)}</h3>
@@ -156,8 +156,8 @@ function renderPostCard(post) {
 
       <div class="post-footer">
         <div class="post-stats-group">
-          <span title="Comentarios ciudadanos">💬 ${commentsCount} ${commentsCount === 1 ? "comentario" : "comentarios"}</span>
-          <span title="Voluntarios registrados">🤝 ${participantsCount} ${participantsCount === 1 ? "colaborador" : "colaboradores"}</span>
+          <span title="Comentarios ciudadanos">${commentsCount} ${commentsCount === 1 ? "comentario" : "comentarios"}</span>
+          <span title="Voluntarios registrados">${participantsCount} ${participantsCount === 1 ? "colaborador" : "colaboradores"}</span>
         </div>
         <div style="display: flex; gap: 6px;">
           <button class="btn btn-secondary btn-sm" data-action="view-post" data-id="${post.id}" type="button">
@@ -436,7 +436,7 @@ async function openPostDetail(postId) {
         <h2 style="font-size: 1.5rem; line-height: 1.25; margin-bottom: 4px;">${escapeHTML(post.title)}</h2>
         <div style="font-size: 0.85rem; color: var(--text-muted);">
           Iniciativa de <strong>${escapeHTML(post.authorName || "Anónimo")}</strong> · ${formatDate(post.createdAt)}
-          ${post.location ? `· 📍 ${escapeHTML(post.location)}` : ""}
+          ${post.location ? `· ${escapeHTML(post.location)}` : ""}
         </div>
       </div>
       <button class="modal-close-btn" data-close type="button" aria-label="Cerrar">✕</button>
@@ -450,7 +450,7 @@ async function openPostDetail(postId) {
     <!-- Callout de Participación si existe -->
     ${post.participation ? `
       <div style="background-color: var(--forest-50); border: 1px solid var(--forest-200); border-radius: var(--radius-md); padding: var(--space-md); margin-bottom: var(--space-lg);">
-        <strong style="color: var(--tint-text); display: block; margin-bottom: 4px;">🤝 ¿Cómo puedes colaborar en esta iniciativa?</strong>
+        <strong style="color: var(--tint-text); display: block; margin-bottom: 4px;">¿Cómo puedes colaborar en esta iniciativa?</strong>
         <p style="margin: 0; font-size: 0.925rem; color: var(--tint-text);">${escapeHTML(post.participation)}</p>
       </div>
     ` : ""}
@@ -458,20 +458,20 @@ async function openPostDetail(postId) {
     <!-- Barra de Acciones del Proyecto -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-sm); padding-bottom: var(--space-md); border-bottom: 1px solid var(--border-subtle); margin-bottom: var(--space-lg);">
       <button class="btn btn-primary" id="btnParticipateInDetail" type="button">
-        🤝 Quiero colaborar en este proyecto
+        Quiero colaborar en este proyecto
       </button>
 
       <div style="display: flex; gap: 6px;">
         ${(isAuthor || isAdmin) ? `
           <button class="btn btn-secondary btn-sm" id="btnChangeStatus" type="button">
-            ✏️ Cambiar estado
+            Cambiar estado
           </button>
           <button class="btn btn-danger btn-sm" id="btnDeletePost" type="button">
-            🗑️ Eliminar
+            Eliminar
           </button>
         ` : `
           <button class="btn btn-ghost btn-sm" id="btnReportPost" type="button" style="color: var(--text-muted);">
-            🚩 Reportar
+            Reportar
           </button>
         `}
       </div>
@@ -638,7 +638,7 @@ async function loadVolunteersForDetail(postId, rootEl) {
     }
 
     container.innerHTML = volunteers.map(v => {
-      const opt = CONTRIBUTION_OPTIONS.find(o => o.id === v.contributionType) || { label: "Colaborador", icon: "🤝" };
+      const opt = CONTRIBUTION_OPTIONS.find(o => o.id === v.contributionType) || { label: "Colaborador", icon: "" };
       return `
         <span class="volunteer-pill" title="${v.note ? escapeHTML(v.note) : 'Colaborador registrado'}">
           <span>${opt.icon}</span>
@@ -755,7 +755,7 @@ function openVolunteerModal(postId, onSuccess) {
       </div>
 
       <div style="background-color: var(--bg-surface-secondary); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-muted); margin-bottom: var(--space-md);">
-        🔒 <strong>Privacidad protegida:</strong> Tu correo electrónico y teléfono no serán visibles públicamente. Se mostrará tu nombre público y el tipo de aporte para que el equipo pueda organizar la actividad.
+        <strong>Privacidad protegida:</strong> Tu correo electrónico y teléfono no serán visibles públicamente. Se mostrará tu nombre público y el tipo de aporte para que el equipo pueda organizar la actividad.
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: var(--space-sm);">

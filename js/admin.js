@@ -12,8 +12,10 @@ import {
   addDoc,
   onSnapshot,
   query,
-  serverTimestamp
+  serverTimestamp,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getChallengeExperience, dateFromEvidence } from "./challenge-features.js";
 
 const {
   CHALLENGES,
@@ -125,12 +127,12 @@ function evidenceMediaHTML(e, style, { controls = false } = {}) {
 
 function evidenceStatusBadge(status) {
   if (status === "approved") {
-    return `<span class="status-badge status-approved">🟢 Aprobada</span>`;
+    return `<span class="status-badge status-approved">Aprobada</span>`;
   }
   if (status === "rejected") {
-    return `<span class="status-badge status-rejected">🔴 Rechazada</span>`;
+    return `<span class="status-badge status-rejected">Rechazada</span>`;
   }
-  return `<span class="status-badge status-pending">🟡 Pendiente</span>`;
+  return `<span class="status-badge status-pending">Pendiente</span>`;
 }
 
 function calculateStats() {
@@ -139,13 +141,28 @@ function calculateStats() {
   const approvedEvidences = state.evidences.filter(e => e.status === "approved").length;
   const rejectedEvidences = state.evidences.filter(e => e.status === "rejected").length;
   const pendingReports = state.reports.filter(r => r.status === "pending" || !r.status).length;
+  const completedChallenges = participants.reduce((total, user) => total + Math.max(0, Number(user.completed) || 0), 0);
+  const activePosts = state.forumPosts.filter(post => !post.deleted);
+  const completedInitiatives = activePosts.filter(post => String(post.status || "").toLowerCase() === "completed").length;
+
+  // No se estima el peso a partir de fotografías. Solo suman registros con una cantidad
+  // numérica y la marca explícita de verificación de moderación.
+  const verifiedWasteEntries = state.evidences.filter(e => {
+    const amount = Number(e.verifiedWasteKg);
+    return e.status === "approved" && e.wasteMeasurementVerified === true && Number.isFinite(amount) && amount >= 0;
+  });
+  const verifiedWasteKg = verifiedWasteEntries.reduce((total, evidence) => total + Number(evidence.verifiedWasteKg), 0);
 
   return {
     usersCount: participants.length,
+    completedChallenges,
     pendingEvidences,
     approvedEvidences,
     rejectedEvidences,
-    postsCount: state.forumPosts.length,
+    postsCount: activePosts.length,
+    completedInitiatives,
+    verifiedWasteKg,
+    hasVerifiedWasteData: verifiedWasteEntries.length > 0,
     pendingReports,
     totalEvidences: state.evidences.length
   };
@@ -187,38 +204,31 @@ function dashboardView() {
   const recentActivity = state.activity.slice(0, 6);
 
   return `
-    <!-- Tarjetas de Métricas -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl);">
-      <div class="card" style="padding: var(--space-lg); text-align: center;">
-        <span class="eyebrow" style="margin-bottom: 4px;">Comunidad</span>
-        <strong style="font-size: 2rem; color: var(--accent-text); display: block;">${s.usersCount}</strong>
-        <span class="text-muted" style="font-size: 0.8rem;">Participantes registrados</span>
+    <!-- Indicadores de impacto con datos reales de Firebase -->
+    <div class="impact-admin-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl);">
+      <div class="card impact-admin-stat" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow">Comunidad</span><strong>${s.usersCount}</strong><span class="text-muted">Personas participantes</span>
       </div>
-
-      <div class="card" style="padding: var(--space-lg); text-align: center; border-color: ${s.pendingEvidences > 0 ? 'var(--status-pending-border)' : 'var(--border-subtle)'}; background: ${s.pendingEvidences > 0 ? 'var(--status-pending-bg)' : 'var(--bg-surface)'};">
-        <span class="eyebrow" style="margin-bottom: 4px;">Evidencias</span>
-        <strong style="font-size: 2rem; color: ${s.pendingEvidences > 0 ? 'var(--status-pending-text)' : 'var(--text-primary)'}; display: block;">${s.pendingEvidences}</strong>
-        <span class="text-muted" style="font-size: 0.8rem;">Esperando revisión</span>
+      <div class="card impact-admin-stat" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow">🌱 Acción ecológica</span><strong>${s.completedChallenges}</strong><span class="text-muted">Retos completados por participantes</span>
       </div>
-
-      <div class="card" style="padding: var(--space-lg); text-align: center;">
-        <span class="eyebrow" style="margin-bottom: 4px;">Aprobadas</span>
-        <strong style="font-size: 2rem; color: var(--status-approved-text); display: block;">${s.approvedEvidences}</strong>
-        <span class="text-muted" style="font-size: 0.8rem;">Acciones validadas</span>
+      <div class="card impact-admin-stat" style="padding: var(--space-lg); text-align: center; border-color: ${s.pendingEvidences > 0 ? 'var(--status-pending-border)' : 'var(--border-subtle)'}; background: ${s.pendingEvidences > 0 ? 'var(--status-pending-bg)' : 'var(--bg-surface)'};">
+        <span class="eyebrow">Evidencias</span><strong>${s.pendingEvidences}</strong><span class="text-muted">Esperando revisión</span>
       </div>
-
-      <div class="card" style="padding: var(--space-lg); text-align: center;">
-        <span class="eyebrow" style="margin-bottom: 4px;">Foros Ciudadanos</span>
-        <strong style="font-size: 2rem; color: var(--accent-text); display: block;">${s.postsCount}</strong>
-        <span class="text-muted" style="font-size: 0.8rem;">Iniciativas activas</span>
+      <div class="card impact-admin-stat" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow">Participación</span><strong>${s.completedInitiatives}</strong><span class="text-muted">Iniciativas finalizadas</span>
       </div>
-
-      <div class="card" style="padding: var(--space-lg); text-align: center; ${s.pendingReports > 0 ? 'border-color: var(--status-rejected-border); background: var(--status-rejected-bg);' : ''}">
-        <span class="eyebrow" style="margin-bottom: 4px;">Reportes</span>
-        <strong style="font-size: 2rem; color: ${s.pendingReports > 0 ? 'var(--status-rejected-text)' : 'var(--text-muted)'}; display: block;">${s.pendingReports}</strong>
-        <span class="text-muted" style="font-size: 0.8rem;">Pendientes de resolver</span>
+      <div class="card impact-admin-stat" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow">Impacto material</span><strong class="impact-waste-value">${s.hasVerifiedWasteData ? `${s.verifiedWasteKg.toLocaleString("es-CR", { maximumFractionDigits: 2 })} kg` : "Sin datos"}</strong><span class="text-muted">Residuos con peso verificado</span>
+      </div>
+      <div class="card impact-admin-stat" style="padding: var(--space-lg); text-align: center;">
+        <span class="eyebrow">Evidencias</span><strong>${s.approvedEvidences}</strong><span class="text-muted">Evidencias aprobadas</span>
+      </div>
+      <div class="card impact-admin-stat" style="padding: var(--space-lg); text-align: center; ${s.pendingReports > 0 ? 'border-color: var(--status-rejected-border); background: var(--status-rejected-bg);' : ''}">
+        <span class="eyebrow">Moderación</span><strong>${s.pendingReports}</strong><span class="text-muted">Reportes pendientes</span>
       </div>
     </div>
+    <p class="impact-data-note">Las cifras se actualizan con datos de Firebase. El peso de residuos no se estima: aparece solo cuando existe un registro numérico marcado como verificado.</p>
 
     <!-- Rejilla de Actividad y Últimas Evidencias -->
     <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-lg);">
@@ -322,7 +332,7 @@ function evidenceView() {
 
       <!-- Filtros de Evidencias -->
       <div class="filter-bar" style="margin-bottom: 0;">
-        <input class="filter-input" id="evFilterSearch" placeholder="🔍 Buscar por participante o correo..." value="${escapeHTML(filters.search)}">
+        <input class="filter-input" id="evFilterSearch" placeholder="Buscar por participante o correo..." value="${escapeHTML(filters.search)}">
         
         <select class="filter-select" id="evFilterChallenge">
           <option value="all">Todas las misiones (${CHALLENGES.length})</option>
@@ -333,9 +343,9 @@ function evidenceView() {
 
         <select class="filter-select" id="evFilterStatus">
           <option value="all" ${filters.status === "all" ? "selected" : ""}>Todos los estados</option>
-          <option value="pending" ${filters.status === "pending" ? "selected" : ""}>🟡 Pendientes de revisión</option>
-          <option value="approved" ${filters.status === "approved" ? "selected" : ""}>🟢 Aprobadas</option>
-          <option value="rejected" ${filters.status === "rejected" ? "selected" : ""}>🔴 Rechazadas</option>
+          <option value="pending" ${filters.status === "pending" ? "selected" : ""}>Pendientes de revisión</option>
+          <option value="approved" ${filters.status === "approved" ? "selected" : ""}>Aprobadas</option>
+          <option value="rejected" ${filters.status === "rejected" ? "selected" : ""}>Rechazadas</option>
         </select>
       </div>
     </div>
@@ -400,7 +410,7 @@ function forumsView() {
       </div>
 
       <div class="filter-bar" style="margin-bottom: 0;">
-        <input class="filter-input" id="forumAdminSearch" placeholder="🔍 Buscar por título, autor o comunidad..." value="${escapeHTML(filters.search)}">
+        <input class="filter-input" id="forumAdminSearch" placeholder="Buscar por título, autor o comunidad..." value="${escapeHTML(filters.search)}">
       </div>
     </div>
 
@@ -418,7 +428,7 @@ function forumsView() {
                   <span class="tag-category">${cat.icon} ${escapeHTML(cat.label)}</span>
                   <span class="tag-type">${pType.icon} ${escapeHTML(pType.label)}</span>
                   <span class="status-badge ${status.class}">${status.badge}</span>
-                  ${p.location ? `<span class="tag-location">📍 ${escapeHTML(p.location)}</span>` : ""}
+                  ${p.location ? `<span class="tag-location">${escapeHTML(p.location)}</span>` : ""}
                 </div>
 
                 <h3 style="font-size: 1.15rem; margin-bottom: 4px;">${escapeHTML(p.title)}</h3>
@@ -429,7 +439,7 @@ function forumsView() {
                   ${escapeHTML(p.description?.substring(0, 180) || "")}${p.description?.length > 180 ? "..." : ""}
                 </p>
                 <div style="font-size: 0.775rem; color: var(--text-muted);">
-                  💬 ${p.commentsCount || 0} comentarios · 🤝 ${p.participantsCount || 0} voluntarios
+                  ${p.commentsCount || 0} comentarios · ${p.participantsCount || 0} voluntarios
                 </div>
               </div>
 
@@ -473,7 +483,7 @@ function reportsView() {
               <div class="flex items-center justify-between mb-xs">
                 <div>
                   <span class="status-badge ${isPending ? 'status-rejected' : 'status-approved'}">
-                    ${isPending ? '⚠️ Pendiente de revisión' : '✓ Resuelto / Desestimado'}
+                    ${isPending ? 'Pendiente de revisión' : '✓ Resuelto / Desestimado'}
                   </span>
                   <strong style="margin-left: 8px; font-size: 0.95rem;">Motivo: ${escapeHTML(r.reason || "General")}</strong>
                 </div>
@@ -530,12 +540,13 @@ function usersView() {
         <div>
           <span class="eyebrow">DIRECTORIO CIUDADANO</span>
           <h2>Usuarios registrados (${list.length})</h2>
+          <p class="text-muted" style="margin: 6px 0 0; max-width: 720px; font-size: 0.85rem;">Si una cuenta ya fue eliminada de Firebase Authentication pero sigue apareciendo en la clasificación, elimínala también aquí. Esto borra su perfil de ECRA y el progreso usado en la clasificación; no borra la cuenta de Authentication.</p>
         </div>
-        <button class="btn btn-secondary btn-sm" id="btnExportUsers" type="button">⬇ Exportar a CSV</button>
+        <button class="btn btn-secondary btn-sm" id="btnExportUsers" type="button">Exportar a CSV</button>
       </div>
 
       <div class="filter-bar" style="margin-bottom: 0;">
-        <input class="filter-input" id="userAdminSearch" placeholder="🔍 Buscar por nombre o correo electrónico..." value="${escapeHTML(filters.search)}">
+        <input class="filter-input" id="userAdminSearch" placeholder="Buscar por nombre o correo electrónico..." value="${escapeHTML(filters.search)}">
       </div>
     </div>
 
@@ -547,6 +558,7 @@ function usersView() {
             <th style="padding: 12px 16px;">Correo</th>
             <th style="padding: 12px 16px;">Rol</th>
             <th style="padding: 12px 16px;">Registro</th>
+            <th style="padding: 12px 16px;">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -561,10 +573,15 @@ function usersView() {
               <td style="padding: 12px 16px; color: var(--text-secondary);">${escapeHTML(u.email || "—")}</td>
               <td style="padding: 12px 16px;">
                 <span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-outline'}" style="font-size: 0.75rem;">
-                  ${u.role === 'admin' ? '🛡️ Admin' : '🌱 Miembro'}
+                  ${u.role === 'admin' ? 'Admin' : '🌱 Miembro'}
                 </span>
               </td>
               <td style="padding: 12px 16px; font-size: 0.8rem; color: var(--text-muted);">${formatDateShort(u.createdAt)}</td>
+              <td style="padding: 12px 16px; white-space: nowrap;">
+                ${u.role === "admin" || String(u.email || "").toLowerCase() === String(ADMIN_EMAIL || "").toLowerCase()
+                  ? '<span class="text-muted" style="font-size:0.8rem;">Protegido</span>'
+                  : `<button class="btn btn-danger btn-sm" type="button" data-action="delete-user" data-user-id="${escapeHTML(u.id)}">Eliminar</button>`}
+              </td>
             </tr>
           `).join("")}
         </tbody>
@@ -619,7 +636,7 @@ function settingsView() {
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
       <div class="card" style="padding: var(--space-lg);">
-        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">🔥 Firebase Platform</h3>
+        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">Firebase Platform</h3>
         <p class="text-muted" style="font-size: 0.875rem;">
           Autenticación con Email/Contraseña y Google Sign-In, base de datos Cloud Firestore y Reglas de Seguridad granulares.
         </p>
@@ -630,7 +647,7 @@ function settingsView() {
       </div>
 
       <div class="card" style="padding: var(--space-lg);">
-        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">📦 Supabase Storage</h3>
+        <h3 style="font-size: 1.15rem; margin-bottom: 8px;">Supabase Storage</h3>
         <p class="text-muted" style="font-size: 0.875rem;">
           Almacenamiento en la nube para las fotos, videos y evidencias de los participantes.
         </p>
@@ -693,8 +710,8 @@ function openEvidenceReviewModal(evidenceId) {
 
         <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
           <button class="btn btn-ghost" data-close-btn type="button">Cancelar</button>
-          <button class="btn btn-danger" id="btnRejectEvidence" type="button">🔴 Rechazar evidencia</button>
-          <button class="btn btn-primary" id="btnApproveEvidence" type="button">🟢 Aprobar evidencia</button>
+          <button class="btn btn-danger" id="btnRejectEvidence" type="button">Rechazar evidencia</button>
+          <button class="btn btn-primary" id="btnApproveEvidence" type="button">Aprobar evidencia</button>
         </div>
       </div>
     </div>
@@ -850,21 +867,54 @@ async function approveEvidence(id, moderatorComment) {
 
     let progressSynced = false;
     let progressError = null;
+    let earnedXP = 0;
+    let earnedWeeklyBonus = false;
     if (userId && challenge) {
       try {
         const progressRef = await findChallengeProgressRef(userId, challenge);
-        const progressData = {
-          userId,
-          challengeId: challenge.id,
-          challengeNumber: challenge.number,
-          status: "completed",
-          completedAt: reviewedAt,
-          updatedAt: reviewedAt,
-          notes: "Evidencia aprobada por moderación"
-        };
-        // Merge admite tanto documentos existentes con campos históricos como la creación
-        // del documento canónico cuando esta persona no tenía un progreso registrado.
-        await setDoc(progressRef, progressData, { merge: true });
+        const userRef = doc(db, "users", userId);
+        // Se calcula con la fecha de envío (no la de revisión), así se conserva el bono
+        // si la evidencia se mandó mientras el reto todavía era el reto semanal.
+        const submittedOn = dateFromEvidence(ev.submittedAtServer || ev.submittedAt);
+        const reward = getChallengeExperience(challenge, submittedOn);
+        await runTransaction(db, async transaction => {
+          earnedXP = 0;
+          earnedWeeklyBonus = false;
+          const [progressSnap, userSnap] = await Promise.all([
+            transaction.get(progressRef),
+            transaction.get(userRef)
+          ]);
+          const previousProgress = progressSnap.exists() ? (progressSnap.data() || {}) : {};
+          const previousStatus = String(previousProgress.status || "").trim().toLowerCase();
+          const alreadyCompleted = ["completed", "approved", "completado", "completada", "finalizado", "finalizada"].includes(previousStatus);
+          const shouldAwardXP = !alreadyCompleted && previousProgress.xpAwarded !== true;
+          const previousUser = userSnap.exists() ? (userSnap.data() || {}) : {};
+          const progressData = {
+            userId,
+            challengeId: challenge.id,
+            challengeNumber: challenge.number,
+            status: "completed",
+            completedAt: reviewedAt,
+            updatedAt: reviewedAt,
+            notes: "Evidencia aprobada por moderación"
+          };
+
+          if (shouldAwardXP) {
+            earnedXP = reward.xp;
+            earnedWeeklyBonus = reward.isWeekly;
+            progressData.xpAwarded = true;
+            progressData.xpAwardedAmount = reward.xp;
+            progressData.xpAwardedAt = reviewedAt;
+            progressData.xpAwardType = reward.isWeekly ? "weekly_challenge" : "ecological_challenge";
+            transaction.set(userRef, {
+              challengeXp: Math.max(0, Number(previousUser.challengeXp) || 0) + reward.xp,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+          }
+
+          // La transacción evita duplicar XP si se revisa dos veces la misma misión.
+          transaction.set(progressRef, progressData, { merge: true });
+        });
         try {
           await syncUserCompletedCount(userId);
         } catch (error) {
@@ -895,6 +945,8 @@ async function approveEvidence(id, moderatorComment) {
         ? "Firebase denegó actualizar el progreso; revisa que las reglas de Firestore publicadas permitan al administrador crear y actualizar user_challenges."
         : "No se pudo actualizar el progreso de la misión. La evidencia quedó aprobada; vuelve a abrirla o revisa la consola del navegador.";
       showToast(detail, "warning");
+    } else if (earnedXP > 0) {
+      showToast(`Evidencia aprobada: +${earnedXP} XP${earnedWeeklyBonus ? " por el doble XP del reto semanal" : ""}.`, "success");
     } else {
       showToast("Evidencia aprobada y progreso de la misión actualizado.", "success");
     }
@@ -978,6 +1030,76 @@ function exportUsersCSV() {
   ];
   downloadCSV("bwc-directorio-usuarios.csv", rows);
   showToast("Descargando directorio de usuarios en CSV...");
+}
+
+async function deleteECRAUser(userId, button) {
+  const selected = state.users.find(user => user.id === userId);
+  if (!selected) {
+    showToast("No se encontró el usuario. Actualiza el directorio e inténtalo de nuevo.");
+    return;
+  }
+
+  const selectedEmail = String(selected.email || "").trim().toLowerCase();
+  const adminEmail = String(ADMIN_EMAIL || "").trim().toLowerCase();
+  const currentUid = String(auth.currentUser?.uid || "").trim();
+  const selectedUid = String(selected.firebaseUid || selected.uid || selected.userId || selected.id || "").trim();
+  if (String(selected.role || "").toLowerCase() === "admin" || (adminEmail && selectedEmail === adminEmail) || (currentUid && currentUid === selectedUid)) {
+    showToast("Por seguridad, no puedes eliminar la cuenta administradora desde este directorio.");
+    return;
+  }
+
+  const aliases = [...new Set([
+    selected.id, selected.firebaseUid, selected.uid, selected.userId, selected.idField
+  ].map(value => String(value ?? "").trim()).filter(Boolean))];
+  const aliasSet = new Set(aliases);
+  const sameAccount = (profile) => [
+    profile.id, profile.firebaseUid, profile.uid, profile.userId, profile.idField
+  ].some(value => aliasSet.has(String(value ?? "").trim()));
+  const profilesToDelete = state.users.filter(sameAccount);
+  if (!profilesToDelete.some(profile => profile.id === selected.id)) profilesToDelete.push(selected);
+
+  const userLabel = selected.name || selected.email || "este usuario";
+  const confirmed = confirm(
+    `¿Eliminar a ${userLabel} de ECRA?\n\nSe eliminarán su perfil de Firestore y los registros de progreso asociados que utiliza la clasificación. Esta acción no se puede deshacer.\n\nLa cuenta de Firebase Authentication debe eliminarse por separado si aún existe.`
+  );
+  if (!confirmed) return;
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Eliminando…";
+  }
+
+  try {
+    // Reúne los progresos vinculados a cualquiera de los identificadores históricos del perfil.
+    const progressDocs = new Map();
+    for (const alias of aliases) {
+      const snap = await getDocs(query(collection(db, "user_challenges"), where("userId", "==", alias)));
+      snap.docs.forEach(progressDoc => progressDocs.set(progressDoc.id, progressDoc));
+    }
+
+    // Se borra primero el progreso y al final el perfil: si algo falla, el perfil no queda
+    // ocultado de la clasificación mientras todavía existan registros que el borrado no alcanzó.
+    const progressList = [...progressDocs.values()];
+    for (let index = 0; index < progressList.length; index += 40) {
+      await Promise.all(progressList.slice(index, index + 40).map(progressDoc => deleteDoc(progressDoc.ref)));
+    }
+
+    for (let index = 0; index < profilesToDelete.length; index += 40) {
+      await Promise.all(profilesToDelete.slice(index, index + 40).map(profile => deleteDoc(doc(db, "users", profile.id))));
+    }
+
+    showToast("Usuario eliminado de ECRA. La clasificación se actualizará automáticamente.");
+  } catch (error) {
+    console.error("No se pudo eliminar el usuario de ECRA:", error);
+    const code = String(error?.code || "").toLowerCase();
+    if (code.includes("permission-denied")) {
+      showToast("Firebase denegó la eliminación. Comprueba que las reglas de Firestore estén publicadas y que la sesión sea administradora.");
+    } else {
+      showToast("No se pudo completar la eliminación. Revisa la consola y vuelve a intentarlo.");
+    }
+  } finally {
+    render();
+  }
 }
 
 function exportEvidencesCSV() {
@@ -1084,6 +1206,11 @@ function bindEvents() {
         showToast("Error al desestimar reporte.");
       }
     };
+  });
+
+  // Eliminar perfiles que ya no deben aparecer en ECRA / clasificación.
+  document.querySelectorAll("[data-action='delete-user']").forEach(button => {
+    button.addEventListener("click", () => deleteECRAUser(button.dataset.userId, button));
   });
 
   // Exportar CSV

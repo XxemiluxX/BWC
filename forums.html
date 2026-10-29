@@ -14,7 +14,7 @@
   <script>(function(){try{var t=localStorage.getItem('ecra_theme_v2')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 </head>
 <body>
-  <!-- Encabezado Sticky con Navegación y Auth -->
+
   <header class="site-header">
     <div class="container header-content">
       <a class="brand" href="index.html" aria-label="Inicio ECRA">
@@ -58,41 +58,41 @@
 
     <!-- Barra de Búsqueda y Filtros Multifunción -->
     <div class="filter-bar" style="margin-bottom: var(--space-lg);">
-      <input id="forumSearch" class="filter-input" type="text" placeholder="🔍 Buscar por título, problema, comunidad o palabra clave..." aria-label="Buscar publicaciones">
+      <input id="forumSearch" class="filter-input" type="text" placeholder="Buscar por título, problema, comunidad o palabra clave..." aria-label="Buscar publicaciones">
 
       <select id="categoryFilter" class="filter-select" aria-label="Filtrar por categoría">
         <option value="all">Todas las categorías (9)</option>
         <option value="campaign">🌱 Campañas ecológicas</option>
-        <option value="problem">⚠️ Problemas ambientales de mi comunidad</option>
-        <option value="project">🛠️ Proyectos sostenibles</option>
-        <option value="wildlife">🦋 Protección de flora y fauna</option>
-        <option value="waste">♻️ Reciclaje y contaminación</option>
-        <option value="water">💧 Agua y conservación de nacientes</option>
-        <option value="education">📚 Educación ambiental</option>
-        <option value="idea">💡 Ideas y propuestas ciudadanas</option>
-        <option value="general">🌐 General / Otros temas</option>
+        <option value="problem">Problemas ambientales de mi comunidad</option>
+        <option value="project">Proyectos sostenibles</option>
+        <option value="wildlife">Protección de flora y fauna</option>
+        <option value="waste">Reciclaje y contaminación</option>
+        <option value="water">Agua y conservación de nacientes</option>
+        <option value="education">Educación ambiental</option>
+        <option value="idea">Ideas y propuestas ciudadanas</option>
+        <option value="general">General / Otros temas</option>
       </select>
 
       <select id="typeFilter" class="filter-select" aria-label="Filtrar por tipo de publicación">
         <option value="all">Todos los tipos</option>
-        <option value="idea">💡 Ideas ciudadanas</option>
-        <option value="campaign">📢 Campañas</option>
-        <option value="problem">⚠️ Problemas ambientales</option>
+        <option value="idea">Ideas ciudadanas</option>
+        <option value="campaign">Campañas</option>
+        <option value="problem">Problemas ambientales</option>
         <option value="project">🌱 Proyectos en marcha</option>
       </select>
 
       <select id="statusFilter" class="filter-select" aria-label="Filtrar por estado">
         <option value="all">Todos los estados</option>
-        <option value="proposal">📋 Propuesta</option>
-        <option value="planning">📝 En planificación</option>
-        <option value="development">🚧 En desarrollo</option>
-        <option value="completed">✅ Finalizada</option>
+        <option value="proposal">Propuesta</option>
+        <option value="planning">En planificación</option>
+        <option value="development">En desarrollo</option>
+        <option value="completed">Finalizada</option>
       </select>
 
       <select id="sortFilter" class="filter-select" aria-label="Ordenar publicaciones">
-        <option value="newest">🕒 Más recientes</option>
-        <option value="participants">🤝 Más participantes</option>
-        <option value="comments">💬 Más comentadas</option>
+        <option value="newest">Más recientes</option>
+        <option value="participants">Más participantes</option>
+        <option value="comments">Más comentadas</option>
       </select>
     </div>
 
@@ -100,12 +100,12 @@
     <div class="filter-chips-row" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-xl);">
       <button class="chip-filter active" data-chip-category="all" type="button">Todas</button>
       <button class="chip-filter" data-chip-category="campaign" type="button">🌱 Campañas</button>
-      <button class="chip-filter" data-chip-category="problem" type="button">⚠️ Problemas locales</button>
-      <button class="chip-filter" data-chip-category="project" type="button">🛠️ Proyectos</button>
-      <button class="chip-filter" data-chip-category="water" type="button">💧 Nacientes y agua</button>
-      <button class="chip-filter" data-chip-category="waste" type="button">♻️ Residuos</button>
-      <button class="chip-filter" data-chip-category="wildlife" type="button">🦋 Biodiversidad</button>
-      <button class="chip-filter" data-chip-category="education" type="button">📚 Educación</button>
+      <button class="chip-filter" data-chip-category="problem" type="button">Problemas locales</button>
+      <button class="chip-filter" data-chip-category="project" type="button">Proyectos</button>
+      <button class="chip-filter" data-chip-category="water" type="button">Nacientes y agua</button>
+      <button class="chip-filter" data-chip-category="waste" type="button">Residuos</button>
+      <button class="chip-filter" data-chip-category="wildlife" type="button">Biodiversidad</button>
+      <button class="chip-filter" data-chip-category="education" type="button">Educación</button>
     </div>
 
     <!-- Indicador de Carga -->
@@ -193,11 +193,11 @@
         <div>
           <h4 class="footer-heading">Contacto</h4>
           <div class="footer-contact-item">
-            <span>📞</span>
+            <span></span>
             <span>Teléfono: <strong>87506973</strong></span>
           </div>
           <div class="footer-contact-item">
-            <span>✉️</span>
+            <span></span>
             <a href="mailto:proyecto.ecracr@gmail.com" style="text-decoration: underline;">proyecto.ecracr@gmail.com</a>
           </div>
         </div>

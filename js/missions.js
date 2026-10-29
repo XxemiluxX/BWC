@@ -6,7 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import {
   MISSIONS, MISSION_BY_ID, MISSION_CATEGORIES, FRAMES, TITLES, BACKDROPS, LEVELS, TIER_LABELS,
-  claimedSet, xpFromClaimed, unlockedRewards, rewardSource, levelForXp, cosmeticsFromUser,
+  claimedSet, xpFromClaimed, xpFromUserData, unlockedRewards, rewardSource, levelForXp, cosmeticsFromUser,
   metricsFromUser, missionState, avatarHTML, titleChipHTML, todayKey, yesterdayKey, dateKey
 } from "./missions-data.js";
 
@@ -101,7 +101,7 @@ function renderPlayer() {
         <div>
           <span class="eyebrow">Tu aventura empieza aquí</span>
           <h2 class="player-name">¿Listo/a para subir de nivel?</h2>
-          <p style="margin:0;font-size:.92rem">Cada misión te da XP y recompensas para tu perfil.</p>
+          <p style="margin:0;font-size:.92rem">Cada misión y reto ecológico aprobado te da XP y recompensas para tu perfil.</p>
         </div>
       </div>
       ${renderLadder(0)}
@@ -114,7 +114,7 @@ function renderPlayer() {
 
   const name = state.profile?.name || state.user.displayName || "Participante";
   const cos = cosmeticsFromUser(state.profile);
-  const xp = xpFromClaimed(claimed);
+  const xp = xpFromUserData(state.profile || {});
   const lv = levelForXp(xp);
   const m = currentMetrics();
   const ready = MISSIONS.filter(x => missionState(x, m, claimed).ready).length;
@@ -140,7 +140,7 @@ function renderPlayer() {
     </div>
     <div class="player-stats">
       <div class="player-stat"><b>${claimed.size}/${MISSIONS.length}</b><span>Misiones</span></div>
-      <div class="player-stat"><b>${currentStreak()} 🔥</b><span>Racha de días</span></div>
+      <div class="player-stat"><b>${currentStreak()}</b><span>Racha de días</span></div>
       <div class="player-stat"><b>${ready}</b><span>Por reclamar</span></div>
     </div>
     ${renderLadder(xp)}`;
@@ -155,7 +155,7 @@ function renderPlayer() {
 function shareUrl() {
   return new URL("index.html", window.location.href).href;
 }
-const SHARE_TEXT = "Únete a ECRA: retos ecológicos, foros comunitarios y logros para cuidar nuestro planeta 🌎🦥";
+const SHARE_TEXT = "Únete a ECRA: retos ecológicos, foros comunitarios y logros para cuidar nuestro planeta";
 
 function renderShare() {
   const dates = new Set(state.profile?.shareDates || []);
@@ -170,9 +170,9 @@ function renderShare() {
       <p class="text-muted" style="margin:0;font-size:.92rem">Cada día que compartes cuenta para las misiones de la sección <strong>Compartir</strong>.</p>
     </div>
     <div class="share-actions">
-      ${canNative ? `<button class="btn btn-primary" type="button" data-share="native">📤 Compartir</button>` : ""}
-      <button class="btn ${canNative ? "btn-secondary" : "btn-primary"}" type="button" data-share="whatsapp">💬 WhatsApp</button>
-      <button class="btn btn-secondary" type="button" data-share="copy">🔗 Copiar enlace</button>
+      ${canNative ? `<button class="btn btn-primary" type="button" data-share="native">Compartir</button>` : ""}
+      <button class="btn ${canNative ? "btn-secondary" : "btn-primary"}" type="button" data-share="whatsapp">WhatsApp</button>
+      <button class="btn btn-secondary" type="button" data-share="copy">Copiar enlace</button>
     </div>
     <div>
       <div class="share-days" role="img" aria-label="Has compartido en ${days} de 7 días">${dots}</div>
@@ -186,7 +186,7 @@ async function countShare() {
   if (!state.user) return;
   try {
     const result = await recordShare();
-    if (result.counted) showToast("¡Gracias por compartir! Sumaste un día 🌟", "success");
+    if (result.counted) showToast("¡Gracias por compartir! Sumaste un día", "success");
     else showToast("Hoy ya contaste tu compartida. ¡Vuelve mañana!", "info");
     refreshAll();
   } catch (error) {
@@ -223,10 +223,10 @@ async function handleShare(kind) {
 // ----------------------------- Misiones -----------------------------
 
 function rewardChips(reward) {
-  const chips = [`<span class="reward-chip xp">⭐ ${reward.xp} XP</span>`];
-  if (reward.frame) chips.push(`<span class="reward-chip">🖼️ Marco: ${escapeHTML(FRAMES[reward.frame].label)}</span>`);
-  if (reward.title) chips.push(`<span class="reward-chip">🏷️ Título: ${escapeHTML(TITLES[reward.title].label)}</span>`);
-  if (reward.backdrop) chips.push(`<span class="reward-chip">🌄 Fondo: ${escapeHTML(BACKDROPS[reward.backdrop].label)}</span>`);
+  const chips = [`<span class="reward-chip xp">${reward.xp} XP</span>`];
+  if (reward.frame) chips.push(`<span class="reward-chip">Marco: ${escapeHTML(FRAMES[reward.frame].label)}</span>`);
+  if (reward.title) chips.push(`<span class="reward-chip">Título: ${escapeHTML(TITLES[reward.title].label)}</span>`);
+  if (reward.backdrop) chips.push(`<span class="reward-chip">Fondo: ${escapeHTML(BACKDROPS[reward.backdrop].label)}</span>`);
   return chips.join("");
 }
 
@@ -235,13 +235,13 @@ function renderFilters() {
   const m = currentMetrics();
   const ready = state.user ? MISSIONS.filter(x => missionState(x, m, claimed).ready).length : 0;
   const chips = [
-    { id: "all", icon: "✨", label: "Todas" },
-    ...(state.user ? [{ id: "ready", icon: "🎁", label: `Por reclamar${ready ? ` (${ready})` : ""}` }] : []),
+    { id: "all", icon: "", label: "Todas" },
+    ...(state.user ? [{ id: "ready", icon: "", label: `Por reclamar${ready ? ` (${ready})` : ""}` }] : []),
     ...MISSION_CATEGORIES
   ];
   $("missionFilters").innerHTML = chips.map(c => `
     <button type="button" class="chip-filter ${c.id === state.filter ? "active" : ""}" data-filter="${c.id}" aria-pressed="${c.id === state.filter}">
-      <span aria-hidden="true">${c.icon}</span> ${escapeHTML(c.label)}
+      ${c.icon ? `<span aria-hidden="true">${c.icon}</span> ` : ""}${escapeHTML(c.label)}
     </button>`).join("");
 }
 
@@ -254,9 +254,9 @@ function missionCard(mission) {
   if (guest) {
     action = `<a class="btn btn-secondary btn-sm" href="login.html?returnUrl=missions.html">Iniciar sesión</a>`;
   } else if (st.claimed) {
-    action = `<span class="mission-claimed-tag">✅ Reclamada</span>`;
+    action = `<span class="mission-claimed-tag">Reclamada</span>`;
   } else if (st.ready) {
-    action = `<button class="btn btn-primary btn-sm" type="button" data-claim="${mission.id}">🎁 Reclamar</button>`;
+    action = `<button class="btn btn-primary btn-sm" type="button" data-claim="${mission.id}">Reclamar</button>`;
   } else {
     action = `<span class="text-muted" style="font-size:.8rem">En progreso</span>`;
   }
@@ -266,7 +266,7 @@ function missionCard(mission) {
   return `
     <article class="card mission-card ${st.ready && !guest ? "is-ready" : ""} ${st.claimed && !guest ? "is-claimed" : ""}">
       <div class="mission-head">
-        <span class="mission-icon" aria-hidden="true">${st.claimed && !guest ? "✅" : mission.icon}</span>
+        <span class="mission-icon" aria-hidden="true">${mission.icon}</span>
         <div>
           <h3 class="mission-title">${escapeHTML(mission.title)}</h3>
           <p class="mission-desc">${escapeHTML(mission.desc)}</p>
@@ -321,8 +321,8 @@ function tile({ kind, id, def, visual, unlocked, equipped }) {
   else action = `<button class="btn ${equipped ? "btn-secondary" : "btn-primary"} btn-sm" type="button" data-equip="${kind}:${equipped ? "" : id}">${equipped ? "Quitar" : "Equipar"}</button>`;
   return `
     <div class="reward-tile ${equipped ? "is-equipped" : ""} ${state.user && !unlocked ? "is-locked" : ""}">
-      ${state.user && !unlocked ? `<span class="reward-lock" aria-label="Bloqueado">🔒</span>` : ""}
-      ${equipped ? `<span class="reward-lock" aria-label="Equipado">✅</span>` : ""}
+      ${state.user && !unlocked ? `<span class="reward-lock" aria-label="Bloqueado"></span>` : ""}
+      ${equipped ? `<span class="reward-lock" aria-label="Equipado"></span>` : ""}
       ${visual}
       ${kind === "title" ? "" : `<span class="reward-name">${escapeHTML(def.label)}</span>`}
       <span class="reward-tier tier-${tier}">${TIER_LABELS[tier]}</span>
@@ -355,17 +355,17 @@ function renderCollection() {
 
   $("collection").innerHTML = `
     <section class="collection-block">
-      <h3>🖼️ Marcos de perfil</h3>
+      <h3>Marcos de perfil</h3>
       <p class="text-muted">Bordes con diseño que rodean tu foto en tu perfil, la clasificación y los foros.</p>
       <div class="reward-grid">${frames}</div>
     </section>
     <section class="collection-block">
-      <h3>🏷️ Títulos</h3>
+      <h3>Títulos</h3>
       <p class="text-muted">Aparecen debajo de tu nombre. Puedes cambiarlos cuando quieras.</p>
       <div class="reward-grid">${titles}</div>
     </section>
     <section class="collection-block">
-      <h3>🌄 Fondos de perfil</h3>
+      <h3>Fondos de perfil</h3>
       <p class="text-muted">Cambian el escenario de la tarjeta principal de tu perfil.</p>
       <div class="reward-grid">${backs}</div>
     </section>`;
@@ -375,7 +375,7 @@ function renderBanner() {
   $("guestBanner").innerHTML = state.user ? "" : `
     <div class="guest-banner">
       <div>
-        <h3>🎒 Estás viendo el catálogo como visitante</h3>
+        <h3>Estás viendo el catálogo como visitante</h3>
         <p>Crea tu cuenta o inicia sesión para empezar a ganar XP, reclamar recompensas y lucirlas en tu perfil.</p>
       </div>
       <a class="btn btn-primary" href="login.html?returnUrl=missions.html">Iniciar sesión</a>
@@ -420,7 +420,7 @@ async function claimMission(id) {
   const btn = document.querySelector(`[data-claim="${id}"]`);
   if (btn) { btn.disabled = true; btn.textContent = "Reclamando…"; }
 
-  const levelBefore = levelForXp(xpFromClaimed(claimed)).index;
+  const levelBefore = levelForXp(xpFromUserData(state.profile || {})).index;
   try {
     await updateDoc(doc(db, "users", state.user.uid), {
       claimedMissions: arrayUnion(id),
@@ -429,12 +429,12 @@ async function claimMission(id) {
   } catch (error) {
     console.error(error);
     showToast("No se pudo reclamar la recompensa. Revisa tu conexión e inténtalo otra vez.", "error");
-    if (btn) { btn.disabled = false; btn.textContent = "🎁 Reclamar"; }
+    if (btn) { btn.disabled = false; btn.textContent = "Reclamar"; }
     return;
   }
 
   state.profile.claimedMissions = [...(state.profile.claimedMissions || []), id];
-  const levelAfter = levelForXp(xpFromClaimed(currentClaimed()));
+  const levelAfter = levelForXp(xpFromUserData(state.profile || {}));
   refreshAll();
   confetti();
   openRewardModal(mission, levelAfter.index > levelBefore ? levelAfter.current : null);
@@ -465,7 +465,7 @@ function openRewardModal(mission, newLevel) {
       </div>
       <button class="modal-close-btn" data-close type="button" aria-label="Cerrar">✕</button>
     </div>
-    <p style="text-align:center;margin:0 0 var(--space-sm)"><span class="reward-chip xp">⭐ +${r.xp} XP</span></p>
+    <p style="text-align:center;margin:0 0 var(--space-sm)"><span class="reward-chip xp">+${r.xp} XP</span></p>
     ${newLevel ? `<p style="text-align:center;font-weight:700;margin:0 0 var(--space-sm)">¡Subiste de nivel! ${newLevel.icon} ${newLevel.label}</p>` : ""}
     <div class="reward-modal-list">${parts.join("") || `<p class="text-muted" style="margin:0">Esta misión da solo XP. ¡Sigue sumando!</p>`}</div>
     <div style="display:flex;justify-content:flex-end;margin-top:var(--space-lg)">
@@ -499,7 +499,7 @@ async function equip(kind, id) {
   }
   state.profile.equipped = { ...(state.profile.equipped || {}), [kind]: id || null };
   refreshAll();
-  showToast(id ? "¡Listo! Ya lo luces en tu perfil ✨" : "Recompensa quitada.", "success");
+  showToast(id ? "¡Listo! Ya lo luces en tu perfil" : "Recompensa quitada.", "success");
 }
 
 // ----------------------------- Arranque -----------------------------

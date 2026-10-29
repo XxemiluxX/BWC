@@ -48,32 +48,36 @@
       </p>
     </div>
 
+    <!-- El reto semanal rota automáticamente cada lunes entre los retos existentes. -->
+    <section id="weeklyChallengeBanner" class="weekly-challenge-wrap" aria-live="polite" aria-label="Reto ecológico de la semana"></section>
+
     <!-- Barra de Filtros y Búsqueda -->
     <div class="filter-bar">
-      <input id="challengeSearch" class="filter-input" type="text" placeholder="🔍 Buscar por palabra clave, acción o residuo..." aria-label="Buscar misiones">
+      <input id="challengeSearch" class="filter-input" type="text" placeholder="Buscar por palabra clave, acción o residuo..." aria-label="Buscar misiones">
       
       <select id="categoryFilter" class="filter-select" aria-label="Filtrar por categoría">
         <option value="all">Todas las categorías</option>
-        <option value="waste">♻️ Reciclaje y basura</option>
-        <option value="water">💧 Agua y nacientes</option>
-        <option value="wildlife">🦋 Plantas y animales</option>
-        <option value="energy">⚡ Luz y energía</option>
-        <option value="community">🧤 Mi comunidad</option>
-        <option value="consumption">🛍️ Compras con cabeza</option>
-        <option value="education">📚 Hablemos del ambiente</option>
+        <option value="waste">Reciclaje y basura</option>
+        <option value="water">Agua y nacientes</option>
+        <option value="wildlife">Plantas y animales</option>
+        <option value="energy">Luz y energía</option>
+        <option value="community">Mi comunidad</option>
+        <option value="consumption">Compras con cabeza</option>
+        <option value="education">Hablemos del ambiente</option>
       </select>
 
       <select id="difficultyFilter" class="filter-select" aria-label="Filtrar por dificultad">
         <option value="all">Cualquier dificultad</option>
-        <option value="Fácil">Fácil</option>
-        <option value="Media">Media</option>
+        <option value="Principiante">🌱 Principiante</option>
+        <option value="Intermedio">🌿 Intermedio</option>
+        <option value="Avanzado">Avanzado</option>
       </select>
     </div>
 
     <!-- Indicador de Usuario Autenticado -->
     <div id="authStatusBanner" class="card mb-lg hidden" style="padding: 12px 18px; display: none; align-items: center; justify-content: space-between; background-color: var(--forest-50); border-color: var(--forest-200);">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 1.25rem;">👋</span>
+        <span style="font-size: 1.25rem;"></span>
         <span style="font-size: 0.9rem; color: var(--tint-text); font-weight: 600;">Sesión activa: tu progreso en las misiones se sincronizará automáticamente con tu perfil.</span>
       </div>
       <a href="profile.html" class="btn btn-secondary btn-sm" style="border-color: var(--forest-300);">Ver mi panel de progreso</a>
@@ -150,11 +154,11 @@
         <div>
           <h4 class="footer-heading">Contacto</h4>
           <div class="footer-contact-item">
-            <span>📞</span>
+            <span></span>
             <span>Teléfono: <strong>87506973</strong></span>
           </div>
           <div class="footer-contact-item">
-            <span>✉️</span>
+            <span></span>
             <a href="mailto:proyecto.ecracr@gmail.com" style="text-decoration: underline;">proyecto.ecracr@gmail.com</a>
           </div>
         </div>

@@ -1,19 +1,3 @@
-// ECRA — Catálogo de Misiones y Logros
-// ---------------------------------------------------------------------------
-// Este archivo NO depende de Firebase: lo pueden importar la página de misiones,
-// el perfil, la clasificación y los foros para dibujar avatares con marco,
-// títulos bajo el nombre y fondos de perfil.
-//
-// Cómo funciona el sistema:
-//   1. Cada misión mide una "métrica" (días de sesión, racha, veces compartido,
-//      retos ecológicos completados, publicaciones, etc.).
-//   2. Cuando la métrica llega a la meta, la persona pulsa "Reclamar" y la misión
-//      se guarda en users/{uid}.claimedMissions.
-//   3. Las recompensas (marco, título, fondo) se desbloquean según las misiones
-//      reclamadas, y la persona elige cuáles equipar (users/{uid}.equipped).
-// ---------------------------------------------------------------------------
-
-// ----------------------------- Utilidades de fecha -----------------------------
 
 function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -40,11 +24,11 @@ export function pageKeyFromPath(pathname = window.location.pathname) {
 
 export const MISSION_CATEGORIES = [
   { id: "start",     label: "Primeros pasos", icon: "🌱" },
-  { id: "streak",    label: "Constancia",     icon: "🔥" },
-  { id: "share",     label: "Compartir",      icon: "📣" },
-  { id: "action",    label: "Retos ecológicos", icon: "🌎" },
-  { id: "community", label: "Comunidad",      icon: "🤝" },
-  { id: "collection",label: "Colección",      icon: "🎒" }
+  { id: "streak",    label: "Constancia",     icon: "" },
+  { id: "share",     label: "Compartir",      icon: "" },
+  { id: "action",    label: "Retos ecológicos", icon: "" },
+  { id: "community", label: "Comunidad",      icon: "" },
+  { id: "collection",label: "Colección",      icon: "" }
 ];
 
 // ----------------------------- Recompensas: marcos -----------------------------
@@ -52,65 +36,65 @@ export const MISSION_CATEGORIES = [
 
 export const FRAMES = {
   semilla:    { label: "Semilla",          icon: "🌱", tier: "common",    blurb: "Un aro verde fresco, recién brotado." },
-  hojas:      { label: "Corona de hojas",  icon: "🍃", tier: "common",    blurb: "Hojas girando alrededor de tu foto." },
-  rio:        { label: "Río vivo",         icon: "🌊", tier: "rare",      blurb: "Agua cristalina que nunca deja de fluir." },
-  mariposa:   { label: "Morpho azul",      icon: "🦋", tier: "rare",      blurb: "Los destellos azules de la mariposa más famosa de Costa Rica." },
-  sol:        { label: "Sol tropical",     icon: "☀️", tier: "rare",      blurb: "Rayos de sol que giran sin parar." },
-  nube:       { label: "Bosque nuboso",    icon: "☁️", tier: "rare",      blurb: "Neblina suave que abraza tu foto." },
-  luciernaga: { label: "Luciérnagas",      icon: "✨", tier: "epic",      blurb: "Puntos de luz que parpadean en la noche." },
-  perezoso:   { label: "Ritmo pura vida",  icon: "🦥", tier: "epic",      blurb: "Respira hondo… sin prisa, pero sin pausa." },
-  volcan:     { label: "Volcán Arenal",    icon: "🌋", tier: "epic",      blurb: "Lava que late en el borde de tu perfil." },
-  aurora:     { label: "Aurora del bosque",icon: "🌌", tier: "epic",      blurb: "Un resplandor verde, turquesa y violeta." },
-  quetzal:    { label: "Plumas de quetzal",icon: "🪶", tier: "legendary", blurb: "Verde esmeralda con destellos rojos." },
-  legendario: { label: "Corona dorada",    icon: "👑", tier: "legendary", blurb: "Solo para quienes lo han dado todo por el planeta." }
+  hojas:      { label: "Corona de hojas",  icon: "", tier: "common",    blurb: "Hojas girando alrededor de tu foto." },
+  rio:        { label: "Río vivo",         icon: "", tier: "rare",      blurb: "Agua cristalina que nunca deja de fluir." },
+  mariposa:   { label: "Morpho azul",      icon: "", tier: "rare",      blurb: "Los destellos azules de la mariposa más famosa de Costa Rica." },
+  sol:        { label: "Sol tropical",     icon: "", tier: "rare",      blurb: "Rayos de sol que giran sin parar." },
+  nube:       { label: "Bosque nuboso",    icon: "", tier: "rare",      blurb: "Neblina suave que abraza tu foto." },
+  luciernaga: { label: "Luciérnagas",      icon: "", tier: "epic",      blurb: "Puntos de luz que parpadean en la noche." },
+  perezoso:   { label: "Ritmo pura vida",  icon: "", tier: "epic",      blurb: "Respira hondo… sin prisa, pero sin pausa." },
+  volcan:     { label: "Volcán Arenal",    icon: "", tier: "epic",      blurb: "Lava que late en el borde de tu perfil." },
+  aurora:     { label: "Aurora del bosque",icon: "", tier: "epic",      blurb: "Un resplandor verde, turquesa y violeta." },
+  quetzal:    { label: "Plumas de quetzal",icon: "", tier: "legendary", blurb: "Verde esmeralda con destellos rojos." },
+  legendario: { label: "Corona dorada",    icon: "", tier: "legendary", blurb: "Solo para quienes lo han dado todo por el planeta." }
 };
 
 // ----------------------------- Recompensas: títulos -----------------------------
 
 export const TITLES = {
   brote:        { label: "Brote curioso",           icon: "🌱", tier: "common" },
-  explorador:   { label: "Explorador/a verde",      icon: "🧭", tier: "common" },
-  constante:    { label: "Visitante constante",     icon: "📅", tier: "common" },
-  rio:          { label: "Constante como el río",   icon: "💧", tier: "rare" },
-  guardian:     { label: "Guardián/a del bosque",   icon: "🌳", tier: "epic" },
-  habitante:    { label: "Habitante del bosque",    icon: "🏡", tier: "rare" },
-  mensajero:    { label: "Mensajero/a verde",       icon: "📣", tier: "common" },
-  embajador:    { label: "Embajador/a ECRA",        icon: "🌟", tier: "epic" },
-  semilla:      { label: "Primera semilla",         icon: "🫘", tier: "common" },
-  manos:        { label: "Manos a la tierra",       icon: "🧤", tier: "rare" },
-  cazador:      { label: "Cazador/a de evidencias", icon: "📸", tier: "rare" },
-  maestro:      { label: "Maestro/a del compost",   icon: "♻️", tier: "epic" },
-  leyenda:      { label: "Leyenda de ECRA",         icon: "🏆", tier: "legendary" },
-  voz:          { label: "Voz de la comunidad",          icon: "📢", tier: "common" },
-  vecino:       { label: "Buen vecino/a",           icon: "🏘️", tier: "rare" },
-  unidos:       { label: "Manos unidas",            icon: "🤝", tier: "rare" },
-  polinizador:  { label: "Polinizador/a",           icon: "🐝", tier: "rare" },
-  veterano:     { label: "Veterano/a del bosque",   icon: "🧓", tier: "epic" },
-  aguador:      { label: "Guardián/a del agua",     icon: "💧", tier: "rare" },
-  reciclador:   { label: "Reciclador/a estrella",   icon: "♻️", tier: "rare" },
-  solar:        { label: "Energía solar",           icon: "☀️", tier: "rare" },
-  fauna:        { label: "Amigo/a de la fauna",     icon: "🦜", tier: "rare" },
-  corazon:      { label: "Corazón de la comunidad", icon: "💚", tier: "rare" },
-  consciente:   { label: "Consumo consciente",      icon: "🛍️", tier: "rare" },
-  educador:     { label: "Educador/a verde",        icon: "🎓", tier: "rare" },
-  todoterreno:  { label: "Todoterreno ecológico",   icon: "🧗", tier: "epic" },
-  conversador:  { label: "Conversador/a del foro",  icon: "💬", tier: "common" },
-  lider:        { label: "Líder de iniciativas",    icon: "🚩", tier: "epic" },
-  equipo:       { label: "Jugador/a de equipo",     icon: "🫶", tier: "rare" },
-  coleccionista:{ label: "Coleccionista",           icon: "🎒", tier: "common" },
-  centenario:   { label: "Árbol centenario",        icon: "🌳", tier: "epic" }
+  explorador:   { label: "Explorador/a verde",      icon: "", tier: "common" },
+  constante:    { label: "Visitante constante",     icon: "", tier: "common" },
+  rio:          { label: "Constante como el río",   icon: "", tier: "rare" },
+  guardian:     { label: "Guardián/a del bosque",   icon: "", tier: "epic" },
+  habitante:    { label: "Habitante del bosque",    icon: "", tier: "rare" },
+  mensajero:    { label: "Mensajero/a verde",       icon: "", tier: "common" },
+  embajador:    { label: "Embajador/a ECRA",        icon: "", tier: "epic" },
+  semilla:      { label: "Primera semilla",         icon: "", tier: "common" },
+  manos:        { label: "Manos a la tierra",       icon: "", tier: "rare" },
+  cazador:      { label: "Cazador/a de evidencias", icon: "", tier: "rare" },
+  maestro:      { label: "Maestro/a del compost",   icon: "", tier: "epic" },
+  leyenda:      { label: "Leyenda de ECRA",         icon: "", tier: "legendary" },
+  voz:          { label: "Voz de la comunidad",          icon: "", tier: "common" },
+  vecino:       { label: "Buen vecino/a",           icon: "", tier: "rare" },
+  unidos:       { label: "Manos unidas",            icon: "", tier: "rare" },
+  polinizador:  { label: "Polinizador/a",           icon: "", tier: "rare" },
+  veterano:     { label: "Veterano/a del bosque",   icon: "", tier: "epic" },
+  aguador:      { label: "Guardián/a del agua",     icon: "", tier: "rare" },
+  reciclador:   { label: "Reciclador/a estrella",   icon: "", tier: "rare" },
+  solar:        { label: "Energía solar",           icon: "", tier: "rare" },
+  fauna:        { label: "Amigo/a de la fauna",     icon: "", tier: "rare" },
+  corazon:      { label: "Corazón de la comunidad", icon: "", tier: "rare" },
+  consciente:   { label: "Consumo consciente",      icon: "", tier: "rare" },
+  educador:     { label: "Educador/a verde",        icon: "", tier: "rare" },
+  todoterreno:  { label: "Todoterreno ecológico",   icon: "", tier: "epic" },
+  conversador:  { label: "Conversador/a del foro",  icon: "", tier: "common" },
+  lider:        { label: "Líder de iniciativas",    icon: "", tier: "epic" },
+  equipo:       { label: "Jugador/a de equipo",     icon: "", tier: "rare" },
+  coleccionista:{ label: "Coleccionista",           icon: "", tier: "common" },
+  centenario:   { label: "Árbol centenario",        icon: "", tier: "epic" }
 };
 
 // ----------------------------- Recompensas: fondos de perfil -----------------------------
 
 export const BACKDROPS = {
-  nuboso:    { label: "Bosque nuboso",         icon: "☁️", tier: "common" },
-  noche:     { label: "Noche de luciérnagas",  icon: "✨", tier: "common" },
-  naciente:  { label: "Naciente cristalina",   icon: "💧", tier: "rare" },
-  atardecer: { label: "Atardecer en el Pacífico", icon: "🌅", tier: "epic" },
-  arrecife:  { label: "Arrecife de coral",     icon: "🐠", tier: "rare" },
-  cafetal:   { label: "Cafetal al amanecer",   icon: "☕", tier: "epic" },
-  arenal:    { label: "Amanecer en el Arenal", icon: "🌋", tier: "legendary" }
+  nuboso:    { label: "Bosque nuboso",         icon: "", tier: "common" },
+  noche:     { label: "Noche de luciérnagas",  icon: "", tier: "common" },
+  naciente:  { label: "Naciente cristalina",   icon: "", tier: "rare" },
+  atardecer: { label: "Atardecer en el Pacífico", icon: "", tier: "epic" },
+  arrecife:  { label: "Arrecife de coral",     icon: "", tier: "rare" },
+  cafetal:   { label: "Cafetal al amanecer",   icon: "", tier: "epic" },
+  arenal:    { label: "Amanecer en el Arenal", icon: "", tier: "legendary" }
 };
 
 export const TIER_LABELS = {
@@ -123,15 +107,15 @@ export const TIER_LABELS = {
 // ----------------------------- Niveles -----------------------------
 
 export const LEVELS = [
-  { xp: 0,    label: "Semilla",    icon: "🫘" },
+  { xp: 0,    label: "Semilla",    icon: "" },
   { xp: 60,   label: "Brote",      icon: "🌱" },
   { xp: 150,  label: "Plántula",   icon: "🌿" },
-  { xp: 300,  label: "Arbusto",    icon: "🪴" },
-  { xp: 500,  label: "Árbol",      icon: "🌳" },
-  { xp: 800,  label: "Bosque",     icon: "🌲" },
-  { xp: 1200, label: "Selva",      icon: "🦜" },
-  { xp: 1800, label: "Cordillera", icon: "⛰️" },
-  { xp: 2600, label: "Guardián/a del planeta", icon: "🌎" }
+  { xp: 300,  label: "Arbusto",    icon: "" },
+  { xp: 500,  label: "Árbol",      icon: "" },
+  { xp: 800,  label: "Bosque",     icon: "" },
+  { xp: 1200, label: "Selva",      icon: "" },
+  { xp: 1800, label: "Cordillera", icon: "" },
+  { xp: 2600, label: "Guardián/a del planeta", icon: "" }
 ];
 
 export function levelForXp(xp = 0) {
@@ -446,6 +430,11 @@ export function xpFromClaimed(claimed) {
   return xp;
 }
 
+// XP total: recompensas reclamadas + XP de retos ecológicos aprobados por moderación.
+export function xpFromUserData(userData = {}) {
+  return xpFromClaimed(claimedSet(userData)) + Math.max(0, Number(userData?.challengeXp) || 0);
+}
+
 export function unlockedRewards(claimed) {
   const out = { frame: new Set(), title: new Set(), backdrop: new Set() };
   claimed.forEach(id => {
@@ -471,7 +460,7 @@ export function cosmeticsFromUser(userData) {
   const frame = unlocked.frame.has(eq.frame) ? eq.frame : null;
   const title = unlocked.title.has(eq.title) ? eq.title : null;
   const backdrop = unlocked.backdrop.has(eq.backdrop) ? eq.backdrop : null;
-  const xp = xpFromClaimed(claimed);
+  const xp = xpFromUserData(userData);
   return { frame, title, backdrop, xp, level: levelForXp(xp).current };
 }
 
@@ -496,7 +485,7 @@ export function metricsFromUser(userData = {}, extra = {}) {
     collabs: extra.collabs ?? 0,
     claimedCount: claimed.size,
     framesUnlocked: unlocked.frame.size,
-    xp: xpFromClaimed(claimed),
+    xp: xpFromUserData(userData),
     categoriesDone: Object.values(cats).filter(n => n > 0).length
   };
   // Retos completados por categoría: cat_water, cat_waste, cat_energy…

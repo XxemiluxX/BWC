@@ -44,12 +44,12 @@ function timeValue(value) {
 
 function evidenceStatusBadge(status) {
   if (status === "approved") {
-    return `<span class="status-badge status-approved">🟢 Aprobada</span>`;
+    return `<span class="status-badge status-approved">Aprobada</span>`;
   }
   if (status === "rejected") {
-    return `<span class="status-badge status-rejected">🔴 Requiere ajustes</span>`;
+    return `<span class="status-badge status-rejected">Requiere ajustes</span>`;
   }
-  return `<span class="status-badge status-pending">🟡 En revisión</span>`;
+  return `<span class="status-badge status-pending">En revisión</span>`;
 }
 
 // Inicializar pestañas
@@ -189,7 +189,7 @@ function updateHeroCard() {
 
   if (roleBadgeEl) {
     if (isAdmin) {
-      roleBadgeEl.textContent = "🛡️ Moderador / Administrador";
+      roleBadgeEl.textContent = "Moderador / Administrador";
       roleBadgeEl.style.background = "rgba(217, 119, 54, 0.35)";
       roleBadgeEl.style.borderColor = "rgba(217, 119, 54, 0.6)";
     } else {
@@ -290,11 +290,11 @@ function renderChallengesPanel() {
       completedCount++;
     }
 
-    let statusBadgeHtml = `<span class="status-badge status-neutral">⚪ No iniciado</span>`;
+    let statusBadgeHtml = `<span class="status-badge status-neutral">No iniciado</span>`;
     if (currentStatus === "in_progress") {
-      statusBadgeHtml = `<span class="status-badge status-pending">🟡 En progreso</span>`;
+      statusBadgeHtml = `<span class="status-badge status-pending">En progreso</span>`;
     } else if (currentStatus === "completed") {
-      statusBadgeHtml = `<span class="status-badge status-approved">🟢 Completado</span>`;
+      statusBadgeHtml = `<span class="status-badge status-approved">Completado</span>`;
     }
 
     return `
@@ -312,16 +312,16 @@ function renderChallengesPanel() {
 
         <div class="challenge-footer" style="flex-direction: column; align-items: stretch; gap: 8px;">
           <div style="display: flex; justify-content: space-between; font-size: 0.775rem; color: var(--text-muted);">
-            <span>⏱️ ${escapeHTML(ch.duration)}</span>
-            <span>⚡ Dificultad: ${escapeHTML(ch.difficulty)}</span>
+            <span>${escapeHTML(ch.duration)}</span>
+            <span>Dificultad: ${escapeHTML(ch.difficulty)}</span>
           </div>
 
           <div style="display: flex; gap: 6px; margin-top: 4px;">
             ${currentStatus === "completed" ? `
-              <span class="status-badge status-approved" style="flex: 1; justify-content: center;">🟢 Misión cumplida</span>
+              <span class="status-badge status-approved" style="flex: 1; justify-content: center;">Misión cumplida</span>
             ` : `
               <a class="btn btn-primary btn-sm" href="challenge.html?id=${ch.id}" title="Para cumplir la misión debes enviar una foto o un video" style="flex: 1; text-align: center;">
-                📸 Enviar foto o video
+                Enviar foto o video
               </a>
             `}
           </div>
@@ -349,7 +349,7 @@ function renderPostsPanel() {
   if (userPosts.length === 0) {
     container.innerHTML = `
       <div class="card" style="grid-column: 1 / -1; text-align: center; padding: var(--space-2xl);">
-        <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">📢</div>
+        <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);"></div>
         <h3>Aún no has publicado en los foros</h3>
         <p class="text-muted" style="margin-bottom: var(--space-md);">
           ¿Tienes una idea ecológica para tu comunidad o conoces un problema ambiental que amerite atención? Compártelo con la comunidad.
@@ -379,8 +379,8 @@ function renderPostsPanel() {
 
         <div class="post-footer">
           <div class="post-stats-group">
-            <span>💬 ${Number(p.commentsCount || 0)}</span>
-            <span>🤝 ${Number(p.participantsCount || 0)}</span>
+            <span>${Number(p.commentsCount || 0)}</span>
+            <span>${Number(p.participantsCount || 0)}</span>
           </div>
           <a class="btn btn-secondary btn-sm" href="forums.html?id=${p.id}">
             Ver en foros →
@@ -402,7 +402,7 @@ function renderCollabsPanel() {
   if (userCollabs.length === 0) {
     container.innerHTML = `
       <div class="card" style="grid-column: 1 / -1; text-align: center; padding: var(--space-2xl);">
-        <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">🤝</div>
+        <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);"></div>
         <h3>No te has registrado en proyectos aún</h3>
         <p class="text-muted" style="margin-bottom: var(--space-md);">
           Revisa las iniciativas y campañas sostenibles propuestas por la comunidad ciudadana y ofrécete como voluntario.
@@ -414,7 +414,7 @@ function renderCollabsPanel() {
   }
 
   container.innerHTML = userCollabs.map(collab => {
-    const opt = CONTRIBUTION_OPTIONS.find(o => o.id === collab.contributionType) || { label: "Colaborador", icon: "🤝" };
+    const opt = CONTRIBUTION_OPTIONS.find(o => o.id === collab.contributionType) || { label: "Colaborador", icon: "" };
 
     return `
       <div class="card" style="padding: var(--space-lg); display: flex; flex-direction: column; justify-content: space-between;">
@@ -454,7 +454,7 @@ function renderEvidencesPanel() {
   if (userEvidences.length === 0) {
     container.innerHTML = `
       <div class="card" style="grid-column: 1 / -1; text-align: center; padding: var(--space-2xl);">
-        <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);">📸</div>
+        <div style="font-size: 2.5rem; margin-bottom: var(--space-sm);"></div>
         <h3>No has enviado evidencias (fotos o videos)</h3>
         <p class="text-muted" style="margin-bottom: var(--space-md);">
           Documenta tus acciones ecológicas (reciclaje, limpieza, compostaje, etc.) para que un moderador certifique tu impacto positivo.

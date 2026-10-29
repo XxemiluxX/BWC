@@ -31,7 +31,7 @@ export const CHALLENGES = [
     shortTitle: "Residuos y reciclaje",
     category: "waste",
     categoryLabel: "Reciclaje y basura",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "20-30 min",
     icon: "♻️",
     summary: "Separa la basura de tu casa en tres bolsas y reduce lo que termina en el basurero.",
@@ -39,9 +39,9 @@ export const CHALLENGES = [
     concreteActions: [
       "Limpia y seca envases de plástico, latas o vidrio antes de disponerlos.",
       "Separa cartón y papel evitando que se contaminen con grasa o líquidos.",
-      "Identifica el centro de acopio o día de recolección selectiva de tu municipalidad."
+      "Identifica el centro de reciclaje o día de recolección selectiva de tu municipalidad."
     ],
-    whyItMatters: "La separación en la fuente evita que toneladas de materiales útiles terminen contaminando ríos, costas y vertederos a cielo abierto."
+    whyItMatters: "La separación en el hogar evita que toneladas de materiales útiles terminen contaminando ríos, costas y vertederos."
   },
   {
     id: "challenge-2",
@@ -50,11 +50,11 @@ export const CHALLENGES = [
     shortTitle: "Conservación de agua",
     category: "water",
     categoryLabel: "Agua y nacientes",
-    difficulty: "Media",
+    difficulty: "Intermedio",
     duration: "30-45 min",
     icon: "💧",
     summary: "Busca goteos en tu casa, ahorra agua y cuida la quebrada o naciente que tengas cerca.",
-    instruction: "Realiza una inspección en tu casa o comunidad para detectar goteos en grifos, inodoros o mangueras. Implementa medidas inmediatas de ahorro: duchas de máximo 4 minutos, cerrar la llave al enjabonar platos y, si vives cerca de una quebrada o naciente, asegúrate de que no haya basura ni vertidos cerca.",
+    instruction: "Realiza una inspección en tu casa o comunidad para detectar goteos en grifos, inodoros o mangueras. Implementa medidas inmediatas de ahorro: duchas de máximo 4 minutos, cerrar la llave al enjabonar platos y, si vives cerca de una quebrada o naciente, asegúrate de que no haya basura ni desechos cerca.",
     concreteActions: [
       "Revisa empaques de llaves y tuberías para eliminar goteos continuos.",
       "Aprovecha el agua de lavado de frutas o lluvia para regar plantas de jardín.",
@@ -69,11 +69,11 @@ export const CHALLENGES = [
     shortTitle: "Flora y fauna",
     category: "wildlife",
     categoryLabel: "Plantas y animales",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "30 min",
     icon: "🦋",
-    summary: "Siembra plantas con flores y atrae abejas, mariposas y pajaritos a tu patio.",
-    instruction: "Crea o cuida un pequeño espacio verde con plantas con flores atractivas para polinizadores (como ruda, lantana, girasoles o aromáticas). Si tienes jardín, evita podar en exceso la vegetación silvestre y no apliques pesticidas ni venenos que dañen a insectos benéficos.",
+    summary: "Siembra plantas con flores y atrae abejas, mariposas y pajaritos a en tu jardin.",
+    instruction: "Crea o cuida un pequeño espacio verde con plantas con flores atractivas para polinizadores (como ruda, ortencias, girasoles o aromáticas). Si tienes jardín, evita podar en exceso la vegetación silvestre y no apliques pesticidas ni venenos que dañen a insectos benéficos.",
     concreteActions: [
       "Coloca un bebedero seguro para polinizadores (plato poco profundo con piedras limpias y agua fresca).",
       "Planta al menos una especie autóctona o aromática en maceta o suelo directo.",
@@ -88,7 +88,7 @@ export const CHALLENGES = [
     shortTitle: "Ahorro de energía",
     category: "energy",
     categoryLabel: "Luz y energía",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "20 min",
     icon: "⚡",
     summary: "Desconecta cargadores y aparatos en espera y baja tu recibo de luz.",
@@ -107,7 +107,7 @@ export const CHALLENGES = [
     shortTitle: "Limpieza comunitaria",
     category: "community",
     categoryLabel: "Mi comunidad",
-    difficulty: "Media",
+    difficulty: "Avanzado",
     duration: "45-60 min",
     icon: "🧤",
     summary: "Recoge la basura de una acera, parque o parada de bus y déjalo como nuevo.",
@@ -126,11 +126,11 @@ export const CHALLENGES = [
     shortTitle: "Consumo responsable",
     category: "consumption",
     categoryLabel: "Compras con cabeza",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "Todo el día",
     icon: "🛍️",
     summary: "Haz tus compras del día sin bolsas, pajillas ni botellas desechables.",
-    instruction: "Durante al menos una semana completa, lleva siempre contigo tu bolsa de tela, una botella reutilizable de agua y un recipiente para alimentos cuando salgas. Elige productos locales, de temporada y a granel para evitar envases innecesarios.",
+    instruction: "Durante al menos una semana completa, lleva siempre contigo tu bolsa de tela, una botella reutilizable de agua y un recipiente para alimentos cuando salgas. Elige productos locales, de temporada y evita envases innecesarios.",
     concreteActions: [
       "Di activamente 'sin bolsa plástica, por favor' en el comercio local.",
       "Prefiere productos de agricultores y emprendedores locales de tu cantón o provincia.",
@@ -145,11 +145,11 @@ export const CHALLENGES = [
     shortTitle: "Compostaje y suelo",
     category: "waste",
     categoryLabel: "Compost y tierra",
-    difficulty: "Media",
+    difficulty: "Intermedio",
     duration: "30-40 min",
     icon: "🌱",
     summary: "Convierte cáscaras de fruta y restos de verdura en abono para tus plantas.",
-    instruction: "Aparta un balde con tapa o espacio en tu patio para iniciar compostaje. Coloca una base de hojas secas o aserrín (material marrón) y agrega cáscaras de vegetales, restos de café y frutas (material verde). Mantén la mezcla húmeda pero aireada.",
+    instruction: "Aparta un balde con tapa o espacio en tu jardin para iniciar compostaje. Coloca una base de hojas secas o aserrín (material marrón) y agrega cáscaras de vegetales, restos de café y frutas (material verde). Mantén la mezcla húmeda pero aireada.",
     concreteActions: [
       "No agregues carnes, lácteos ni aceites para evitar malos olores o fauna no deseada.",
       "Mantén la proporción equilibrada: 2 partes de hojas secas por cada parte de restos frescos.",
@@ -164,10 +164,10 @@ export const CHALLENGES = [
     shortTitle: "Educación ambiental",
     category: "education",
     categoryLabel: "Hablemos del ambiente",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "30 min",
     icon: "🗣️",
-    summary: "Conversa con tu familia, amigos o compas del cole sobre cómo cuidar el ambiente.",
+    summary: "Conversa con tu familia, amigos o compañeros de tu centro educativo sobre cómo cuidar el ambiente.",
     instruction: "Conversa con al menos dos personas cercanas sobre una práctica ecológica sencilla que puedan adoptar juntos (como separar residuos o ahorrar agua). También puedes compartir una publicación informativa en los foros de ECRA o en tus redes sociales personales.",
     concreteActions: [
       "Explica de forma positiva por qué te importa el cuidado del planeta sin juzgar a otros.",
@@ -183,13 +183,13 @@ export const CHALLENGES = [
     shortTitle: "Broza al compost",
     category: "waste",
     categoryLabel: "Compost y tierra",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "20-30 min",
     icon: "☕",
     summary: "Utiliza el desecho de la broza de tu café como material organico en tu compostera.",
     instruction: "Junta la broza con cascaras de huevo que normalmente se tira y vuelve esos desechos en nutrientes para tus plantas. Úsala como material organico y extiéndelo como cobertura alrededor de tus plantas para conservar la humedad.",
     concreteActions: [
-      "Combina la broza y cascaras de huevo, al triturarlas tendras compost orgánico.",
+      "Combina la broza del cafe que compras con cascaras de huevo, al triturarlas tendras compost orgánico.",
       "Almacenalo en algun recipiente con tapa, siempre procurando evitar moscas y otros insectos busquen hospedarse en tu compost organico.",
       "No envies esos desechos que pueden dar nutrientes a tus plantas a contenedores de basura."
     ],
@@ -202,7 +202,7 @@ export const CHALLENGES = [
     shortTitle: "Huerta casera",
     category: "consumption",
     categoryLabel: "Huerta y comida",
-    difficulty: "Fácil",
+    difficulty: "Intermedio",
     duration: "40 min",
     icon: "🥬",
     summary: "Siembra culantro, albahaca, chile o lechuga en macetas, botellas o un cantero pequeño.",
@@ -221,15 +221,15 @@ export const CHALLENGES = [
     shortTitle: "Aceite usado",
     category: "water",
     categoryLabel: "Agua y nacientes",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "15 min",
     icon: "🛢️",
     summary: "Evita que el aceite usado termine en el desagüe y llévalo a un punto de recolección.",
     instruction: "Deja enfriar por completo el aceite que usaste para cocinar, fíltralo con un colador y guárdalo en una botella plástica con tapa. Investiga si en tu comunidad, municipalidad o comercio cercano reciben aceite usado, y acuérdate de entregarlo cuando se llene.",
     concreteActions: [
-      "Nunca viertas el aceite en el fregadero, el inodoro ni el suelo.",
+      "Nunca viertas el aceite en el fregadero, el lavamanos ni el suelo.",
       "Limpia las sartenes con papel o un trapo antes de lavarlas para que no entre grasa al desagüe.",
-      "Pregunta en tu centro educativo o junta vecinal si existe un punto de acopio o si se puede organizar uno."
+      "Pregunta en tu centro educativo o comunidad si existe un punto de acopio o si se puede organizar uno."
     ],
     whyItMatters: "Un solo litro de aceite puede contaminar miles de litros de agua y obstruir tuberías y alcantarillas."
   },
@@ -240,7 +240,7 @@ export const CHALLENGES = [
     shortTitle: "Reutilizar envases",
     category: "waste",
     categoryLabel: "Reciclaje y basura",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "30 min",
     icon: "🫙",
     summary: "Convierte envases que ibas a botar en organizadores, macetas, lámparas o recipientes de almacenamiento.",
@@ -259,7 +259,7 @@ export const CHALLENGES = [
     shortTitle: "Agua de lluvia",
     category: "water",
     categoryLabel: "Agua y nacientes",
-    difficulty: "Media",
+    difficulty: "Avanzado",
     duration: "45-60 min",
     icon: "🌧️",
     summary: "Instala un sistema sencillo para recoger agua de lluvia y usarla para regar o limpiar.",
@@ -278,7 +278,7 @@ export const CHALLENGES = [
     shortTitle: "Recibo de agua",
     category: "water",
     categoryLabel: "Agua y nacientes",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "25 min",
     icon: "🧾",
     summary: "Lee el medidor o el recibo de agua, identifica dónde se te va más y fíjate una meta de ahorro.",
@@ -297,7 +297,7 @@ export const CHALLENGES = [
     shortTitle: "Secado al sol",
     category: "energy",
     categoryLabel: "Luz y energía",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "Todo el día",
     icon: "☀️",
     summary: "Evita la secadora durante una semana y aprovecha el sol y el viento para secar la ropa.",
@@ -316,7 +316,7 @@ export const CHALLENGES = [
     shortTitle: "Cocina eficiente",
     category: "energy",
     categoryLabel: "Luz y energía",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "Todo el día",
     icon: "🍳",
     summary: "Adopta hábitos sencillos al cocinar para gastar menos energía sin cambiar tu menú.",
@@ -335,7 +335,7 @@ export const CHALLENGES = [
     shortTitle: "Movilidad sostenible",
     category: "energy",
     categoryLabel: "Moverse mejor",
-    difficulty: "Media",
+    difficulty: "Intermedio",
     duration: "Todo el día",
     icon: "🚲",
     summary: "Elige caminar, usar bicicleta, transporte público o compartir vehículo en tus traslados de un día.",
@@ -354,7 +354,7 @@ export const CHALLENGES = [
     shortTitle: "Desconexión digital",
     category: "education",
     categoryLabel: "Pantallas y naturaleza",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "1-2 horas",
     icon: "📵",
     summary: "Apaga las pantallas un rato y dedica ese tiempo a observar, cuidar o disfrutar tu entorno natural.",
@@ -362,7 +362,7 @@ export const CHALLENGES = [
     concreteActions: [
       "Avisa a tu familia o amistades para que sepan que estarás desconectado/a un rato.",
       "Lleva una libreta para anotar lo que ves, oyes y sientes.",
-      "Comparte tu experiencia después en los foros de ECRA o con tus compañeros."
+      "Comparte tu experiencia después en los foros de ECRA o con tus amigos."
     ],
     whyItMatters: "Reducir el uso excesivo de aparatos electrónicos y volver a mirar nuestro entorno nos ayuda a comprender mejor lo que queremos cuidar."
   },
@@ -373,7 +373,7 @@ export const CHALLENGES = [
     shortTitle: "Residuos electrónicos",
     category: "waste",
     categoryLabel: "Reciclaje y basura",
-    difficulty: "Media",
+    difficulty: "Intermedio",
     duration: "30-40 min",
     icon: "🔋",
     summary: "Reúne pilas, cargadores y aparatos en desuso y averigua dónde entregarlos de forma segura.",
@@ -392,7 +392,7 @@ export const CHALLENGES = [
     shortTitle: "Ropa circular",
     category: "consumption",
     categoryLabel: "Compras con cabeza",
-    difficulty: "Fácil",
+    difficulty: "Intermedio",
     duration: "45 min",
     icon: "👕",
     summary: "Da nueva vida a tu ropa en lugar de desecharla: remienda, intercambia o dona.",
@@ -411,7 +411,7 @@ export const CHALLENGES = [
     shortTitle: "Cero desperdicio de alimentos",
     category: "consumption",
     categoryLabel: "Huerta y comida",
-    difficulty: "Fácil",
+    difficulty: "Principiante",
     duration: "40 min",
     icon: "🥘",
     summary: "Prepara una comida aprovechando sobras, frutas maduras o verduras que estaban por echarse a perder.",
@@ -430,11 +430,11 @@ export const CHALLENGES = [
     shortTitle: "Árbol nativo",
     category: "wildlife",
     categoryLabel: "Plantas y animales",
-    difficulty: "Media",
+    difficulty: "Avanzado",
     duration: "1 hora",
     icon: "🌳",
     summary: "Planta un árbol de una especie nativa de tu zona en un lugar adecuado y comprométete a cuidarlo.",
-    instruction: "Consigue una plántula de especie nativa en un vivero local, junta vecinal o programa de reforestación. Elige con permiso un lugar adecuado, lejos de cables y tuberías, haz un hueco amplio, siembra con cuidado, riégalo y marca el sitio para darle seguimiento.",
+    instruction: "Consigue una semilla de especie nativa en un vivero local, comunidad o programa de reforestación. Elige con permiso un lugar adecuado, lejos de cables y tuberías, haz un hueco amplio, siembra con cuidado, riégalo y marca el sitio para darle seguimiento.",
     concreteActions: [
       "Consulta en un vivero o con una persona experta qué especies nativas se adaptan a tu zona.",
       "Pide autorización si vas a sembrar en un espacio comunal o público.",
@@ -445,21 +445,21 @@ export const CHALLENGES = [
   {
     id: "challenge-23",
     number: 23,
-    title: "Conteo de aves en tu patio o comunidad",
-    shortTitle: "Conteo de aves",
+    title: "Conteo de fauna en tu patio o comunidad",
+    shortTitle: "Conteo de fauna",
     category: "wildlife",
     categoryLabel: "Plantas y animales",
-    difficulty: "Fácil",
+    difficulty: "Intermedio",
     duration: "30 min",
     icon: "🐦",
-    summary: "Observa durante 30 minutos y registra cuántas especies de aves logras identificar.",
-    instruction: "Elige un lugar tranquilo (patio, parque, ventana o camino) y observa durante 30 minutos en la mañana o al final de la tarde. Anota las aves que veas o escuches, con su cantidad aproximada. Si no sabes el nombre, descríbelas o tómales una foto sin molestarlas.",
+    summary: "Observa durante 30 minutos y registra cuántas especies de fauna logras identificar.",
+    instruction: "Elige un lugar tranquilo (patio, parque, ventana o camino) y observa durante 30 minutos en la mañana o al final de la tarde. Anota la fauna que veas o escuches, con su cantidad aproximada. Si no sabes el nombre, descríbelas o tómales una foto sin molestarlas.",
     concreteActions: [
-      "Mantente quieto/a y en silencio para no espantar a las aves.",
-      "Usa una guía de aves de tu país o una aplicación gratuita de identificación.",
+      "Mantente quieto/a y en silencio para no espantar a la fauna.",
+      "Usa una guía de fauna de tu país o una aplicación gratuita de identificación.",
       "Repite el conteo en otra época del año y compara los resultados."
     ],
-    whyItMatters: "Conocer las aves de tu entorno es una forma sencilla de valorar la biodiversidad y detectar cambios en el ecosistema."
+    whyItMatters: "Conocer la fauna de tu entorno es una forma sencilla de valorar la biodiversidad y detectar cambios en el ecosistema."
   },
   {
     id: "challenge-24",
@@ -468,7 +468,7 @@ export const CHALLENGES = [
     shortTitle: "Ecoladrillo",
     category: "waste",
     categoryLabel: "Reciclaje y basura",
-    difficulty: "Media",
+    difficulty: "Intermedio",
     duration: "Varios días",
     icon: "🧱",
     summary: "Rellena una botella con plásticos blandos limpios y secos para fabricar un ladrillo reutilizable.",
@@ -487,14 +487,14 @@ export const CHALLENGES = [
     shortTitle: "Limpieza de quebrada",
     category: "community",
     categoryLabel: "Mi comunidad",
-    difficulty: "Media",
+    difficulty: "Avanzado",
     duration: "1-2 horas",
     icon: "🌊",
     summary: "Organiza o únete a una jornada para retirar basura de las orillas de un cuerpo de agua.",
     instruction: "Reúne a un grupo, lleven guantes, bolsas y recipientes para clasificar lo que recojan. Eviten entrar al agua o zonas inseguras y trabajen solo en las orillas accesibles. Separen reciclables, ordinarios y objetos peligrosos, y registren qué tipo de residuo es el más frecuente.",
     concreteActions: [
       "Avisa a un adulto o a la autoridad local, y no vayas solo/a.",
-      "No recojas vidrios rotos, jeringas ni residuos peligrosos con las manos: repórtalos a las autoridades.",
+      "No recojas vidrios rotos, jeringas ni residuos peligrosos con las manos: repórtalos con un adulto.",
       "Toma fotos del antes y el después y publícalas en los foros de ECRA."
     ],
     whyItMatters: "La basura que llega a quebradas y ríos termina en el mar, afecta la vida acuática y contamina el agua que usan muchas comunidades."
@@ -506,7 +506,7 @@ export const CHALLENGES = [
     shortTitle: "Limpieza natural",
     category: "water",
     categoryLabel: "Agua y nacientes",
-    difficulty: "Fácil",
+    difficulty: "Intermedio",
     duration: "30 min",
     icon: "🧴",
     summary: "Prepara un limpiador sencillo con ingredientes cotidianos para reducir productos agresivos.",
@@ -525,7 +525,7 @@ export const CHALLENGES = [
     shortTitle: "ECRA en tu institución",
     category: "education",
     categoryLabel: "Hablemos del ambiente",
-    difficulty: "Media",
+    difficulty: "Avanzado",
     duration: "30-45 min",
     icon: "🏫",
     summary: "Presenta una misión de ECRA a tu grupo y propongan una acción conjunta.",
@@ -544,7 +544,7 @@ export const CHALLENGES = [
     shortTitle: "Mural sin conexión",
     category: "education",
     categoryLabel: "Hablemos del ambiente",
-    difficulty: "Fácil",
+    difficulty: "Avanzado",
     duration: "1 hora",
     icon: "📌",
     summary: "Crea un cartel o mural informativo con un consejo ambiental para quienes no tienen conexión a internet.",
@@ -558,42 +558,41 @@ export const CHALLENGES = [
   }
 ];
 
-// Categorías oficiales de los Foros Comunitarios
 export const FORUM_CATEGORIES = {
-  campaign: { label: "Campañas ecológicas", icon: "🌱", description: "Jornadas, firmas, reforestación y actividades colectivas." },
-  problem: { label: "Problemas ambientales de mi comunidad", icon: "⚠️", description: "Denuncias constructivas, vertederos clandestinos y puntos críticos." },
-  project: { label: "Proyectos sostenibles", icon: "🛠️", description: "Iniciativas en marcha que requieren voluntarios o apoyo vecinal." },
-  wildlife: { label: "Protección de flora y fauna", icon: "🦋", description: "Cuidado de especies nativas, rescate y siembra comunitaria." },
-  waste: { label: "Reciclaje y contaminación", icon: "♻️", description: "Centros de acopio, compostaje comunitario y reducción de plásticos." },
-  water: { label: "Agua y conservación de nacientes", icon: "💧", description: "Cuidado de ríos, cuencas, quebradas y acueductos comunales." },
-  education: { label: "Educación ambiental", icon: "📚", description: "Talleres, charlas, guías didácticas y recursos escolares." },
-  idea: { label: "Ideas y propuestas ciudadanas", icon: "💡", description: "Propuestas innovadoras para mejorar comunidades y ciudades." },
-  general: { label: "General", icon: "🌐", description: "Cualquier otro tema ambiental y comunitario." }
+  campaign: { label: "Campañas ecológicas", icon: "", description: "Jornadas, firmas, reforestación y actividades colectivas." },
+  problem: { label: "Problemas ambientales de mi comunidad", icon: "", description: "Denuncias constructivas, vertederos clandestinos y puntos críticos." },
+  project: { label: "Proyectos sostenibles", icon: "", description: "Iniciativas en marcha que requieren voluntarios o apoyo vecinal." },
+  wildlife: { label: "Protección de flora y fauna", icon: "", description: "Cuidado de especies nativas, rescate y siembra comunitaria." },
+  waste: { label: "Reciclaje y contaminación", icon: "", description: "Centros de acopio, compostaje comunitario y reducción de plásticos." },
+  water: { label: "Agua y conservación de nacientes", icon: "", description: "Cuidado de ríos, cuencas, quebradas y acueductos comunales." },
+  education: { label: "Educación ambiental", icon: "", description: "Talleres, charlas, guías didácticas y recursos escolares." },
+  idea: { label: "Ideas y propuestas ciudadanas", icon: "", description: "Propuestas innovadoras para mejorar comunidades y ciudades." },
+  general: { label: "General", icon: "", description: "Cualquier otro tema ambiental y comunitario." }
 };
 
 // Estados oficiales de iniciativas en foros
 export const FORUM_STATUSES = {
-  proposal: { label: "Propuesta", class: "status-neutral", badge: "📋 Propuesta" },
-  planning: { label: "En planificación", class: "status-pending", badge: "📝 En planificación" },
-  development: { label: "En desarrollo", class: "status-progress", badge: "🚧 En desarrollo" },
-  completed: { label: "Finalizada", class: "status-approved", badge: "✅ Finalizada" }
+  proposal: { label: "Propuesta", class: "status-neutral", badge: "Propuesta" },
+  planning: { label: "En planificación", class: "status-pending", badge: "En planificación" },
+  development: { label: "En desarrollo", class: "status-progress", badge: "En desarrollo" },
+  completed: { label: "Finalizada", class: "status-approved", badge: "Finalizada" }
 };
 
 // Tipos de publicaciones
 export const FORUM_TYPES = {
-  idea: { label: "Idea", icon: "💡" },
-  campaign: { label: "Campaña", icon: "📢" },
-  problem: { label: "Problema", icon: "⚠️" },
-  project: { label: "Proyecto", icon: "🌱" }
+  idea: { label: "Idea", icon: "" },
+  campaign: { label: "Campaña", icon: "" },
+  problem: { label: "Problema", icon: "" },
+  project: { label: "Proyecto", icon: "" }
 };
 
 // Opciones de colaboración voluntaria
 export const CONTRIBUTION_OPTIONS = [
-  { id: "hands", label: "Manos a la obra / Trabajo en terreno", icon: "🧤" },
-  { id: "ideas", label: "Aporte de ideas y planificación técnica", icon: "💡" },
-  { id: "materials", label: "Donación o préstamo de herramientas/materiales", icon: "📦" },
-  { id: "diffusion", label: "Difusión, comunicación y redes sociales", icon: "📢" },
-  { id: "other", label: "Otra forma de apoyo", icon: "🤝" }
+  { id: "hands", label: "Manos a la obra / Trabajo en terreno", icon: "" },
+  { id: "ideas", label: "Aporte de ideas y planificación técnica", icon: "" },
+  { id: "materials", label: "Donación o préstamo de herramientas/materiales", icon: "" },
+  { id: "diffusion", label: "Difusión, comunicación y redes sociales", icon: "" },
+  { id: "other", label: "Otra forma de apoyo", icon: "" }
 ];
 
 // Promesa para verificar el estado inicial de Auth
@@ -790,9 +789,6 @@ export function showToast(message, type = "info") {
   }, 3400);
 }
 
-// Modal accesible e interactivo con cierre ESC y clic fuera.
-// Si el contenido no trae su propio .modal-overlay, se envuelve aquí: antes los
-// modales de foros/perfil se pintaban sin contenedor al final de la página y no se veían.
 export function openModal(html) {
   let root = document.getElementById("modalRoot") || document.getElementById("adminModalRoot");
   if (!root) {
@@ -1066,11 +1062,6 @@ export async function getRealCommunityMetrics() {
   }
 }
 
-// --------------------------------------------------------------------------
-// MISIONES Y LOGROS: seguimiento de actividad (días con sesión, racha, páginas…)
-// --------------------------------------------------------------------------
-
-// Suma un día de sesión, calcula la racha y anota la página visitada.
 async function trackActivity(user, profile) {
   if (!user?.uid || !profile) return profile;
   const patch = {};
@@ -1166,9 +1157,6 @@ document.addEventListener("DOMContentLoaded", () => {
   togglePasswordVisibility();
 });
 
-// --------------------------------------------------------------------------
-// EFECTOS VISUALES: luz que sigue al puntero y revelado al hacer scroll
-// --------------------------------------------------------------------------
 const SPOTLIGHT_SELECTOR = ".card, .pillar-card, .challenge-card, .post-card, .metric-card, .progress-card, .admin-stat-card";
 const REVEAL_SELECTOR = ".pillar-card, .challenge-card, .post-card, .metric-item, .metric-card, .card, .banner-highlight, .filter-bar, .profile-hero-card, .empty-state";
 
