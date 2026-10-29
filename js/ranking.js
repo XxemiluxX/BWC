@@ -220,12 +220,12 @@ function renderStats(board) {
   const top = board.popularity[0];
   $("rankStats").innerHTML = `
     <div class="card rank-stat">
-      <span class="rank-stat-label">Participantes con misiones</span>
+      <span class="rank-stat-label">Participantes con retos ecológicos</span>
       <span class="rank-stat-value">${board.rows.length}</span>
-      <span class="rank-stat-note">${board.rows.length === 0 ? "Aún nadie en esta categoría" : "Con al menos una misión aprobada"}</span>
+      <span class="rank-stat-note">${board.rows.length === 0 ? "Aún nadie en esta categoría" : "Con al menos un reto ecológico completado"}</span>
     </div>
     <div class="card rank-stat">
-      <span class="rank-stat-label">Misiones cumplidas</span>
+      <span class="rank-stat-label">Retos ecológicos cumplidos</span>
       <span class="rank-stat-value">${board.totalDone}</span>
       <span class="rank-stat-note">Sumando a toda la comunidad</span>
     </div>
@@ -271,7 +271,7 @@ function renderPodium(rows) {
             ${titleLine(r.cos)}
             ${levelChip(r.count)}
           </div>
-          <div class="podium-score"><b>${r.count}</b><span>${plural(r.count, "misión", "misiones")}</span></div>
+          <div class="podium-score"><b>${r.count}</b><span>${plural(r.count, "reto ecológico", "retos ecológicos")}</span></div>
         </li>`;
       }).join("")}
     </ol>
@@ -299,7 +299,7 @@ function renderList(rows, total) {
                 <span style="width: ${Math.max(4, Math.round((r.count / total) * 100))}%"></span>
               </div>
             </div>
-            <span class="rank-count"><b>${r.count}</b> ${plural(r.count, "misión", "misiones")}</span>
+            <span class="rank-count"><b>${r.count}</b> ${plural(r.count, "reto ecológico", "retos ecológicos")}</span>
           </li>
         `).join("")}
       </ol>
@@ -314,7 +314,7 @@ function renderMe(board) {
       <div class="card rank-me">
         <div>
           <strong>¿Dónde quedarías tú?</strong>
-          <p>Inicia sesión para ver tu posición y empezar a sumar misiones.</p>
+          <p>Inicia sesión para ver tu posición y empezar a sumar retos ecológicos.</p>
         </div>
         <a class="btn btn-primary btn-sm" href="login.html?returnUrl=${encodeURIComponent("ranking.html")}" data-auth-guest>Iniciar sesión</a>
       </div>`;
@@ -325,9 +325,9 @@ function renderMe(board) {
       <div class="card rank-me is-me">
         <div>
           <strong>Tu posición: #${mine.rank}</strong>
-          <p>${mine.count} de ${board.total} ${plural(board.total, "misión cumplida", "misiones cumplidas")}.</p>
+          <p>${mine.count} de ${board.total} ${plural(board.total, "reto ecológico", "retos ecológicos")} completados.</p>
         </div>
-        <a class="btn btn-secondary btn-sm" href="challenges.html">Seguir con misiones →</a>
+        <a class="btn btn-secondary btn-sm" href="challenges.html">Seguir con retos ecológicos →</a>
       </div>`;
   }
   const isParticipant = state.participants.some(p => p.uid === state.myUid);
@@ -336,9 +336,9 @@ function renderMe(board) {
     <div class="card rank-me">
       <div>
         <strong>Todavía no estás en la clasificación</strong>
-        <p>Completa una misión con evidencia aprobada para aparecer aquí.</p>
+        <p>Completa un reto ecológico con evidencia aprobada para aparecer aquí.</p>
       </div>
-      <a class="btn btn-primary btn-sm" href="challenges.html">Elegir una misión →</a>
+      <a class="btn btn-primary btn-sm" href="challenges.html">Elegir un reto ecológico →</a>
     </div>`;
 }
 
@@ -346,9 +346,9 @@ function renderEmpty() {
   return `
     <div class="empty-state">
       <img class="sticker sticker--inline" style="--s:120px;--r:-4deg" src="img/perezoso-sticker.png" alt="" aria-hidden="true" width="120" height="120" loading="lazy" draggable="false">
-      <h3>Aún no hay misiones cumplidas aquí</h3>
-      <p class="text-muted">Las misiones cuentan cuando un moderador aprueba tu evidencia. Puedes ser la primera persona en esta lista.</p>
-      <a class="btn btn-primary btn-sm" href="challenges.html" style="margin-top: var(--space-sm);">Ver misiones disponibles</a>
+      <h3>Aún no hay retos ecológicos cumplidos aquí</h3>
+      <p class="text-muted">Los retos ecológicos cuentan cuando un moderador aprueba tu evidencia. Puedes ser la primera persona en esta lista.</p>
+      <a class="btn btn-primary btn-sm" href="challenges.html" style="margin-top: var(--space-sm);">Ver retos ecológicos disponibles</a>
     </div>`;
 }
 
@@ -357,7 +357,7 @@ function renderAside(board) {
   const max = topChallenges[0]?.count || 1;
   $("rankAside").innerHTML = `
     <section class="card" aria-labelledby="popTitle">
-      <h2 id="popTitle" class="aside-title">Misiones más cumplidas</h2>
+      <h2 id="popTitle" class="aside-title">Retos ecológicos más cumplidos</h2>
       ${topChallenges.length ? `
         <ul class="pop-list">
           ${topChallenges.map(({ challenge, count }) => `
