@@ -1,5 +1,6 @@
 import "./app.js";
 import { auth, db } from "./firebase-client.js";
+import { supabase, SUPABASE_BUCKET, assertSupabaseConfigured } from "./supabase-client.js";
 import { cosmeticsFromUser, avatarHTML, titleChipHTML } from "./missions-data.js";
 import {
   collection,
@@ -101,6 +102,75 @@ function withTimeout(promise, ms = 15000) {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
+// Las imágenes de portada se comprimen en el navegador y se guardan en Supabase Storage.
+// Así Firestore conserva solamente la URL, no el contenido pesado de la fotografía.
+const MAX_FORUM_IMAGE_BYTES = 15 * 1024 * 1024;
+const MAX_FORUM_IMAGE_UPLOAD_BYTES = 2.5 * 1024 * 1024;
+
+function loadForumImage(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("No se pudo abrir la imagen. Prueba con un archivo JPG, PNG o WebP."));
+    };
+    image.src = objectUrl;
+  });
+}
+
+async function compressForumImage(file) {
+  const supportedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!file || !supportedTypes.includes(file.type)) {
+    throw new Error("Elige una fotografía JPG, PNG o WebP.");
+  }
+  if (file.size > MAX_FORUM_IMAGE_BYTES) {
+    throw new Error("La fotografía original no puede superar los 15 MB.");
+  }
+
+  const image = await loadForumImage(file);
+  const originalScale = Math.min(1, 1600 / Math.max(image.naturalWidth, image.naturalHeight));
+  let lastBlob = null;
+
+  for (const resizeFactor of [1, 0.85, 0.7]) {
+    const scale = originalScale * resizeFactor;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) throw new Error("No se pudo preparar la fotografía en este navegador.");
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    for (const quality of [0.84, 0.76, 0.68]) {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", quality));
+      if (!blob) throw new Error("No se pudo optimizar la fotografía.");
+      lastBlob = blob;
+      if (blob.size <= MAX_FORUM_IMAGE_UPLOAD_BYTES) return blob;
+    }
+  }
+
+  if (lastBlob && lastBlob.size <= 4 * 1024 * 1024) return lastBlob;
+  throw new Error("La fotografía es demasiado pesada incluso después de optimizarla. Prueba con otra imagen.");
+}
+
+function safeForumImageUrl(value) {
+  if (typeof value !== "string" || !value.trim()) return "";
+  try {
+    const url = new URL(value);
+    const isSupabasePublicImage = url.hostname.endsWith(".supabase.co")
+      && url.pathname.includes(`/storage/v1/object/public/${SUPABASE_BUCKET}/`);
+    return url.protocol === "https:" && isSupabasePublicImage ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 function firestoreErrorMessage(err, action = "guardar") {
   switch (err?.code) {
     case "permission-denied":
@@ -129,10 +199,15 @@ function renderPostCard(post) {
   const pType = FORUM_TYPES[post.type] || FORUM_TYPES.idea;
   const commentsCount = Number(post.commentsCount || 0);
   const participantsCount = Number(post.participantsCount || 0);
-  const authorInitial = initials(post.authorName || "C");
+  const postImage = safeForumImageUrl(post.imageUrl);
 
   return `
     <article class="post-card reveal" data-post-id="${post.id}" data-category="${post.category}">
+      ${postImage ? `
+        <div class="post-cover">
+          <img src="${escapeHTML(postImage)}" alt="Portada de ${escapeHTML(post.title || "la iniciativa")}" loading="lazy" decoding="async">
+        </div>
+      ` : ""}
       <div class="post-header">
         ${avatarHTML(post.authorName || "C", cosmeticsByUid[post.authorId], { size: "post", coreClass: "post-avatar" })}
         <div class="post-meta">
@@ -331,6 +406,18 @@ async function openCreatePostModal() {
         <span class="form-helper">Incentiva la acción colectiva aclarando qué tipo de apoyo se requiere.</span>
       </div>
 
+      <div class="form-group">
+        <label class="form-label" for="newPostImage">Foto de portada (opcional)</label>
+        <div class="forum-image-upload">
+          <input class="form-input forum-image-input" id="newPostImage" type="file" accept="image/jpeg,image/png,image/webp">
+          <span class="form-helper">La foto aparecerá en la portada del foro. Se optimiza automáticamente; máximo 15 MB antes de comprimir.</span>
+          <div class="forum-image-preview-wrap" id="newPostImagePreviewWrap" hidden>
+            <img class="forum-image-preview" id="newPostImagePreview" alt="Vista previa de la portada" loading="lazy">
+            <button class="btn btn-ghost btn-sm forum-image-remove" id="removePostImageBtn" type="button">Quitar foto</button>
+          </div>
+        </div>
+      </div>
+
       <div id="createPostMsg" class="form-message" role="status"></div>
 
       <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
@@ -343,6 +430,51 @@ async function openCreatePostModal() {
   const form = modal.root.querySelector("#createPostForm");
   const msg = modal.root.querySelector("#createPostMsg");
   const submitBtn = modal.root.querySelector("#submitCreatePostBtn");
+  const imageInput = modal.root.querySelector("#newPostImage");
+  const imagePreviewWrap = modal.root.querySelector("#newPostImagePreviewWrap");
+  const imagePreview = modal.root.querySelector("#newPostImagePreview");
+  const removeImageBtn = modal.root.querySelector("#removePostImageBtn");
+  let selectedImageFile = null;
+  let imagePreviewUrl = null;
+
+  const clearSelectedImage = () => {
+    selectedImageFile = null;
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    imagePreviewUrl = null;
+    if (imagePreview) imagePreview.removeAttribute("src");
+    if (imagePreviewWrap) imagePreviewWrap.hidden = true;
+    if (imageInput) imageInput.value = "";
+  };
+
+  imageInput?.addEventListener("change", () => {
+    const file = imageInput.files?.[0];
+    msg.className = "form-message";
+    msg.textContent = "";
+    if (!file) {
+      clearSelectedImage();
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      clearSelectedImage();
+      msg.className = "form-message error";
+      msg.textContent = "Elige una fotografía JPG, PNG o WebP.";
+      return;
+    }
+    if (file.size > MAX_FORUM_IMAGE_BYTES) {
+      clearSelectedImage();
+      msg.className = "form-message error";
+      msg.textContent = "La fotografía original no puede superar los 15 MB.";
+      return;
+    }
+
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    selectedImageFile = file;
+    imagePreviewUrl = URL.createObjectURL(file);
+    imagePreview.src = imagePreviewUrl;
+    imagePreviewWrap.hidden = false;
+  });
+
+  removeImageBtn?.addEventListener("click", clearSelectedImage);
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -377,9 +509,38 @@ async function openCreatePostModal() {
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = "Guardando...";
+    submitBtn.textContent = selectedImageFile ? "Preparando fotografía…" : "Publicando iniciativa…";
+    const imageToUpload = selectedImageFile;
+    let imageUrl = "";
+    let imageStoragePath = "";
+    let submitStage = "procesar la fotografía";
 
     try {
+      if (imageToUpload) {
+        const optimizedImage = await compressForumImage(imageToUpload);
+        assertSupabaseConfigured();
+        imageStoragePath = `${authorId}/forums/${Date.now()}_${Math.random().toString(36).slice(2, 10)}.jpg`;
+        submitBtn.textContent = "Subiendo fotografía…";
+
+        const { error: uploadError } = await supabase.storage
+          .from(SUPABASE_BUCKET)
+          .upload(imageStoragePath, optimizedImage, {
+            contentType: "image/jpeg",
+            cacheControl: "31536000",
+            upsert: false
+          });
+
+        if (uploadError) {
+          throw new Error(`No se pudo subir la fotografía: ${uploadError.message || "revisa la configuración de Supabase Storage"}.`);
+        }
+
+        const { data: publicData } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(imageStoragePath);
+        imageUrl = publicData?.publicUrl || "";
+        if (!imageUrl) throw new Error("La fotografía se subió, pero no se pudo obtener su enlace público.");
+      }
+
+      submitStage = "guardar la publicación";
+      submitBtn.textContent = "Publicando iniciativa…";
       const docRef = await withTimeout(addDoc(collection(db, "forumPosts"), {
         title,
         category,
@@ -388,6 +549,8 @@ async function openCreatePostModal() {
         status,
         description,
         participation,
+        imageUrl,
+        imageStoragePath,
         authorId,
         authorName: currentUser.name || "Miembro de ECRA",
         authorEmail: currentUser.email || "",
@@ -397,6 +560,7 @@ async function openCreatePostModal() {
         createdAtServer: serverTimestamp()
       }));
 
+      clearSelectedImage();
       modal.close();
       showToast("¡Iniciativa publicada exitosamente en los foros!");
       await loadPosts();
@@ -404,7 +568,9 @@ async function openCreatePostModal() {
     } catch (err) {
       console.error("Error al crear publicación:", err);
       msg.className = "form-message error";
-      msg.textContent = firestoreErrorMessage(err, "guardar la publicación");
+      msg.textContent = submitStage === "guardar la publicación"
+        ? firestoreErrorMessage(err, "guardar la publicación")
+        : (err?.message || "No se pudo procesar la fotografía. Inténtalo de nuevo.");
       submitBtn.disabled = false;
       submitBtn.textContent = "Publicar iniciativa";
     }
@@ -421,6 +587,7 @@ async function openPostDetail(postId) {
 
   const cat = FORUM_CATEGORIES[post.category] || FORUM_CATEGORIES.general;
   const pType = FORUM_TYPES[post.type] || FORUM_TYPES.idea;
+  const postImage = safeForumImageUrl(post.imageUrl);
   const isAuthor = currentUser && currentUser.id === post.authorId;
   const isAdmin = currentUser && (currentUser.isAdmin || isConfiguredAdmin(currentUser.email));
 
@@ -441,6 +608,8 @@ async function openPostDetail(postId) {
       </div>
       <button class="modal-close-btn" data-close type="button" aria-label="Cerrar">✕</button>
     </div>
+
+    ${postImage ? `<img class="post-detail-image" src="${escapeHTML(postImage)}" alt="Fotografía de la iniciativa: ${escapeHTML(post.title || "publicación comunitaria")}" loading="lazy" decoding="async">` : ""}
 
     <!-- Descripción Principal -->
     <div style="margin-bottom: var(--space-lg); line-height: 1.6; color: var(--text-primary); font-size: 1rem; white-space: pre-line;">
